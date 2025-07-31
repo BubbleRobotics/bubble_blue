@@ -79,40 +79,42 @@ private:
   void odom_callback(const nav_msgs::msg::Odometry & msg)
   {
     // Transform the odometry into a velocity at the DVL frame
-    try{ 
-    tf2::Vector3 v_dvl = get_dvl_velocity(msg);
+    try {
+      tf2::Vector3 v_dvl = get_dvl_velocity(msg);
 
-    // Transform the velocity at the dvl frame into a noisy TwistWithCovariance Message 
-    geometry_msgs::msg::TwistWithCovarianceStamped noisy_msg = get_noisy_measurement(v_dvl, msg.header);
+    // Transform the velocity at the dvl frame into a noisy TwistWithCovariance Message
+      geometry_msgs::msg::TwistWithCovarianceStamped noisy_msg = get_noisy_measurement(v_dvl,
+        msg.header);
 
     // publish the message
-    measurement_publisher->publish(noisy_msg);
+      measurement_publisher->publish(noisy_msg);
     } catch (tf2::TransformException & ex) {
       RCLCPP_WARN(this->get_logger(), "Transform failed: %s", ex.what());
     }
   }
 
-  tf2::Vector3 get_dvl_velocity(const nav_msgs::msg::Odometry &msg){
+  tf2::Vector3 get_dvl_velocity(const nav_msgs::msg::Odometry & msg)
+  {
 
-    geometry_msgs::msg::Vector3 transformed_velocity; 
+    geometry_msgs::msg::Vector3 transformed_velocity;
 
     geometry_msgs::msg::TransformStamped dvl_base_transform_stamped =
       tf_buffer_.lookupTransform("dvl_link", "base_link", tf2::TimePointZero);
 
     //testing has shown that the velocities being output from the /model/bluerov2/odometry topic are in base_link
-    // even though it says it's in map frame. smh. This transformation will translate from map to dvl frame. 
-    tf2::Vector3 v_base(msg.twist.twist.linear.x, 
-                       msg.twist.twist.linear.y, 
-                       msg.twist.twist.linear.z); 
+    // even though it says it's in map frame. smh. This transformation will translate from map to dvl frame.
+    tf2::Vector3 v_base(msg.twist.twist.linear.x,
+      msg.twist.twist.linear.y,
+      msg.twist.twist.linear.z);
 
-    tf2::Vector3 omega_base(msg.twist.twist.angular.x, 
-                           msg.twist.twist.angular.y, 
-                           msg.twist.twist.angular.z);
+    tf2::Vector3 omega_base(msg.twist.twist.angular.x,
+      msg.twist.twist.angular.y,
+      msg.twist.twist.angular.z);
 
-    //now translate this velocity into the velocity at the dvl link in the base link frame: 
-    tf2::Vector3 r_dvl_base(dvl_base_transform_stamped.transform.translation.x, 
-                            dvl_base_transform_stamped.transform.translation.y, 
-                            dvl_base_transform_stamped.transform.translation.z); 
+    //now translate this velocity into the velocity at the dvl link in the base link frame:
+    tf2::Vector3 r_dvl_base(dvl_base_transform_stamped.transform.translation.x,
+      dvl_base_transform_stamped.transform.translation.y,
+      dvl_base_transform_stamped.transform.translation.z);
 
     tf2::Vector3 v_dvl_base = v_base + omega_base.cross(r_dvl_base);
 
@@ -125,12 +127,14 @@ private:
 
     tf2::Matrix3x3 rot_dvl_base(q_dvl_base);
 
-    tf2::Vector3 v_dvl = rot_dvl_base * v_dvl_base; 
-    return v_dvl; 
+    tf2::Vector3 v_dvl = rot_dvl_base * v_dvl_base;
+    return v_dvl;
   }
 
-  geometry_msgs::msg::TwistWithCovarianceStamped get_noisy_measurement(const tf2::Vector3 &dvl_velocity , const std_msgs::msg::Header &msg_header){
-    
+  geometry_msgs::msg::TwistWithCovarianceStamped get_noisy_measurement(
+    const tf2::Vector3 & dvl_velocity, const std_msgs::msg::Header & msg_header)
+  {
+
     geometry_msgs::msg::TwistWithCovarianceStamped noisy_msg;
 
       // create a gaussian distribution
@@ -161,7 +165,7 @@ private:
     noisy_msg.twist.covariance[7] = cov_;
     noisy_msg.twist.covariance[14] = cov_;
 
-    return noisy_msg; 
+    return noisy_msg;
   }
 
     // Declaring the ROS nodes
