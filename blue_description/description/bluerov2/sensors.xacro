@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <xacro:macro name="sensors_macro" params="prefix:='' use_sim:=false use_imu:=true use_dvl:=true">
+    <!-- Import IMU sensor -->
+    <xacro:include filename="$(find blue_description)/description/vn100/urdf.xacro" />
+    <xacro:imu_urdf prefix="$(arg prefix)" parent="$(arg prefix)base_link">
+      <origin rpy="0 0 0" xyz="0.0 0.0 0.1" />
+    </xacro:imu_urdf>
+
+    <!-- Import DVL sensor -->
+    <xacro:include filename="$(find blue_description)/description/dvl/urdf.xacro" />
+    <xacro:dvl_urdf prefix="$(arg prefix)" parent="$(arg prefix)base_link">
+      <origin rpy="3.1416 0 0" xyz="0.0 0.0 -0.2" />
+    </xacro:dvl_urdf>
+
+    <!-- Add Gazebo sensor plugins if in simulation -->
+    <xacro:if value="$(arg use_sim)">
+      <xacro:include filename="$(find blue_description)/description/vn100/gazebo.xacro" />
+      <xacro:imu_gazebo reference="$(arg prefix)imu_link" topic="/vn100/gz_data" frame_id="imu_link" />
+
+      <xacro:include filename="$(find blue_description)/description/dvl/gazebo.xacro" />
+      <xacro:dvl_gazebo reference="$(arg prefix)dvl_link" topic="/dvl/data_test" />
+    </xacro:if>
+  </xacro:macro>
+</robot>

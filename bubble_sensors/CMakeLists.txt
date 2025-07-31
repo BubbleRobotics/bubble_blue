@@ -20,6 +20,8 @@ find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(pluginlib REQUIRED)
+find_package(gz-transport13 REQUIRED)
+find_package(gz-msgs10 REQUIRED)
 
 # uncomment the following section in order to fill in
 # further dependencies manually.
@@ -30,7 +32,7 @@ add_executable(generic_sensor_publisher src/generic_sensor.cpp)
 add_executable(performance_dvl src/waterlinked_performance_dvl.cpp)
 add_executable(vectornav_imu src/vectornav_imu.cpp)
 ament_target_dependencies(generic_sensor_publisher rclcpp nav_msgs)
-ament_target_dependencies(performance_dvl rclcpp nav_msgs geometry_msgs)
+ament_target_dependencies(performance_dvl rclcpp nav_msgs geometry_msgs tf2 tf2_ros tf2_geometry_msgs)
 ament_target_dependencies(vectornav_imu rclcpp nav_msgs sensor_msgs tf2 tf2_ros tf2_geometry_msgs)
 
 add_library(mavros_sensor_plugin SHARED src/mavros_sensor_plugin.cpp)

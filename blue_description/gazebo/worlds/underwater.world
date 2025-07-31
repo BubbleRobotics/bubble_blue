@@ -17,6 +17,12 @@
       name="gz::sim::systems::SceneBroadcaster">
     </plugin>
 
+    <!-- Add the sensor plugins for gazebo integration-->
+    <plugin
+      filename="libgz-sim8-dvl-system"
+      name="gz::sim::systems::DopplerVelocityLogSystem">
+    </plugin>
+
     <plugin filename="libgz-sim-imu-system.so"
       name="gz::sim::systems::Imu">
     </plugin>

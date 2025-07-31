@@ -10,13 +10,24 @@ DVL at this link: https://waterlinked.com/datasheets/dvl-a50
 #include "rclcpp/rclcpp.hpp"
 #include "nav_msgs/msg/odometry.hpp"
 #include <geometry_msgs/msg/twist_with_covariance_stamped.hpp>
+#include <std_msgs/msg/header.hpp>
 #include <random>
+
+//for the transformations:
+#include <tf2/LinearMath/Quaternion.h>
+#include <tf2/LinearMath/Matrix3x3.h>
+#include <tf2/LinearMath/Vector3.h>
+#include <tf2_ros/transform_listener.h>
+#include <tf2_ros/buffer.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 
 class PerformanceDVL : public rclcpp::Node
 {
 public:
   PerformanceDVL()
-  : Node("perforamnce_dvl")
+  : Node("performance_dvl"),
+    tf_buffer_(this->get_clock()),
+    tf_listener_(tf_buffer_)
   {
         // create/read the parameters for the sensor in the constructor:
         //  standard deviation
@@ -67,29 +78,82 @@ public:
 private:
   void odom_callback(const nav_msgs::msg::Odometry & msg)
   {
-        // create the variable that will store the new noisy message
+    // Transform the odometry into a velocity at the DVL frame
+    try{ 
+    tf2::Vector3 v_dvl = get_dvl_velocity(msg);
+
+    // Transform the velocity at the dvl frame into a noisy TwistWithCovariance Message 
+    geometry_msgs::msg::TwistWithCovarianceStamped noisy_msg = get_noisy_measurement(v_dvl, msg.header);
+
+    // publish the message
+    measurement_publisher->publish(noisy_msg);
+    } catch (tf2::TransformException & ex) {
+      RCLCPP_WARN(this->get_logger(), "Transform failed: %s", ex.what());
+    }
+  }
+
+  tf2::Vector3 get_dvl_velocity(const nav_msgs::msg::Odometry &msg){
+
+    geometry_msgs::msg::Vector3 transformed_velocity; 
+
+    geometry_msgs::msg::TransformStamped dvl_base_transform_stamped =
+      tf_buffer_.lookupTransform("dvl_link", "base_link", tf2::TimePointZero);
+
+    //testing has shown that the velocities being output from the /model/bluerov2/odometry topic are in base_link
+    // even though it says it's in map frame. smh. This transformation will translate from map to dvl frame. 
+    tf2::Vector3 v_base(msg.twist.twist.linear.x, 
+                       msg.twist.twist.linear.y, 
+                       msg.twist.twist.linear.z); 
+
+    tf2::Vector3 omega_base(msg.twist.twist.angular.x, 
+                           msg.twist.twist.angular.y, 
+                           msg.twist.twist.angular.z);
+
+    //now translate this velocity into the velocity at the dvl link in the base link frame: 
+    tf2::Vector3 r_dvl_base(dvl_base_transform_stamped.transform.translation.x, 
+                            dvl_base_transform_stamped.transform.translation.y, 
+                            dvl_base_transform_stamped.transform.translation.z); 
+
+    tf2::Vector3 v_dvl_base = v_base + omega_base.cross(r_dvl_base);
+
+    //finally, transform the velocity of the dvl in the base_link frame into the dvl_link frame
+    tf2::Quaternion q_dvl_base(
+      dvl_base_transform_stamped.transform.rotation.x,
+      dvl_base_transform_stamped.transform.rotation.y,
+      dvl_base_transform_stamped.transform.rotation.z,
+      dvl_base_transform_stamped.transform.rotation.w);
+
+    tf2::Matrix3x3 rot_dvl_base(q_dvl_base);
+
+    tf2::Vector3 v_dvl = rot_dvl_base * v_dvl_base; 
+    return v_dvl; 
+  }
+
+  geometry_msgs::msg::TwistWithCovarianceStamped get_noisy_measurement(const tf2::Vector3 &dvl_velocity , const std_msgs::msg::Header &msg_header){
+    
     geometry_msgs::msg::TwistWithCovarianceStamped noisy_msg;
 
-        // create a gaussian distribution
+      // create a gaussian distribution
     std::normal_distribution diff(0.0, noise_stddev_);
 
         // first add the header
-    noisy_msg.header = msg.header;
+    noisy_msg.header.stamp = msg_header.stamp;
+    noisy_msg.header.frame_id = "dvl_link"; // make sure it registers that it's in the right link
 
         // compensate for long-term inaccuracies in the twist measurement.
-    inaccurate_linear_twist_.x = msg.twist.twist.linear.x *
-      (long_term_inaccuracies_ * (double)std::rand() / RAND_MAX);
-    inaccurate_linear_twist_.y = msg.twist.twist.linear.y *
-      (long_term_inaccuracies_ * (double)std::rand() / RAND_MAX);
-    inaccurate_linear_twist_.z = msg.twist.twist.linear.z *
-      (long_term_inaccuracies_ * (double)std::rand() / RAND_MAX);
+    inaccurate_linear_twist_.x = dvl_velocity.x() *
+      (1 + long_term_inaccuracies_ * (double)std::rand() / RAND_MAX);
+    inaccurate_linear_twist_.y = dvl_velocity.y() *
+      (1 + long_term_inaccuracies_ * (double)std::rand() / RAND_MAX);
+    inaccurate_linear_twist_.z = dvl_velocity.z() *
+      (1 + long_term_inaccuracies_ * (double)std::rand() / RAND_MAX);
 
         // now add some noise
-    noisy_msg.twist.twist.linear.x += std::round((inaccurate_linear_twist_.x +
+    noisy_msg.twist.twist.linear.x = std::round((inaccurate_linear_twist_.x +
         diff(rng_generator_)) / resolution_) * resolution_;
-    noisy_msg.twist.twist.linear.y += std::round((inaccurate_linear_twist_.y +
+    noisy_msg.twist.twist.linear.y = std::round((inaccurate_linear_twist_.y +
         diff(rng_generator_)) / resolution_) * resolution_;
-    noisy_msg.twist.twist.linear.z += std::round((inaccurate_linear_twist_.z +
+    noisy_msg.twist.twist.linear.z = std::round((inaccurate_linear_twist_.z +
         diff(rng_generator_)) / resolution_) * resolution_;
 
         // add covariance for state estimation pipeline. Since there is an EKF on the sensor itself, this should be provided for us
@@ -97,28 +161,7 @@ private:
     noisy_msg.twist.covariance[7] = cov_;
     noisy_msg.twist.covariance[14] = cov_;
 
-        // dont think dvl measures angular rates but just in case
-    if (measure_ang_twist_) {
-      noisy_msg.twist.twist.angular.x += std::round(msg.twist.twist.angular.x +
-        diff(rng_generator_) / resolution_) * resolution_;
-      noisy_msg.twist.twist.angular.y += std::round(msg.twist.twist.angular.y +
-        diff(rng_generator_) / resolution_) * resolution_;
-      noisy_msg.twist.twist.angular.z += std::round(msg.twist.twist.angular.z +
-        diff(rng_generator_) / resolution_) * resolution_;
-
-            // add covariance for state estimation pipeline
-      noisy_msg.twist.covariance[21] = cov_;
-      noisy_msg.twist.covariance[28] = cov_;
-      noisy_msg.twist.covariance[35] = cov_;
-    } else {
-            // make cov -1 to identify that it should not be used
-      noisy_msg.twist.covariance[21] = -1;
-      noisy_msg.twist.covariance[28] = -1;
-      noisy_msg.twist.covariance[35] = -1;
-    }
-
-        // publish the message
-    measurement_publisher->publish(noisy_msg);
+    return noisy_msg; 
   }
 
     // Declaring the ROS nodes
@@ -139,6 +182,10 @@ private:
     // ancillary variables
   std::default_random_engine rng_generator_;
   geometry_msgs::msg::Vector3 inaccurate_linear_twist_;
+
+  //for getting the correct transformations
+  tf2_ros::Buffer tf_buffer_;
+  tf2_ros::TransformListener tf_listener_;
 };
 
 // define the main function which actually spins the sensor up

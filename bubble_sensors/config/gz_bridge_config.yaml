@@ -1,0 +1,5 @@
+topics:
+  - topic: /vn100/gz_data
+    type: gz.msgs.IMU
+    ros_type: sensor_msgs/msg/Imu
+    direction: gz_to_ros

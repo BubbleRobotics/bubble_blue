@@ -47,7 +47,7 @@ launch:
       exec: performance_dvl
       param:
         - name: noise_stddev
-          value: 0.001
+          value: 0.0001
         - name: bias
           value: 0.0001
         - name: long_term_inaccuracy_percentage
@@ -88,17 +88,28 @@ launch:
           value: $(var use_sim)
 
   # Define the transformations from the base link into the dvl and imu frames
-  - node:
-      pkg: tf2_ros
-      exec: static_transform_publisher
-      name: base_link_to_dvl
-      args: --x 0.1 --y 0.0 --z -0.1 --roll 0.0 --pitch 3.14159 --yaw 0.0 --frame-id base_link --child-frame-id dvl
+  # # NOTE: MAKE SURE ALL OF THESE FRAMES ARE THE SAME AS THE FRAMES IN THE DESCRIPTION FILE(sensors.xacro)!!!!
+  # - node:
+  #     pkg: tf2_ros
+  #     exec: static_transform_publisher
+  #     name: base_link_to_dvl
+  #     args: --x 0.0 --y 0.0 --z -0.2 --roll 0.0 --pitch 3.14159 --yaw 0.0 --frame-id base_link --child-frame-id dvl
 
+  # - node:
+  #     pkg: tf2_ros
+  #     exec: static_transform_publisher
+  #     name: base_link_to_vn100
+  #     args: --x 0.0 --y 0.0 --z 0.1 --roll 0.0 --pitch 0.0 --yaw 0.0 --frame-id base_link --child-frame-id vn100
+
+  #launch the roz_gz_bridge to convert the imu gz msg to ros
   - node:
-      pkg: tf2_ros
-      exec: static_transform_publisher
-      name: base_link_to_vn100
-      args: --x 0.0 --y 0.0 --z 0.1 --roll 0.0 --pitch 0.0 --yaw 0.0 --frame-id base_link --child-frame-id vn100
+      pkg: ros_gz_bridge
+      exec: parameter_bridge
+      if: $(var use_sim)
+      args: /vn100/gz_data@sensor_msgs/msg/Imu[gz.msgs.IMU
+      param:
+        - name: use_sim_time
+          value: $(var use_sim)
 
   - include:
       if: $(var use_ekf)
