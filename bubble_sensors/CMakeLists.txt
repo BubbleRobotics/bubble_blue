@@ -20,6 +20,8 @@ find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(tf2_geometry_msgs REQUIRED)
 find_package(pluginlib REQUIRED)
+find_package(gz-transport13 REQUIRED)
+find_package(gz-msgs10 REQUIRED)
 
 # uncomment the following section in order to fill in
 # further dependencies manually.
