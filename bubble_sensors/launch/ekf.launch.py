@@ -29,7 +29,6 @@ def generate_launch_description():
     LaunchDescription: A complete launch description for the EKF node
 
     """
-
     # Constants for paths to different files and folders
     package_name = "bubble_sensors"
 
