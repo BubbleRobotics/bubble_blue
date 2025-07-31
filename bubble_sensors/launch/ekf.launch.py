@@ -17,7 +17,7 @@ from launch_ros.substitutions import FindPackageShare
 
 
 def generate_launch_description():
-    """""
+    """
     Generate a launch description for the EKF node.
 
     This function creates and returns a LaunchDescription object that will start
