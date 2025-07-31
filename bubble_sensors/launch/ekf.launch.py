@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 
-"""
+'''
 This is the Launch file for the EKF node in the robot_localization package in ros2.
 
 This node will take in the ekf.yaml file in the config folder of bubble_sensors,
 and should read from the DVL, the
-"""
+'''
 
 import os
 
@@ -33,10 +33,10 @@ def generate_launch_description():
     launch_delay = 0.0
 
     # Constants for paths to different files and folders
-    package_name = "bubble_sensors"
+    package_name = 'bubble_sensors'
 
     # Config file paths
-    ekf_config_file_path = "config/ekf.yaml"
+    ekf_config_file_path = 'config/ekf.yaml'
 
     # Set the path to different packages
     pkg_share = FindPackageShare(package=package_name).find(package_name)
@@ -45,12 +45,12 @@ def generate_launch_description():
     default_ekf_config_path = os.path.join(pkg_share, ekf_config_file_path)
 
     # Launch configuration variables
-    ekf_config_file = LaunchConfiguration("ekf_config_file")
-    use_sim_time = LaunchConfiguration("use_sim_time")
+    ekf_config_file = LaunchConfiguration('ekf_config_file')
+    use_sim_time = LaunchConfiguration('use_sim_time')
 
     # Declare the launch arguments
     declare_ekf_config_file_cmd = DeclareLaunchArgument(
-        name="ekf_config_file",
+        name='ekf_config_file',
         default_value=default_ekf_config_path,
         description='Full path to the EKF configuration YAML file',
     )
