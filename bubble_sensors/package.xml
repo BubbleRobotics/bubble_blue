@@ -23,8 +23,6 @@
   <depend>tf2_ros</depend>
   <depend>tf2_geometry_msgs</depend>
   <depend>pluginlib</depend>
-  <depend>gz-msgs10</depend>
-  <depend>gz-transport13</depend>
 
 
 
