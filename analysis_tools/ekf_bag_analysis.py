@@ -83,7 +83,7 @@ def read_rosbag2_mcap(path, topics_to_read):
             "omega_y": [],
             "omega_z": [],
         },
-        "/dlv/velocity": {"timestamps": [], "vel_x": [], "vel_y": [], "vel_z": []},
+        "/dvl/velocity": {"timestamps": [], "vel_x": [], "vel_y": [], "vel_z": []},
     }
 
     while reader.has_next():
@@ -206,7 +206,7 @@ def read_rosbag2_mcap(path, topics_to_read):
                 data[topic]["accel_y"].append(accel_y)
                 accel_z = msg.linear_acceleration.z
                 data[topic]["accel_z"].append(accel_z)
-            if topic == "/dlv/velocity":
+            if topic == "/dvl/velocity":
                 # dvl velocity is a twist message
                 msg = rclpy.serialization.deserialize_message(
                     topic_data, TwistWithCovarianceStamped
@@ -301,7 +301,7 @@ def plot_data(data_dictionary):
         "/odometry/filtered",
         "/model/bluerov2/odometry",
         "/mavros/local_position/odom",
-        "/dlv/velocity",
+        "/dvl/velocity",
     ]
     lin_vel_variables = ["vel_x", "vel_y", "vel_z"]
 
