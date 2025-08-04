@@ -5,6 +5,7 @@ from geometry_msgs.msg import TwistWithCovarianceStamped
 from nav_msgs.msg import Odometry
 from rosbag2_py import ConverterOptions, SequentialReader, StorageFilter, StorageOptions
 from sensor_msgs.msg import Imu
+from scipy.spatial.transform import Rotation
 
 
 def read_rosbag2_mcap(path, topics_to_read):
@@ -14,8 +15,8 @@ def read_rosbag2_mcap(path, topics_to_read):
     reader = SequentialReader()
     reader.open(storage_options, converter_options)
 
-    topic_types = reader.get_all_topics_and_types()
-    type_dict = {t.name: t.type for t in topic_types}
+    # topic_types = reader.get_all_topics_and_types()
+    # type_dict = {t.name: t.type for t in topic_types}
 
     # Filter by topic
     reader.set_filter(StorageFilter(topics=topics_to_read))
@@ -31,6 +32,9 @@ def read_rosbag2_mcap(path, topics_to_read):
             "qy": [],
             "qz": [],
             "qw": [],
+            "roll": [],
+            "pitch": [],
+            "yaw": [], 
             "vel_x": [],
             "vel_y": [],
             "vel_z": [],
@@ -47,6 +51,9 @@ def read_rosbag2_mcap(path, topics_to_read):
             "qy": [],
             "qz": [],
             "qw": [],
+            "roll": [],
+            "pitch": [],
+            "yaw": [], 
             "vel_x": [],
             "vel_y": [],
             "vel_z": [],
@@ -63,6 +70,9 @@ def read_rosbag2_mcap(path, topics_to_read):
             "qy": [],
             "qz": [],
             "qw": [],
+            "roll": [],
+            "pitch": [],
+            "yaw": [], 
             "vel_x": [],
             "vel_y": [],
             "vel_z": [],
@@ -76,6 +86,9 @@ def read_rosbag2_mcap(path, topics_to_read):
             "qy": [],
             "qz": [],
             "qw": [],
+            "roll": [],
+            "pitch": [],
+            "yaw": [], 
             "accel_x": [],
             "accel_y": [],
             "accel_z": [],
@@ -110,6 +123,10 @@ def read_rosbag2_mcap(path, topics_to_read):
                 data[topic]["qz"].append(qz)
                 qw = msg.pose.pose.orientation.w
                 data[topic]["qw"].append(qw)
+                eulers = Rotation.from_quat([qx, qy, qz, qw]).as_euler("xyz", degrees=True)
+                data[topic]["roll"].append(eulers[0])
+                data[topic]["pitch"].append(eulers[1])
+                data[topic]["yaw"].append(eulers[2])
                 vel_x = msg.twist.twist.linear.x
                 data[topic]["vel_x"].append(vel_x)
                 vel_y = msg.twist.twist.linear.y
@@ -140,6 +157,10 @@ def read_rosbag2_mcap(path, topics_to_read):
                 data[topic]["qz"].append(qz)
                 qw = msg.pose.pose.orientation.w
                 data[topic]["qw"].append(qw)
+                eulers = Rotation.from_quat([qx, qy, qz, qw]).as_euler("xyz", degrees=True)
+                data[topic]["roll"].append(eulers[0])
+                data[topic]["pitch"].append(eulers[1])
+                data[topic]["yaw"].append(eulers[2])
                 vel_x = msg.twist.twist.linear.x
                 data[topic]["vel_x"].append(vel_x)
                 vel_y = msg.twist.twist.linear.y
@@ -170,6 +191,10 @@ def read_rosbag2_mcap(path, topics_to_read):
                 data[topic]["qz"].append(qz)
                 qw = msg.pose.pose.orientation.w
                 data[topic]["qw"].append(qw)
+                eulers = Rotation.from_quat([qx, qy, qz, qw]).as_euler("xyz", degrees=True)
+                data[topic]["roll"].append(eulers[0])
+                data[topic]["pitch"].append(eulers[1])
+                data[topic]["yaw"].append(eulers[2])
                 vel_x = msg.twist.twist.linear.x
                 data[topic]["vel_x"].append(vel_x)
                 vel_y = msg.twist.twist.linear.y
@@ -194,6 +219,10 @@ def read_rosbag2_mcap(path, topics_to_read):
                 data[topic]["qz"].append(qz)
                 qw = msg.orientation.w
                 data[topic]["qw"].append(qw)
+                eulers = Rotation.from_quat([qx, qy, qz, qw]).as_euler("xyz", degrees=True)
+                data[topic]["roll"].append(eulers[0])
+                data[topic]["pitch"].append(eulers[1])
+                data[topic]["yaw"].append(eulers[2])
                 omega_x = msg.angular_velocity.x
                 data[topic]["omega_x"].append(omega_x)
                 omega_y = msg.angular_velocity.y
@@ -247,15 +276,15 @@ def plot_data(data_dictionary):
         axes[i].legend()
 
     # Second Plot Group. Orientation:
-    fig, axes = plt.subplots(4, 1, figsize=(12, 10))
-    fig.suptitle("Position x,y,z for all topics")
+    fig, axes = plt.subplots(3, 1, figsize=(12, 10))
+    fig.suptitle("Orientation rpy for all topics")
     orient_topics = [
         "/odometry/filtered",
         "/model/bluerov2/odometry",
         "/mavros/local_position/odom",
         "/vn100/gz_data",
     ]
-    orient_variables = ["qx", "qy", "qz", "qw"]
+    orient_variables = ["roll", "pitch", "yaw"]
 
     for i, var in enumerate(orient_variables):
         for topic in orient_topics:
@@ -265,14 +294,14 @@ def plot_data(data_dictionary):
                 label=f"{topic}",
             )
         axes[i].set_xlabel("Time [s]")
-        axes[i].set_ylabel(f"{var} [m]")
+        axes[i].set_ylabel(f"{var} [deg]")
         axes[i].set_title(f"Orientation: {var}")
         axes[i].grid(True)
         axes[i].legend()
 
     # Third Plot Group: Angular Velocity
     fig, axes = plt.subplots(3, 1, figsize=(12, 10))
-    fig.suptitle("Position x,y,z for all topics")
+    fig.suptitle("Angular Velocity for all topics")
     ang_vel_topics = [
         "/odometry/filtered",
         "/model/bluerov2/odometry",
@@ -289,14 +318,14 @@ def plot_data(data_dictionary):
                 label=f"{topic}",
             )
         axes[i].set_xlabel("Time [s]")
-        axes[i].set_ylabel(f"{var} [m]")
+        axes[i].set_ylabel(f"{var} [rad/s]")
         axes[i].set_title(f"Angular Velocity: {var}")
         axes[i].grid(True)
         axes[i].legend()
 
     # Fourth Plot Group: Linear Velocity
     fig, axes = plt.subplots(3, 1, figsize=(12, 10))
-    fig.suptitle("Position x,y,z for all topics")
+    fig.suptitle("Linear Velocity for all topics")
     lin_vel_topics = [
         "/odometry/filtered",
         "/model/bluerov2/odometry",
@@ -313,14 +342,14 @@ def plot_data(data_dictionary):
                 label=f"{topic}",
             )
         axes[i].set_xlabel("Time [s]")
-        axes[i].set_ylabel(f"{var} [m]")
+        axes[i].set_ylabel(f"{var} [m/s]")
         axes[i].set_title(f"Linear Velocity: {var}")
         axes[i].grid(True)
         axes[i].legend()
 
     # Fifth Plot Group: Acceleration
     fig, axes = plt.subplots(3, 1, figsize=(12, 10))
-    fig.suptitle("Position x,y,z for all topics")
+    fig.suptitle("Acceleration for all topics")
     accel_topics = ["/vn100/gz_data"]
     accel_variables = ["accel_x", "accel_y", "accel_z"]
 
@@ -332,7 +361,7 @@ def plot_data(data_dictionary):
                 label=f"{topic}",
             )
         axes[i].set_xlabel("Time [s]")
-        axes[i].set_ylabel(f"{var} [m]")
+        axes[i].set_ylabel(f"{var} [m/s^2]")
         axes[i].set_title(f"Acceleration: {var}")
         axes[i].grid(True)
         axes[i].legend()
@@ -344,7 +373,7 @@ if __name__ == "__main__":
     rclpy.init()
 
     # Assuming that the
-    bag_path = "../../rosbag2_2025_07_31-15_06_56/rosbag2_2025_07_31-15_06_56_0.mcap"
+    bag_path = input("Type the full path from the current Directory to the bag")
 
     topics_to_read = [
         "/odometry/filtered",

@@ -10,7 +10,7 @@ and should read from the DVL, the
 import os
 
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument
+from launch.actions import DeclareLaunchArgument, TimerAction
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
@@ -29,6 +29,10 @@ def generate_launch_description():
     LaunchDescription: A complete launch description for the EKF node
 
     """
+
+    # add launch delay, hardcoded for now: 
+    launch_delay = 0.0
+
     # Constants for paths to different files and folders
     package_name = 'bubble_sensors'
 
@@ -67,6 +71,12 @@ def generate_launch_description():
         parameters=[ekf_config_file, {'use_sim_time': use_sim_time}],
     )
 
+    # Add a timer to delay the EKF node launch by 5 seconds
+    delayed_ekf_node_cmd = TimerAction(
+        period=launch_delay,
+        actions=[start_ekf_node_cmd]
+    )
+
     # Create the launch description and populate
     ld = LaunchDescription()
 
@@ -75,6 +85,6 @@ def generate_launch_description():
     ld.add_action(declare_use_sim_time_cmd)
 
     # Add the actions
-    ld.add_action(start_ekf_node_cmd)
+    ld.add_action(delayed_ekf_node_cmd)
 
     return ld

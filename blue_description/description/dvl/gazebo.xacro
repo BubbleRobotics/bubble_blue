@@ -36,7 +36,7 @@
               </range>
               <noise type="gaussian">
                 <mean>0.0</mean>
-                <stddev>0.01</stddev>
+                <stddev>0.0</stddev>
               </noise>
             </bottom_mode>
           </tracking>

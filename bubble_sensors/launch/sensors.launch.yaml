@@ -13,11 +13,11 @@ launch:
 
   - arg:
       name: use_imu
-      default: "true"
+      default: "false"
 
   - arg:
       name: use_ekf
-      default: "false"
+      default: "true"
 
   - node:
       pkg: bubble_sensors
@@ -47,9 +47,9 @@ launch:
       exec: performance_dvl
       param:
         - name: noise_stddev
-          value: 0.0001
+          value: 0.0
         - name: bias
-          value: 0.0001
+          value: 0.0
         - name: long_term_inaccuracy_percentage
           value: 0.1
         - name: resolution_mms

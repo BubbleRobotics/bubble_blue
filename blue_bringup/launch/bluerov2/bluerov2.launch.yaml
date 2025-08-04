@@ -23,11 +23,11 @@ launch:
 
   - arg:
       name: use_imu
-      default: "true"
+      default: "false"
 
   - arg:
       name: use_ekf
-      default: "false"
+      default: "true"
 
   - arg:
       name: localization_source
