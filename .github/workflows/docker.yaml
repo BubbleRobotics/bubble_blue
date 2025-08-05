@@ -82,7 +82,7 @@ jobs:
           bake-target: docker-metadata-action-robot
           tags: |
             type=raw,value=${{ matrix.ROS_DISTRO }}-robot
-      #Checking if moving to just a direct push allows the container to be built
+
       - name: Set Docker metadata for "desktop"
         if: env.PUSH == 'true'
         id: meta-desktop
@@ -106,15 +106,6 @@ jobs:
         run: |
           ls -la .docker/
           cat .docker/docker-bake.hcl | head -10
-      - name: Debug PUSH Environment
-        run: |
-          echo "Event name: ${{ github.event_name }}"
-          echo "Repository: ${{ github.repository }}"
-          echo "Ref: ${{ github.ref }}"
-          echo "Is PUSH: ${{ env.PUSH }}"
-          echo "meta-ci: ${{ steps.meta-ci.outputs.bake-file }}"
-          echo "meta-robot: ${{ steps.meta-robot.outputs.bake-file }}"
-          echo "meta-desktop: ${{ steps.meta-desktop.outputs.bake-file }}"
 
       - if: github.event_name == 'push'
         name: Build and push (non PR)
