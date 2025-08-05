@@ -29,8 +29,7 @@ def generate_launch_description():
     LaunchDescription: A complete launch description for the EKF node
 
     """
-
-    # add launch delay, hardcoded for now: 
+    # add launch delay, hardcoded for now:
     launch_delay = 0.0
 
     # Constants for paths to different files and folders
