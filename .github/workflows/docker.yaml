@@ -120,7 +120,7 @@ jobs:
           df -h
 
       - if: github.event_name == 'push'
-        name: Build and push (non PR)
+        name: Build and push amd64 (non PR)
         uses: docker/bake-action@v6.5.0
         env:
           BLUE_ROS_DISTRO: ${{ matrix.ROS_DISTRO }}
@@ -128,6 +128,21 @@ jobs:
         with:
           files: |
             .docker/docker-bake.hcl
+          push: ${{ env.PUSH }}
+          set: |
+            *.platform=linux/amd64
+            *.cache-from=type=registry,ref=ghcr.io/${{ steps.lowercase-repo.outputs.repository }}:cache-${{ matrix.ROS_DISTRO }}
+            *.cache-to=type=registry,mode=max,ref=ghcr.io/${{ steps.lowercase-repo.outputs.repository }}:cache-${{ matrix.ROS_DISTRO }}
+
+      - if: github.event_name == 'push'
+        name: Build and push arm64 (non PR)
+        uses: docker/bake-action@v6.5.0
+        env:
+          BLUE_ROS_DISTRO: ${{ matrix.ROS_DISTRO }}
+          BLUE_GITHUB_REPO: ${{ steps.lowercase-repo.outputs.repository }}
+        with:
+          files: |
+            .docker/docker-bake-robot.hcl
           push: ${{ env.PUSH }}
           set: |
             *.cache-from=type=registry,ref=ghcr.io/${{ steps.lowercase-repo.outputs.repository }}:cache-${{ matrix.ROS_DISTRO }}

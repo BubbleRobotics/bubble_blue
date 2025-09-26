@@ -13,7 +13,7 @@ variable "BLUE_ROS_DISTRO" { default = "jazzy" }
 variable "BLUE_GITHUB_REPO" { default = "patpat98/bubble_blue" }
 
 group "default" {
-  targets = ["ci", "robot", "desktop"]
+  targets = ["ci", "robot"]
 }
 
 # These are populated by the metadata-action Github action for each target
@@ -40,7 +40,7 @@ target "ci" {
     ROS_DISTRO = "${BLUE_ROS_DISTRO}"
   }
   tags = [
-    "ghcr.io/${BLUE_GITHUB_REPO}:${BLUE_ROS_DISTRO}-ci"
+    "ghcr.io/${BLUE_GITHUB_REPO}:arm64-${BLUE_ROS_DISTRO}-ci"
   ]
   labels = {
     "org.opencontainers.image.source" = "https://github.com/${BLUE_GITHUB_REPO}"
@@ -62,7 +62,7 @@ target "robot" {
   inherits = [ "ci", "docker-metadata-action-robot" ]
   target = "robot"
   tags = [
-    "ghcr.io/${BLUE_GITHUB_REPO}:${BLUE_ROS_DISTRO}-robot"
+    "ghcr.io/${BLUE_GITHUB_REPO}:arm64-${BLUE_ROS_DISTRO}-robot"
   ]
   cache_to = [
     "type=local,dest=.docker-cache"
