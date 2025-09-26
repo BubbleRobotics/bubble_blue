@@ -103,16 +103,20 @@ jobs:
       #    bake-target: docker-metadata-action-desktop-nvidia
       #    tags: |
       #      type=raw,value=${{ matrix.ROS_DISTRO }}-desktop-nvidia
-      - name: Free Disk Space
+      - name: Free Disk Space (Selective)
         run: |
-          df -h
           sudo rm -rf /usr/share/dotnet
           sudo rm -rf /usr/local/lib/android
           sudo rm -rf /opt/ghc
           sudo rm -rf /opt/hostedtoolcache/CodeQL
-          sudo docker system prune -af
-          sudo apt-get autoremove -y
+          # Don't remove everything with docker system prune
+          docker image prune -f
+          docker container prune -f
+          sudo apt-get autoremove -y --purge
           sudo apt-get autoclean -y
+          # Remove specific large directories but preserve ROS
+          sudo rm -rf /usr/share/swift*
+          sudo rm -rf /usr/local/share/boost*
           df -h
 
       - if: github.event_name == 'push'
