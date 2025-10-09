@@ -1,7 +1,0 @@
-# Request
-string port
-string msg
----
-# Response
-bool success
-string message
