@@ -1,7 +1,7 @@
 services:
   blue:
     #save the image in the container registry
-    image: ghcr.io/patpat98/bubble_blue:jazzy-desktop
+    image: ghcr.io/bubblerobotics/docker-dev-container:jazzy-desktop
     environment:
       - DISPLAY=${DISPLAY}
       - XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR}
