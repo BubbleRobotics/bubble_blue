@@ -15,7 +15,7 @@ on:
   workflow_dispatch:
 
 env:
-  PUSH: ${{ (github.event_name != 'pull_request') && (github.repository == 'Patpat98/bubble_blue') }}
+  PUSH: ${{ (github.event_name != 'pull_request') && (github.repository == 'bubblerobotics/bubble_blue') }}
 
 jobs:
   docker_build:
