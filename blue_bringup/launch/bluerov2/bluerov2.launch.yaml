@@ -14,23 +14,7 @@ launch:
       default: "false"
 
   - arg:
-      name: use_generic
-      default: "false"
-
-  - arg:
-      name: use_dvl
-      default: "true"
-
-  - arg:
       name: use_blue_localization
-      default: "true"
-
-  - arg:
-      name: use_imu
-      default: "true"
-
-  - arg:
-      name: use_ekf
       default: "true"
 
   - arg:
@@ -168,29 +152,3 @@ launch:
 
   - include:
       file: $(find-pkg-share message_transforms)/launch/tf.launch.yaml
-
-  # if using sim, use simulated sensors
-  - include:
-      file: $(find-pkg-share bubble_sensors)/launch/sim_sensors.launch.yaml
-      if: $(var use_sim)
-      arg:
-          - name: use_generic
-            value: $(var use_generic)
-          - name: use_dvl
-            value: $(var use_dvl)
-          - name: use_imu
-            value: $(var use_imu)
-          - name: use_ekf
-            value: $(var use_ekf)
-
-  # if using the real robot, use the actual robot sensors
-  - include:
-      file: $(find-pkg-share bubble_sensors)/launch/real_sensors.launch.yaml
-      if: $(not $(var use_sim))
-      arg:
-          - name: use_dvl
-            value: $(var use_dvl)
-          - name: use_imu
-            value: $(var use_imu)
-          - name: use_ekf
-            value: $(var use_ekf)
