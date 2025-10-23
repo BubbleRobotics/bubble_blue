@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
 
-  <xacro:macro name="sensors_macro" params="prefix:='' use_sim:=false use_imu:=true use_dvl:=true">
+  <xacro:macro name="sensors_macro" params="prefix:='' use_sim:=false use_imu:=true use_dvl:=true use_gnss:=true">
     <!-- Import IMU sensor -->
     <xacro:include filename="$(find blue_description)/description/vn100/urdf.xacro" />
     <xacro:imu_urdf prefix="$(arg prefix)" parent="$(arg prefix)base_link">
@@ -15,6 +15,10 @@
       <origin rpy="3.1416 0 0" xyz="0.0 0.0 -0.12" />
     </xacro:dvl_urdf>
 
+    <!-- GNSS sensor -->
+    <xacro:include filename="$(find sensors_gnss)/description/ZED-F9P/urdf.xacro" />
+    <xacro:gnss_urdf prefix="$(arg prefix)" parent="$(arg prefix)base_link" />
+
     <!-- Add Gazebo sensor plugins if in simulation -->
     <xacro:if value="$(arg use_sim)">
       <xacro:include filename="$(find blue_description)/description/vn100/gazebo.xacro" />
@@ -23,6 +27,9 @@
 
       <xacro:include filename="$(find blue_description)/description/dvl/gazebo.xacro" />
       <xacro:dvl_gazebo reference="$(arg prefix)dvl_link" topic="/dvl/data_test" />
+
+      <xacro:include filename="$(find sensors_gnss)/description/ZED-F9P/gazebo.xacro" />
+      <xacro:gnss_gazebo reference="$(arg prefix)gnss_link" />
     </xacro:if>
   </xacro:macro>
 </robot>
