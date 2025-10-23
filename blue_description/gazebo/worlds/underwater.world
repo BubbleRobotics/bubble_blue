@@ -2,6 +2,19 @@
 <sdf version="1.6">
   <world name="underwater_world">
 
+    <!-- Set initial position to Zurich, Switzerland -->
+    <spherical_coordinates>
+      <!-- Use WGS84 for standard GPS coordinates -->
+      <surface_model>EARTH_WGS84</surface_model>
+      <!-- Zurich coordinates -->
+      <latitude_deg>47.3769</latitude_deg>
+      <longitude_deg>8.5417</longitude_deg>
+      <!-- Altitude in meters above sea level -->
+      <elevation>408.0</elevation>
+      <!-- Heading offset (rotation between Gazebo X-axis and East) -->
+      <heading_deg>0.0</heading_deg>
+    </spherical_coordinates>
+
     <plugin
       filename="gz-sim-physics-system"
       name="gz::sim::systems::Physics">
