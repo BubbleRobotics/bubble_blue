@@ -45,7 +45,12 @@
 
     <include>
       <uri>model://sand_heightmap</uri>
-      <pose>0 7 -10 0 0 0</pose>
+      <pose>0 7 -10.5 0 0 0</pose>
+    </include>
+
+    <include>
+    <uri>model://pilot</uri>
+    <pose>0 0 0 0 0 0</pose>
     </include>
 
     <include>
