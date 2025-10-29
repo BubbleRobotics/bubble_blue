@@ -19,6 +19,10 @@
     <xacro:include filename="$(find sensors_gnss)/description/ZED-F9P/urdf.xacro" />
     <xacro:gnss_urdf prefix="$(arg prefix)" parent="$(arg prefix)base_link" />
 
+    <!-- Import RealSense D455 -->
+    <xacro:include filename="$(find sensors_camera)/description/d455/urdf.xacro" />
+    <xacro:realsense_d455_urdf prefix="$(arg prefix)" parent="$(arg prefix)base_link"/>
+
     <!-- Add Gazebo sensor plugins if in simulation -->
     <xacro:if value="$(arg use_sim)">
       <xacro:include filename="$(find blue_description)/description/vn100/gazebo.xacro" />
@@ -30,6 +34,9 @@
 
       <xacro:include filename="$(find sensors_gnss)/description/ZED-F9P/gazebo.xacro" />
       <xacro:gnss_gazebo reference="$(arg prefix)gnss_link" />
+
+      <xacro:include filename="$(find sensors_camera)/description/d455/gazebo.xacro" />
+      <xacro:realsense_d455_gazebo reference="$(arg prefix)realsense_d455_link"/>
     </xacro:if>
   </xacro:macro>
 </robot>
