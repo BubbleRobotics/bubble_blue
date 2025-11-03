@@ -4,14 +4,14 @@ RRT path follower: generate a 3D path (ENU meters, z up) and fly it via MAVLink/
 - Start/Goal (ENU): start=(0,0,0), goal=(11.35433787, 13.38846827, -5)
 - Bounds: x∈[-2,20], y∈[-2,20], z∈[-10,1] (z up)
 """
-import pymap3d as pm
+
 from pymavlink import mavutil
 import math
 import time
 from mavros_msgs.srv import CommandBool, SetMode
 import rclpy
 from dataclasses import dataclass
-from typing import List, Tuple
+from typing import List
 import random
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D  # noqa: F401
@@ -31,15 +31,21 @@ def set_mode(mode="GUIDED"):
     client = node.create_client(SetMode, '/mavros/set_mode')
     if not client.wait_for_service(timeout_sec=5.0):
         print("Set mode service not available!")
-        node.destroy_node(); rclpy.shutdown(); return False
-    req = SetMode.Request(); req.custom_mode = mode
+        node.destroy_node()
+        rclpy.shutdown()
+        return False
+    req = SetMode.Request()
+    req.custom_mode = mode
     future = client.call_async(req)
     rclpy.spin_until_future_complete(node, future)
     result = future.result()
-    node.destroy_node(); rclpy.shutdown()
+    node.destroy_node()
+    rclpy.shutdown()
     if result and result.mode_sent:
-        print(f"Flight mode set to: {mode}"); return True
-    print("Failed to set flight mode"); return False
+        print(f"Flight mode set to: {mode}")
+        return True
+    print("Failed to set flight mode")
+    return False
 
 def arm_vehicle_and_set_mode(arm=False, mode="MANUAL"):
     print(f"Setting mavros mode to {mode}")
@@ -49,24 +55,34 @@ def arm_vehicle_and_set_mode(arm=False, mode="MANUAL"):
     set_mode_client = node.create_client(SetMode, '/mavros/set_mode')
     if not set_mode_client.wait_for_service(timeout_sec=5.0):
         print("Set mode service not available!")
-        node.destroy_node(); rclpy.shutdown(); return False
-    req = SetMode.Request(); req.custom_mode = mode
+        node.destroy_node()
+        rclpy.shutdown()
+        return False
+    req = SetMode.Request()
+    req.custom_mode = mode
     fut = set_mode_client.call_async(req)
     rclpy.spin_until_future_complete(node, fut)
     res = fut.result()
     if not (res and res.mode_sent):
-        print("Failed to set flight mode"); node.destroy_node(); rclpy.shutdown(); return False
+        print("Failed to set flight mode")
+        node.destroy_node()
+        rclpy.shutdown()
+        return False
     print(f"Flight mode set to: {mode}")
     print("Arming vehicle" if arm else "Disarming vehicle")
     arming_client = node.create_client(CommandBool, '/mavros/cmd/arming')
     if not arming_client.wait_for_service(timeout_sec=5.0):
         print('Arming service not available!')
-        node.destroy_node(); rclpy.shutdown(); return False
-    req2 = CommandBool.Request(); req2.value = arm
+        node.destroy_node()
+        rclpy.shutdown()
+        return False
+    req2 = CommandBool.Request()
+    req2.value = arm
     fut2 = arming_client.call_async(req2)
     rclpy.spin_until_future_complete(node, fut2)
     res2 = fut2.result()
-    node.destroy_node(); rclpy.shutdown()
+    node.destroy_node()
+    rclpy.shutdown()
     print('Arming successful' if (res2 and res2.success) else 'Arming failed')
     return bool(res2 and res2.success)
 
@@ -115,22 +131,20 @@ def reached_goal(x_goal_east_m, y_goal_north_m, up_goal_m, yaw_goal_deg, thresho
 
     else:
         raise ValueError("No LOCAL_POSITION_NED message received")
-    _ = master.recv_match(type='ATTITUDE', blocking=False, timeout=0.2)  # yaw ignored
+    att_msg = master.recv_match(type='ATTITUDE', blocking=False, timeout=0.2)  # yaw ignored
 
-    
-    """if not pos_msg: return False, None
-    lat_current = pos_msg.lat / 1e7
-    lon_current = pos_msg.lon / 1e7"""
+    if att_msg is not None:
+        yaw_current_rad = att_msg.yaw
+        yaw_current_deg = math.degrees(yaw_current_rad)
+        yaw_scale = 1.0
+    else:
+        yaw_current_deg = 180.0  # default if no attitude message
+        yaw_scale = 3.0       # do not move if yaw is not known
 
-    # relative_alt is mm up; depth positive down
-    #depth_current = -pos_msg.relative_alt / 1000.0
-    # meters per degree (local)
-    """m_per_deg_lat = 111000.0
-    m_per_deg_lon = 111000.0 * math.cos(math.radians(lat_goal))"""
     x_dist = (x_goal_east_m - x_current_east_m) 
     y_dist = (y_goal_north_m - y_current_north_m)
     depth_dist = (up_goal_m - up_current_m) 
-    yaw_dist = 0.0  # yaw completely ignored
+    yaw_dist = yaw_scale*(yaw_goal_deg - yaw_current_deg)/100.0  # scale down yaw error
     total = math.sqrt(x_dist**2 + y_dist**2 + depth_dist**2 + yaw_dist**2)
     return total < threshold, total
 
@@ -140,37 +154,62 @@ def reached_goal(x_goal_east_m, y_goal_north_m, up_goal_m, yaw_goal_deg, thresho
 
 @dataclass
 class Bounds3D:
-    minx: float; miny: float; minz: float
-    maxx: float; maxy: float; maxz: float
+    minx: float
+    miny: float
+    minz: float
+    maxx: float
+    maxy: float
+    maxz: float
 
 @dataclass
 class State:
-    x: float; y: float; z: float; yaw: float = 0.0  # yaw unused, stays 0
+    x: float
+    y: float
+    z: float
+    yaw: float = 0.0  # yaw unused, stays 0
 
 @dataclass
 class Node:
-    s: State; parent: int
+    s: State
+    parent: int
 
 @dataclass
 class Sphere:
-    cx: float; cy: float; cz: float; r: float
+    cx: float
+    cy: float
+    cz: float
+    r: float
 
 @dataclass
 class AABB:
-    minx: float; miny: float; minz: float; maxx: float; maxy: float; maxz: float
+    minx: float
+    miny: float
+    minz: float
+    maxx: float
+    maxy: float
+    maxz: float
 
 @dataclass
 class OrientedBox:
-    cx: float; cy: float; cz: float
-    sx: float; sy: float; sz: float  # full sizes
+    cx: float
+    cy: float
+    cz: float
+    sx: float
+    sy: float
+    sz: float  # full sizes
     yaw: float
 
 @dataclass
 class RobotBox:
-    hx: float; hy: float; hz: float; z_offset: float  # half sizes + center offset
+    hx: float
+    hy: float
+    hz: float
+    z_offset: float  # half sizes + center offset
 
 def dist_xyz(a: State, b: State) -> float:
-    dx = a.x - b.x; dy = a.y - b.y; dz = a.z - b.z
+    dx = a.x - b.x
+    dy = a.y - b.y
+    dz = a.z - b.z
     return math.sqrt(dx*dx + dy*dy + dz*dz)
 
 def in_bounds(p: State, b: Bounds3D) -> bool:
@@ -187,7 +226,9 @@ def collides_robot(p_base: State, rb: RobotBox,
 
     # Spheres
     for sp in spheres:
-        dx = pc.x - sp.cx; dy = pc.y - sp.cy; dz = pc.z - sp.cz
+        dx = pc.x - sp.cx
+        dy = pc.y - sp.cy
+        dz = pc.z - sp.cz
         if (dx*dx + dy*dy + dz*dz) <= (sp.r + r_sphere)**2:
             return True
 
@@ -228,19 +269,101 @@ def edge_free(a: State, b: State, bounds: Bounds3D, rb: RobotBox,
                   a.y + t*(b.y - a.y),
                   a.z + t*(b.z - a.z),
                   0.0)  # yaw ignored
-        if not in_bounds(p, bounds): return False
-        if collides_robot(p, rb, spheres, aabbs, obbs): return False
+        if not in_bounds(p, bounds): 
+            return False
+        if collides_robot(p, rb, spheres, aabbs, obbs): 
+            return False
     return True
 
+def optimize_path_shortcut(
+    path: List["State"],
+    bounds: "Bounds3D",
+    rb: "RobotBox",
+    spheres: List["Sphere"],
+    aabbs: List["AABB"],
+    obbs: List["OrientedBox"],
+    res: float,
+    *,
+    max_passes: int = 10
+) -> List["State"]:
+    """
+    Greedy path shortcutting (a.k.a. path pruning) using the provided edge_free().
+
+    Strategy:
+      - Iterate through the path from left to right.
+      - For each i, try to connect directly to the farthest j (descending search) that
+        preserves a collision-free straight-line edge via edge_free().
+      - If such j is found, delete all intermediate nodes (i+1 ... j-1).
+      - Repeat passes until no further changes or max_passes reached.
+
+    Guarantees:
+      - Start and goal are preserved (first and last nodes).
+      - Every retained edge edge_free(...) == True.
+      - Works with your collides_robot() via edge_free().
+
+    Args:
+        path:       List of States [start, ..., goal].
+        bounds:     Bounds3D for in-bounds checks inside edge_free().
+        rb:         RobotBox used by collides_robot() (via edge_free()).
+        spheres:    List of Sphere obstacles.
+        aabbs:      List of axis-aligned boxes.
+        obbs:       List of oriented boxes.
+        res:        Edge sampling resolution passed to edge_free().
+        max_passes: Safety cap on how many full pruning passes to attempt.
+
+    Returns:
+        A simplified list of States with redundant waypoints removed.
+    """
+    if not path or len(path) < 3:
+        # Nothing to optimize (need at least start, one middle, goal)
+        return path
+
+    # Work on a copy to avoid mutating the caller's list
+    pts = list(path)
+
+    # Outer loop: keep making passes while progress is possible
+    for _ in range(max_passes):
+        changed = False
+        i = 0
+        # We always keep pts[0]; try to leap as far as possible from each kept node.
+        while i < len(pts) - 2:
+            # Try to jump from i to the farthest j
+            jumped = False
+            # Start from the goal (len(pts)-1) down to i+2
+            for j in range(len(pts) - 1, i + 1, -1):
+                if j == i + 1:
+                    # Adjacent; nothing to shortcut
+                    continue
+                if edge_free(pts[i], pts[j], bounds, rb, spheres, aabbs, obbs, res):
+                    # Remove intermediates i+1 ... j-1
+                    del pts[i + 1:j]
+                    changed = True
+                    jumped = True
+                    break  # After jump, try to jump again from the same i to new farther points
+            if not jumped:
+                # Couldn't jump farther; move forward
+                i += 1
+
+        if not changed:
+            break
+
+    return pts
+
+
 def nearest(tree: List[Node], q: State) -> int:
-    best = 1e18; idx = -1
+    best = 1e18
+    idx = -1
     for i, n in enumerate(tree):
         d = dist_xyz(n.s, q)
-        if d < best: best = d; idx = i
+        if d < best: 
+            best = d
+        idx = i
     return idx
 
 def steer_toward(qn: State, qt: State, max_step: float) -> State:
-    dx = qt.x - qn.x; dy = qt.y - qn.y; dz = qt.z - qn.z
+    dx = qt.x - qn.x
+    dy = qt.y - qn.y
+    dz = qt.z - qn.z
     d = math.sqrt(dx*dx + dy*dy + dz*dz)
     if d < 1e-9:
         return State(qt.x, qt.y, qt.z, 0.0)
@@ -260,7 +383,8 @@ def connect_toward(tree: List[Node], q_target: State,
         tree.append(Node(qnext, idx))
         idx = len(tree) - 1
         qn = qnext
-        if dist_xyz(qn, q_target) < 1e-9: return idx
+        if dist_xyz(qn, q_target) < 1e-9: 
+            return idx
         if dist_xyz(qn, q_target) <= step:
             qnext2 = steer_toward(qn, q_target, step)
             if not edge_free(qn, qnext2, bounds, rb, spheres, aabbs, obbs, edge_res):
@@ -315,10 +439,12 @@ def generate_rrt_path(q_start:State,q_goal:State,step_size:float,bounds:Bounds3D
             0.0
         )
     
-    tes = collides_robot(q_goal, robot, spheres, aabbs, obbs)  # test goal collision
-    print(f"Goal collision: {tes}")
+    testing_goal = collides_robot(q_goal, robot, spheres, aabbs, obbs)  # test goal collision
+    print(f"Goal collision: {testing_goal}")
 
-    success = False; meet_a = -1; meet_b = -1
+    success = False
+    meet_a = -1
+    meet_b = -1
     for i in range(max_iters):
         if i % 1000 == 0:
             print(f"RRT iteration {i}, Ta size={len(Ta)}, Tb size={len(Tb)}")
@@ -327,7 +453,10 @@ def generate_rrt_path(q_start:State,q_goal:State,step_size:float,bounds:Bounds3D
         q_new_a = Ta[new_a].s
         new_b = connect_toward(Tb, q_new_a, step, edge_res, bounds, robot, spheres, aabbs, obbs)
         if dist_xyz(Tb[new_b].s, q_new_a) < step*0.5:
-            success = True; meet_a = new_a; meet_b = new_b; break
+            success = True
+            meet_a = new_a
+            meet_b = new_b
+            break
         Ta, Tb = Tb, Ta  # swap
 
     if not success:
@@ -355,32 +484,19 @@ def generate_rrt_path(q_start:State,q_goal:State,step_size:float,bounds:Bounds3D
 
     if path and dist_xyz(path[0], q_start) > dist_xyz(path[-1], q_start):
         path = list(reversed(path))
+
+    path = optimize_path_shortcut(path, bounds, robot, spheres, aabbs, obbs, edge_res)
     return path
 
 # =========================
 # FOLLOW THE RRT PATH
 # =========================
 
-def enu_to_geodetic(lat0: float, lon0: float, alt_0:float, east: float, north: float, up:float) -> Tuple[float, float]:
-    """Small-angle ENU meters -> lat/lon degrees around (lat0, lon0)."""
-    m_per_deg_lat = 111000.0
-    m_per_deg_lon = 111000.0 * math.cos(math.radians(lat0))
-    lat = lat0 + (north / m_per_deg_lat)
-    lon = lon0 + (east  / m_per_deg_lon)
-    test = pm.enu2geodetic(east, north, up, lat0, lon0, alt_0)
-    return test[0], test[1], test[2]
-
-def geodetic_to_enu(lat0: float, lon0: float, alt_0:float, lat: float, lon: float, alt:float) -> Tuple[float, float]:
-    """Small-angle lat/lon degrees -> ENU meters around (lat0, lon0)."""
-    m_per_deg_lat = 111000.0
-    m_per_deg_lon = 111000.0 * math.cos(math.radians(lat0))
-    north = (lat - lat0) * m_per_deg_lat
-    east  = (lon - lon0) * m_per_deg_lon
-    test = pm.geodetic2enu(lat, lon, alt, lat0, lon0, alt_0)
-    return test[0], test[1], test[2]
 
 def _aabb_edges(aabb):
-    xs = [aabb.minx, aabb.maxx]; ys = [aabb.miny, aabb.maxy]; zs = [aabb.minz, aabb.maxz]
+    xs = [aabb.minx, aabb.maxx]
+    ys = [aabb.miny, aabb.maxy]
+    zs = [aabb.minz, aabb.maxz]
     corners = [(x,y,z) for x in xs for y in ys for z in zs]
     eid = [(0,1),(0,2),(0,4),(1,3),(1,5),(2,3),(2,6),(3,7),(4,5),(4,6),(5,7),(6,7)]
     return [(corners[i], corners[j]) for (i,j) in eid]
@@ -441,32 +557,14 @@ def plot_rrt_path_3d(path, bounds, aabbs, obbs, q_start, q_goal, save_path="rrt_
     print(f"Saved 3D path plot to {save_path}")
 
 def main():
-        # Grab home as reference for ENU->LLA mapping
-    """home = master.recv_match(type='HOME_POSITION', blocking=True, timeout=3)
-    if not home:
-        raise RuntimeError("No HOME_POSITION received; cannot convert ENU to WGS84.")
-    lat0 = home.latitude / 1e7
-    lon0 = home.longitude / 1e7
-    alt0 = home.altitude / 1000.0
-    print(f"Home lat0={lat0:.7f}, lon0={lon0:.7f}, alt0={alt0:.2f}m")
-    la0 = 41.358389
-    lo0 = 2.185278
-    print(f"Difference from home: dlat={lat0 - la0:.7f}, dlon={lon0 - lo0:.7f}")"""
-    """lat0 = la0
-    lon0 = lo0"""
+    # Grab home as reference for ENU->LLA mapping
+
     # Arm & mode
     # Bounds (ENU, z up)
     bounds = Bounds3D(-2, -2, -10, 20, 20, 1)
     # Start / goal (ENU, z up)
     pos_msg = master.recv_match(type='LOCAL_POSITION_NED', blocking=True, timeout=1)
     
-    """depth = (depth_current) - 49.35
-
-    lat_current = pos_msg.lat / 1e7
-    lon_current = pos_msg.lon / 1e7
-    alt_current = pos_msg.relative_alt / 1000.0
-    enu = geodetic_to_enu(lat0, lon0, alt0, lat_current, lon_current, alt_current)
-    print(depth)"""
     if pos_msg:
         x_current = pos_msg.y  # meters North
         y_current = pos_msg.x  # meters East
@@ -477,7 +575,7 @@ def main():
     q_start = State(x_current, y_current, up_current, 0.0)
     print(f"Start ENU: x={q_start.x:.2f}, y={q_start.y:.2f}, z={q_start.z:.2f}")
     #q_start = State(11.35433787, 13.38846827, -5.0, 0.0)
-    q_goal  = State(11.25, 13.5, -5, 0.0)
+    q_goal  = State(11.25, 13.5, -5.25, 0.0)
     #q_goal = State(11.835702, 13.253233, -5, 0.0)
     
     arm_vehicle_and_set_mode(True, "GUIDED")
@@ -489,7 +587,6 @@ def main():
     if not path:
         print("No path to follow; exiting.")
         return
-
     # Recreate obstacles/bounds for plotting
     bounds = Bounds3D(-2, -2, -10, 20, 20, 0)
     aabbs: List[AABB] = []
@@ -512,14 +609,18 @@ def main():
     print(f"First waypoint x={path[0].x}, y={path[0].y}, z={path[0].z}")
     print(path)
     for i, wp in enumerate(path):
-        # Convert (x east, y north, z up) -> (lat, lon, depth)
-        #lat, lon, alt = enu_to_geodetic(lat0, lon0, alt0, east=wp.x, north=wp.y, up=wp.z)
         
-        if i > length - 3:
+        distance = dist_xyz(wp, q_goal)
+        if distance < 2.0:
+            print(f"Distance to goal: {distance} m")
+            yaw_deg = 105.6923 # final desired yaw
+        else:
+            yaw_deg = 0.0   # FORCE yaw to 0 always
+        """if i > length - 3:
             THRESH = 0.05  # tighter threshold for last two waypoints
             yaw_deg = 105.6923
         else:
-            yaw_deg = 0.0   # FORCE yaw to 0 always
+            yaw_deg = 0.0   # FORCE yaw to 0 always"""
 
         goto_position(wp.x, wp.y, wp.z, yaw_deg=yaw_deg)
         # Wait until reached
@@ -528,17 +629,28 @@ def main():
         
         # Wait until reachedS
         start_t = time.time()
+        last_dist = 0.0
+        counter = 0
         while True:
-            
+            counter += 1
+                
             ok, dist = reached_goal(wp.x, wp.y, wp.z, yaw_deg, threshold=THRESH)
+            if counter % 20 == 0:
+                if abs(last_dist-dist) < 0.01:
+                    print("No longer moving towards waypoint!")
+                    break
+                else:
+                    last_dist = dist
+            print(f"Difference between current and last error: {abs(last_dist-dist):.4f} m")
             if ok:
                 print(f"  reached (err≈{dist:.2f} m)")
                 break
-            if time.time() - start_t > 20.0:  # per-waypoint timeout
+            if time.time() - start_t > 180.0:  # per-waypoint timeout
                 print(f"  timeout at this waypoint (last err≈{dist:.2f} m), moving on")
                 break
             time.sleep(0.3)
-
+        
+            
     print("RRT path complete. No further commands sent.")
 
 if __name__ == "__main__":

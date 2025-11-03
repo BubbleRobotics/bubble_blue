@@ -63,8 +63,10 @@
     <pose>0 0 0 0 0 0</pose>
     </include>
     
-
-
+    <include>
+    <uri>model://obstacles</uri>
+    <pose>0 0 0 0 0 0</pose>
+    </include>
 
     <include>
       <uri>
