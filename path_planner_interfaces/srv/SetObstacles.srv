@@ -1,0 +1,7 @@
+# Request: lists of obstacles
+path_planner_interfaces/Sphere[] spheres
+path_planner_interfaces/AABB[] aabbs
+path_planner_interfaces/OrientedBox[] oriented_boxes
+---
+# Response
+bool success

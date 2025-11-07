@@ -39,6 +39,18 @@
       </graded_buoyancy>
     </plugin>
 
+    <plugin filename="libcurrent_system.so" name="CurrentSystem">
+      <vx>0.0</vx>
+      <vy>0.3</vy>
+      <vz>0.0</vz>
+      <rho>1000.0</rho>
+      <drag_coeff>0.8</drag_coeff>
+      <area>0.03</area>
+      <affected_models>
+        <model>bluerov2</model>
+      </affected_models>
+    </plugin>
+
     <include>
       <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Sun</uri>
     </include>

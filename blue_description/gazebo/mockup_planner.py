@@ -171,7 +171,7 @@ def reached_goal(lat_goal, lon_goal, depth_goal, yaw_goal, threshold=0.05):
 
     # Print safely even if yaw is None
     yaw_str = f"{yaw_deg:.1f}°" if yaw_deg is not None else "N/A"
-    print(f"Current: lat={lat_dist:.7f}, lon={lon_dist:.7f}, depth={depth_dist:.2f} m, yaw={yaw_dist}, dist={total_dist:.2f} m")
+    print(f"Current: dist_lat={lat_dist:.7f}, dist_lon={lon_dist:.7f}, dist_depth={depth_dist:.2f} m, dist_yaw={yaw_dist}, total_dist={total_dist:.2f} m")
 
     return total_dist < threshold, total_dist
 
@@ -224,9 +224,9 @@ while not done:
         lat_end = bottom_left["lat"]
         lon_end = bottom_left["lon"]
         depth_end = bottom_left["depth"]
-        goto_position(lat_end, lon_end, depth_end, yaw_deg=yaw)
+        goto_position(lat_end, lon_end, depth_end+0.05, yaw_deg=yaw)
         while not checked_apriltags:
-            checked_apriltags, dist = reached_goal(lat_end, lon_end, depth_end, yaw, threshold=0.05)
+            checked_apriltags, dist = reached_goal(lat_end, lon_end, depth_end+0.05, yaw, threshold=0.1)
             time.sleep(0.5)
 
     if going_right:
