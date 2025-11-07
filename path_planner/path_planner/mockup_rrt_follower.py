@@ -17,15 +17,20 @@ from typing import List, Tuple, Optional
 
 import rclpy
 from rclpy.node import Node
+from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSHistoryPolicy
 from rclpy.parameter import Parameter
 from mavros_msgs.srv import CommandBool, SetMode
 from pymavlink import mavutil
-from geometry_msgs.msg import Pose, Point, Quaternion
+from geometry_msgs.msg import Pose, Point, Quaternion, Vector3
 from robot_localization.srv import SetPose
-from geometry_msgs.msg import PoseWithCovarianceStamped
+from geometry_msgs.msg import PoseWithCovarianceStamped, PoseStamped
 from path_planner_interfaces.srv import InitiatePath, SetObstacles
 from path_planner_interfaces.msg import Sphere, AABB, OrientedBox
 from std_srvs.srv import Trigger
+from std_msgs.msg import Header
+from mavros_msgs.msg import PositionTarget
+from mavros_msgs.msg import State as mavState
+from tf_transformations import euler_from_quaternion
 
 
 # ============
@@ -113,7 +118,7 @@ class RrtPathFollowerNode(Node):
         self.near_goal = float(self.get_parameter('near_goal_radius').value)
         self.safety_buffer = float(self.get_parameter('safety_buffer').value)
 
-        self.q_start = State(0, 0, -1)
+        self.q_start = State(0.0, 0.0, -1)
         goal_xyz = self.get_parameter('goal').get_parameter_value().double_array_value
         self.q_goal  = State(goal_xyz[0], goal_xyz[1], goal_xyz[2], 0.0)
         self.q_goal = State(11.0,13.45,-5.2,0.0)
@@ -125,10 +130,19 @@ class RrtPathFollowerNode(Node):
 
         self.mavlink_url: str = self.get_parameter('mavlink_url').get_parameter_value().string_value
         self.mavlink_url = 'udp:127.0.0.1:14550'
+        # MAVROS subscribers
+        # QoS: small queue, best-effort is fine for pose
+
+        self.current_pose = State(0.0, 0.0, 0.0, 0.0)
+        self._pose_sub = self.create_subscription(
+            PoseWithCovarianceStamped, '/mavros/vision_pose/pose_cov', self._pose_cb, 10)
+        self._last_pose = None
+        self._pose_lock = threading.Lock()
+        # MAVROS setpoint publishers
+        self.setpoint_local_pub = self.create_publisher(PositionTarget,'/mavros/setpoint_raw/local',10)
         # MAVROS service clients
         self.set_mode_cli = self.create_client(SetMode, '/mavros/set_mode')
         self.arm_cli      = self.create_client(CommandBool, '/mavros/cmd/arming')
-        
         # --- worker management ---
         self._worker = None
         self._cancel_evt = threading.Event()
@@ -157,16 +171,56 @@ class RrtPathFollowerNode(Node):
             'path_planner/replan',
             self.handler_replan
         )
+        
+        
+        self._is_connected = False
 
-        # pymavlink connection
-        self.get_logger().info(f'Connecting MAVLink: {self.mavlink_url}')
-        self.master = mavutil.mavlink_connection(self.mavlink_url)
-        self.master.wait_heartbeat(timeout=1000)
-        self.get_logger().info('MAVLink heartbeat received')
+        # Create a subscription to listen for MAVROS heartbeat (state)
+        self._state_sub = self.create_subscription(
+            mavState, '/mavros/state', self.state_callback, 10
+        )
+
+        self.get_logger().info('Waiting for MAVLink heartbeat (MAVROS state)...')
+
+        # Non-blocking loop to wait for heartbeat and process callbacks
+        start_time = time.time()
+        timeout = 10  # Timeout in seconds
+
+        while not self._is_connected and (time.time() - start_time) < timeout:
+            rclpy.spin_once(self)  # Process messages (this calls the callback)
+            self.get_logger().info(f'Waiting for heartbeat...{self._is_connected}')
+            time.sleep(0.5)
+
+        if self._is_connected:
+            self.get_logger().info('Connected to MAVLink vehicle.')
+        else:
+            self.get_logger().warn(f"Heartbeat not received within {timeout} seconds.")
+            # Handle timeout (e.g., exit or try again)
+            raise ValueError("Path Planner Node Timed out - No Heartbeat from MAVROS")
 
         
+        self.q_start = self.current_pose
+        
+        self.destroy_subscription(self._state_sub)
+
+        self.get_logger().info('Path planner: rrt_path_follower node initialized.')
+
+
+    def state_callback(self, msg: mavState):
+        # Check if the connection is established
+        
+        if msg.connected and not self._is_connected:
+            self._is_connected = True
+            
+
     def _start_new_worker(self):
         """Cancel any existing worker and start a new one."""
+   
+        self.goto_position(self.current_pose.x,
+                            self.current_pose.y,
+                            self.current_pose.z,
+                            self.current_pose.yaw)
+
         with self._worker_lock:
             # 1) ask the current worker to stop
             if self._worker and self._worker.is_alive():
@@ -191,6 +245,16 @@ class RrtPathFollowerNode(Node):
         finally:
             # nothing to cleanup right now
             pass
+
+    def _pose_cb(self, msg: PoseWithCovarianceStamped):
+        position = msg.pose.pose.position
+        q = msg.pose.pose.orientation
+        quat = [q.x, q.y, q.z, q.w]
+        _,_,yaw = euler_from_quaternion(quat)
+        self.current_pose = State(x=position.x, y=position.y, z=position.z, yaw=yaw)
+        
+            
+        
     # ===== service handler =====
     
 
@@ -198,12 +262,8 @@ class RrtPathFollowerNode(Node):
         goal_x = request.pose.position.x
         goal_y = request.pose.position.y
         goal_z = request.pose.position.z
-        pos = self.master.recv_match(type='LOCAL_POSITION_NED', blocking=True, timeout=2.0)
-        if pos is None:
-            self.get_logger().error('No LOCAL_POSITION_NED from FCU')
-            return
         
-        self.goto_position(pos.x, pos.y, pos.z, 0.0)
+        
         self.get_logger().info(
             "\n\n##################################################################\n"
         )
@@ -225,12 +285,7 @@ class RrtPathFollowerNode(Node):
         self.get_logger().info(
             "Service request: Add Obstacle)"
         )
-        pos = self.master.recv_match(type='LOCAL_POSITION_NED', blocking=True, timeout=2.0)
-        if pos is None:
-            self.get_logger().error('No LOCAL_POSITION_NED from FCU')
-            return
         
-        self.goto_position(pos.x, pos.y, pos.z, 0.0)
         self.aabbs_added = [] #For now do not add them to the aabbs becuase they cannot be removed again
         # Change obstacles and for now just replan
         for _, sphere in enumerate(request.spheres):
@@ -258,12 +313,7 @@ class RrtPathFollowerNode(Node):
         self.get_logger().info(
             "Service request: Set Obstacle)"
         )
-        pos = self.master.recv_match(type='LOCAL_POSITION_NED', blocking=True, timeout=2.0)
-        if pos is None:
-            self.get_logger().error('No LOCAL_POSITION_NED from FCU')
-            return
         
-        self.goto_position(pos.x, pos.y, pos.z, 0.0)
         self.spheres = request.spheres
         self.aabbs = request.aabbs
         self.oriented_boxes = request.oriented_boxes
@@ -284,14 +334,6 @@ class RrtPathFollowerNode(Node):
         self.get_logger().info(
             "Service request: Replan"
         )
-        pos = self.master.recv_match(type='LOCAL_POSITION_NED', blocking=True, timeout=2.0)
-        if pos is None:
-            self.get_logger().error('No LOCAL_POSITION_NED from FCU')
-            return
-        
-        self.goto_position(pos.x, pos.y, pos.z, 0.0)
-
-
         # Start worker thread to run the mission
         self._start_new_worker()
 
@@ -327,57 +369,48 @@ class RrtPathFollowerNode(Node):
         self.get_logger().info(f'Arm({value}): {"OK" if ok else "FAIL"}')
         return ok
 
-    def set_yaw(self, yaw_deg: float, speed_deg_per_s: float = 10.0, relative: bool = False) -> None:
-        self.master.mav.command_long_send(
-            self.master.target_system, self.master.target_component,
-            mavutil.mavlink.MAV_CMD_CONDITION_YAW,
-            0, yaw_deg, speed_deg_per_s, 0, 1 if relative else 0, 0, 0, 0
-        )
-        _ = self.master.recv_match(type='COMMAND_ACK', blocking=True, timeout=1)
 
     def goto_position(self, x_east_m: float, y_north_m: float, up_m: float, yaw_deg: Optional[float] = 0.0) -> None:
-        x_north_m = y_north_m
-        y_east_m  = x_east_m
-        depth_m   = -up_m  # NED positive down
+  
+        msg = PositionTarget()
+        # Use local NED frame (MAVROS translates correctly)
+        msg.header.frame_id = "map"
 
-        self.master.mav.set_position_target_local_ned_send(
-            0,
-            self.master.target_system,
-            self.master.target_component,
-            mavutil.mavlink.MAV_FRAME_LOCAL_NED,
-            int(0b110111111000),  # position + yaw
-            x_north_m, y_east_m, depth_m,
-            0, 0, 0,
-            0, 0, 0,
-            0.0 if yaw_deg is None else math.radians(yaw_deg),
-            0
+        msg.coordinate_frame = PositionTarget.FRAME_LOCAL_NED
+
+        # Type mask (bits = ignore fields)
+        # We want to send ONLY position + yaw
+        # ignore velocity, accel, yaw_rate
+        msg.type_mask = (
+            PositionTarget.IGNORE_VX |
+            PositionTarget.IGNORE_VY |
+            PositionTarget.IGNORE_VZ |
+            PositionTarget.IGNORE_AFX |
+            PositionTarget.IGNORE_AFY |
+            PositionTarget.IGNORE_AFZ |
+            PositionTarget.IGNORE_YAW_RATE
         )
-        if yaw_deg is not None:
-            self.set_yaw(yaw_deg)
+        # Desired position (NED)
+        msg.position.x = float(x_east_m)    # North
+        msg.position.y = float(y_north_m)    # East
+        msg.position.z = float(up_m)        # Down
 
+        # Desired yaw (rad)
+        msg.yaw = float(math.radians(-yaw_deg+90))
+        self.setpoint_local_pub.publish(msg)
+         
     # ==================
     # Geometry helpers
     # ==================
     def reached_goal(self, x_goal_e: float, y_goal_n: float, up_goal: float, yaw_goal_deg: float) -> Tuple[bool, float]:
-        pos = self.master.recv_match(type='LOCAL_POSITION_NED', blocking=True, timeout=0.5)
-        if pos is None:
-            raise RuntimeError('No LOCAL_POSITION_NED')
-        # NED -> ENU
-        x_e = pos.y
-        y_n = pos.x
-        up  = -pos.z
-        att = self.master.recv_match(type='ATTITUDE', blocking=False, timeout=0.2)
-        if att is not None:
-            yaw_deg = math.degrees(att.yaw)
-            yaw_scale = 1.0
-        else:
-            yaw_deg = 180.0
-            yaw_scale = 3.0
-        dx = x_goal_e - x_e
-        dy = y_goal_n - y_n
-        dz = up_goal - up
-        dyaw = 0*yaw_scale * (yaw_goal_deg - yaw_deg) / 100.0
+        
+    
+        dx = x_goal_e - self.current_pose.x
+        dy = y_goal_n - self.current_pose.y
+        dz = up_goal - self.current_pose.z + 0.05
+        dyaw = 0.0* (yaw_goal_deg - self.current_pose.yaw) / 100.0
         total = math.sqrt(dx*dx + dy*dy + dz*dz + dyaw*dyaw)
+        self.get_logger().info(f"Current: dx={dx:.7f}, dy={dy:.7f}, dz={dz:.2f} m, dyaw={dyaw}, total_dist={total:.2f} m")
         return (total < self.threshold, total)
 
     def dist_xyz(self, a: State, b: State) -> float:
@@ -635,13 +668,11 @@ class RrtPathFollowerNode(Node):
 
     def _run(self) -> None:
         # parameters
-        
-        # read current pose (LOCAL_POSITION_NED)
-        pos = self.master.recv_match(type='LOCAL_POSITION_NED', blocking=True, timeout=2.0)
-        if pos is None:
-            self.get_logger().error('No LOCAL_POSITION_NED from FCU')
-            return
-        self.q_start = State(pos.y, pos.x, -pos.z, 0.0)  # ENU
+        self.q_start = self.current_pose
+        self.goto_position(self.current_pose.x,
+                            self.current_pose.y,
+                            self.current_pose.z,
+                            self.current_pose.yaw)
 
         self.get_logger().info(f'RRT path from start ENU ({self.q_start.x}, {self.q_start.y}, {self.q_start.z})')
         self.get_logger().info(f'            to goal ENU ({self.q_goal.x},  {self.q_goal.y},  {self.q_goal.z})')

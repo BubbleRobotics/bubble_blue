@@ -11,6 +11,13 @@ mavros:
       - local*
       - global_position
       - mavros_sensor
+      - local_position
+      - home_position
+      - odometry
+      - gps_input
+      - waypoint
+      - setpoint_*
+      - heartbeat
     mavros_sensor:
       sensor_topic: "/sensors/generalized_sensor_test"
       mavros_topic: "/mavros/custom_vision_speed/speed_twist"

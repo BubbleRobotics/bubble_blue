@@ -142,9 +142,9 @@ def parse_args():
     p.add_argument('--x', type=float, default=2.0, help='Center X of the box')
     p.add_argument('--y', type=float, default=0.0, help='Center Y of the box')
     p.add_argument('--z', type=float, default=-3.5, help='Center Z of the box')
-    p.add_argument('--sx', type=float, default=1.0, help='Box length along X (must be > 0)')
-    p.add_argument('--sy', type=float, default=1.0, help='Box length along Y (must be > 0)')
-    p.add_argument('--sz', type=float, default=1.0, help='Box length along Z (must be > 0)')
+    p.add_argument('--sx', type=float, default=0.75, help='Box length along X (must be > 0)')
+    p.add_argument('--sy', type=float, default=0.75, help='Box length along Y (must be > 0)')
+    p.add_argument('--sz', type=float, default=0.75, help='Box length along Z (must be > 0)')
     p.add_argument('action', nargs='?', choices=['spawn', 'remove'], default='spawn', help='Action to perform')
     return p.parse_args()
 
