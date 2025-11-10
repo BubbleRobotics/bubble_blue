@@ -55,8 +55,6 @@ from tf2_ros import (
 )
 from tf2_ros.buffer import Buffer
 from tf2_ros.transform_listener import TransformListener
-import random
-from tf_transformations import euler_from_quaternion, quaternion_from_euler
 
 
 class Localizer(Node, ABC):
@@ -638,7 +636,6 @@ class GazeboLocalizer(PoseLocalizer):
         pose_cov = PoseWithCovarianceStamped()
         pose_cov.header = msg.header
         pose_cov.pose = msg.pose
-
 
         self.state = pose_cov
 
