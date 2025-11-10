@@ -638,28 +638,7 @@ class GazeboLocalizer(PoseLocalizer):
         pose_cov = PoseWithCovarianceStamped()
         pose_cov.header = msg.header
         pose_cov.pose = msg.pose
-        dx = (random.random() - 0.5)*0.3
-        dy = (random.random() - 0.5)*0.3
-        dz = (random.random() - 0.5)*0.3
-        dyaw = (random.random() - 0.5)*5
-        
-        pose_cov.pose.pose.position.x += dx
-        pose_cov.pose.pose.position.y += dy
-        pose_cov.pose.pose.position.z += dz
-        q = pose_cov.pose.pose.orientation
-        quat = [q.x, q.y, q.z, q.w]
-        roll, pitch, yaw = euler_from_quaternion(quat)
-        yaw += dyaw
-        self.get_logger().info(f"Yaw {yaw} and dyaw {dyaw}")
-        quat = quaternion_from_euler(roll, pitch, yaw)
-        pose_cov.pose.pose.orientation.x = quat[0]
-        pose_cov.pose.pose.orientation.y = quat[1]
-        pose_cov.pose.pose.orientation.z = quat[2]
-        pose_cov.pose.pose.orientation.w = quat[3]
 
-
-        """pose_cov.pose.pose.position.x = 0.0
-        pose_cov.pose.pose.position.y = 0.0"""
 
         self.state = pose_cov
 

@@ -55,10 +55,6 @@ def add_bumps_to_sdf(
     if not sdf_path.exists():
         raise FileNotFoundError(f"No such file: {sdf_path}")
 
-    # Backup
-    bak_path = sdf_path.with_suffix(sdf_path.suffix + ".bak")
-    bak_path.write_bytes(sdf_path.read_bytes())
-
     # Parse XML
     tree = ET.parse(sdf_path)
     root = tree.getroot()
@@ -163,7 +159,7 @@ def add_bumps_to_sdf(
 
     indent(root)
     tree.write(sdf_path, encoding="utf-8", xml_declaration=True)
-    print(f"Wrote {bumps} bumps to {sdf_path} (and backed up to {bak_path})")
+    print(f"Wrote {bumps} bumps to {sdf_path}")
 
 if __name__ == "__main__": 
     # Defaults assume the script lives beside model.sdf 

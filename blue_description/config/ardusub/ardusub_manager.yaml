@@ -1,8 +1,8 @@
 ardusub_manager:
   ros__parameters:
     message_intervals:
-      ids: [31, 32, 242]
-      rates: [50.0, 50.0, 1.0]
+      ids: [31, 32]
+      rates: [50.0, 50.0]
     set_ekf_origin: true
     ekf_origin:
         latitude: 41.358389  # 41°21'30.2"N
