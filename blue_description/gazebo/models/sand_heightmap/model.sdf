@@ -22,7 +22,7 @@
         <pose>0 0 0 0 0 0</pose>
         <geometry>
           <mesh>
-            <scale>0.5 0.5 0.00001</scale>
+            <scale>0.5 0.5 0.005</scale>
             <uri>model://sand_heightmap/meshes/sandseabed.dae</uri>
           </mesh>
         </geometry>
@@ -32,7 +32,7 @@
         <pose>0 0 0 0 0 0</pose>
         <geometry>
           <mesh>
-            <scale>0.5 0.5 0.00001</scale>
+            <scale>0.5 0.5 0.005</scale>
             <uri>model://sand_heightmap/meshes/sandseabed.dae</uri>
           </mesh>
         </geometry>
