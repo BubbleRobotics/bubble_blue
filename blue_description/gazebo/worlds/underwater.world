@@ -22,7 +22,7 @@
       filename="libgz-sim8-dvl-system"
       name="gz::sim::systems::DopplerVelocityLogSystem">
     </plugin>
-
+    
     <plugin filename="libgz-sim-imu-system.so"
       name="gz::sim::systems::Imu">
     </plugin>
@@ -45,8 +45,26 @@
 
     <include>
       <uri>model://sand_heightmap</uri>
-      <pose>0 7 -10 0 0 0</pose>
+      <pose>0 7 -10.5 0 0 0</pose>
     </include>
+
+    <include>
+    <uri>model://harbor</uri>
+    <pose>0 0 0 0 0 0</pose>
+    </include>
+
+    <include>
+    <uri>model://apriltags</uri>
+    <pose>0 0 0 0 0 0</pose>
+    </include>
+   
+    <include>
+    <uri>model://features</uri>
+    <pose>0 0 0 0 0 0</pose>
+    </include>
+    
+
+
 
     <include>
       <uri>

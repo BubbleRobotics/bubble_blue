@@ -5,7 +5,7 @@ ardusub_manager:
       rates: [50.0, 50.0]
     set_ekf_origin: true
     ekf_origin:
-        latitude: 47.3769
-        longitude: 8.5417
+        latitude: 41.358389  # 41°21'30.2"N
+        longitude: 2.185278  # 2°11'7.0"E
         altitude: 0.0
     publish_tf: false
