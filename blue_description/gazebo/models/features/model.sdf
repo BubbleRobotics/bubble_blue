@@ -1,0 +1,2008 @@
+<?xml version='1.0' encoding='utf-8'?>
+<sdf version="1.6">
+  <model name="features">
+    <static>true</static>
+    <link name="features">
+      <visual name="feature_0_bump_0">
+        <pose>11.56861537990573 12.970231476619922 -3.7480319369779096 1.5157164618843226 2.0710062443771533 2.978420635183491</pose>
+        <geometry>
+          <box>
+            <size>0.017645699277081758 0.02290035129731474 0.020899533708716243</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_0_bump_1">
+        <pose>11.56940362626439 12.96748461529327 -4.180973380932384 3.0146697869244456 3.0481408747604513 2.520112332082696</pose>
+        <geometry>
+          <box>
+            <size>0.048012770627220036 0.040254731866151694 0.019647174900682518</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_0_bump_2">
+        <pose>11.592077667678172 13.178775330466673 -4.77251814371066 2.7251074800924635 0.4344575660413326 0.398889128308679</pose>
+        <geometry>
+          <box>
+            <size>0.03966912452114853 0.035338416050457046 0.02513199394403265</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_0_bump_3">
+        <pose>11.560510647541445 13.139226738297367 -3.8923839675721035 0.16744394166856214 0.30589380168743396 1.52272570041587</pose>
+        <geometry>
+          <box>
+            <size>0.03336273374544309 0.017290933345316083 0.015031659471560727</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_0_bump_4">
+        <pose>11.572342123816995 13.201404594199873 -4.641566618543955 2.092400670750828 1.697571101895829 2.630221993305645</pose>
+        <geometry>
+          <box>
+            <size>0.026271599238510225 0.02684161841576632 0.02417269255176238</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_0_bump_5">
+        <pose>11.637873068069151 13.236591225119538 -3.76015044316384 1.059638812264997 1.5715522130261832 1.8816003204224114</pose>
+        <geometry>
+          <box>
+            <size>0.02175064573684079 0.04312574497830698 0.03216000869821577</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_0_bump_6">
+        <pose>11.620697280966999 13.22814366863324 -4.466391094856738 0.03591490869481391 1.6330059025835684 2.0199850087345617</pose>
+        <geometry>
+          <box>
+            <size>0.03673362634234133 0.021327433207458335 0.0395512977644243</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_0_bump_7">
+        <pose>11.548069336012274 12.981093348961661 -3.7962003338189607 1.1796585986151533 1.0770878319794819 1.42703682924385</pose>
+        <geometry>
+          <box>
+            <size>0.0312610788492932 0.017738049311269096 0.021178974537201953</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_0_bump_8">
+        <pose>11.616942228342989 13.080944942731941 -4.882096999761025 1.2392220462214283 2.6036940074028454 2.7348055824262403</pose>
+        <geometry>
+          <box>
+            <size>0.02274905601970556 0.03463461542013882 0.04366449710665647</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_0_bump_9">
+        <pose>11.455301630366288 12.498789646006133 -4.389195107419238 2.471732304628792 0.0689379684820653 1.1137647768325059</pose>
+        <geometry>
+          <box>
+            <size>0.02073136944992596 0.035386044694403276 0.03504975121384662</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_0_bump_10">
+        <pose>11.405970314206273 12.454461293151157 -4.458842420770618 2.2547179922776213 2.1037857824414736 0.5232225165034489</pose>
+        <geometry>
+          <box>
+            <size>0.015772518977419395 0.033826315005871535 0.0244296657754544</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_0_bump_11">
+        <pose>11.412145486311134 12.497216339651917 -4.127613149627103 2.0570004653406686 2.706198987535751 1.3365034803239841</pose>
+        <geometry>
+          <box>
+            <size>0.04902425951292149 0.020892412663797967 0.03351952455589263</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_0_bump_12">
+        <pose>11.37402071300614 12.494685562387978 -3.970747969757041 2.7307207925354557 1.138374358218659 2.7568124487225663</pose>
+        <geometry>
+          <box>
+            <size>0.03350655395926637 0.022229071443834673 0.04353689327073771</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_0_bump_13">
+        <pose>11.5822506745177 13.094481272853308 -4.134437251692395 3.0377361163053216 1.4375531143905143 0.9501518420567786</pose>
+        <geometry>
+          <box>
+            <size>0.023838637575639386 0.023928713475164648 0.020656601341776784</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_0_bump_14">
+        <pose>11.505776813960685 12.517293250349052 -4.287244801993968 2.064229037531749 0.6944334110270515 1.031709456061396</pose>
+        <geometry>
+          <box>
+            <size>0.04526041598151594 0.01661980776331241 0.03076896929943538</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_0_bump_15">
+        <pose>11.434398228646833 12.49936817008732 -4.84765952161608 0.33143342646204316 1.7143391848962999 0.33553812676243955</pose>
+        <geometry>
+          <box>
+            <size>0.02032253749063698 0.035522244986981436 0.03285639341144962</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_0_bump_16">
+        <pose>11.558121696440166 13.027503220729493 -4.796291355912971 2.3542405383282423 1.074958775044434 1.4024787616726584</pose>
+        <geometry>
+          <box>
+            <size>0.023261524257602386 0.02179368320669152 0.015892336104814376</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_0_bump_17">
+        <pose>11.597943866466808 12.958379720830875 -4.235138330683773 1.314767477319406 2.316781133155888 1.8505696648973418</pose>
+        <geometry>
+          <box>
+            <size>0.03931765536150486 0.019496236794202888 0.04557805380860339</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_0_bump_18">
+        <pose>11.526423965563138 13.038338508867671 -4.654711805320972 2.309375678517285 1.5537412542272926 2.25497107910898</pose>
+        <geometry>
+          <box>
+            <size>0.03099546985977432 0.0488091170338231 0.023677427201618764</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_0_bump_19">
+        <pose>11.450736581086023 12.77153856228538 -4.655728994863277 0.05387433792058415 1.7298822131834144 0.10980105119785036</pose>
+        <geometry>
+          <box>
+            <size>0.046787336380552096 0.03989833794867517 0.0433483905984613</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_0_bump_20">
+        <pose>11.637752073708953 13.143261935386525 -4.215199583801091 2.274155117237859 2.98328905798747 0.24644553706505556</pose>
+        <geometry>
+          <box>
+            <size>0.04727065552580931 0.03057923859991104 0.035833587281851</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_0_bump_21">
+        <pose>11.574029962780383 13.16693900525415 -4.726808960170622 0.43028961562033885 2.351349456850132 1.074449085179439</pose>
+        <geometry>
+          <box>
+            <size>0.04142750886434783 0.025268746824476964 0.029823349508094697</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_0_bump_22">
+        <pose>11.45225539268414 12.684210385160146 -3.82712667372741 0.20682913047720886 0.7779313743890444 2.448741367279092</pose>
+        <geometry>
+          <box>
+            <size>0.030586676983104473 0.045807697534031855 0.026457325383419474</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_0_bump_23">
+        <pose>11.445867098415013 12.75484300245141 -3.9642798151755883 1.6234850715262419 0.09994859634353762 0.4653126839423377</pose>
+        <geometry>
+          <box>
+            <size>0.020568561837470717 0.022561610888865668 0.018003314324387214</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_0_bump_24">
+        <pose>11.402971402021677 12.510805875587147 -4.095727250474807 1.369299623586754 0.6379697469613356 0.4444046370054478</pose>
+        <geometry>
+          <box>
+            <size>0.019060910293675872 0.030322401219026386 0.028325191380164597</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_0_bump_25">
+        <pose>11.670196467108584 13.158199093490547 -4.338236364078677 0.7567257259293224 2.490952777106739 1.3995981938221358</pose>
+        <geometry>
+          <box>
+            <size>0.025009103412874215 0.03299931513927801 0.049149741751000384</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_0_bump_26">
+        <pose>11.664591559764173 13.186036674439672 -4.914680031855001 2.2709361523080207 2.7819000651261034 0.5252033083177351</pose>
+        <geometry>
+          <box>
+            <size>0.030595718669625748 0.01713395410265093 0.03917491557192305</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_0_bump_27">
+        <pose>11.469228685242657 12.691090291438568 -3.792278476020964 0.12976374856354483 1.8095189680682793 0.15392648058762362</pose>
+        <geometry>
+          <box>
+            <size>0.04337965176946021 0.029720169085099758 0.01874934921999929</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_0_bump_28">
+        <pose>11.433301707418348 12.647840623550314 -4.072442445250356 2.899555584849333 0.04106157187367743 2.4937685473943314</pose>
+        <geometry>
+          <box>
+            <size>0.03242239233505752 0.039960312070372525 0.03799840733475493</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_0_bump_29">
+        <pose>11.535373077619756 13.009691190653642 -4.749870193624737 0.3438821819898466 1.0597377278545586 2.794886377039121</pose>
+        <geometry>
+          <box>
+            <size>0.01703795315740615 0.022002907164025982 0.023154005409380007</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_0_bump_30">
+        <pose>11.536089722645439 12.900357438114412 -4.151620913539073 0.6413045885614717 2.0664360540002784 0.8029374330563409</pose>
+        <geometry>
+          <box>
+            <size>0.021985116538250322 0.02252298587342874 0.01783852676428526</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_0_bump_31">
+        <pose>11.537294681440333 12.831046044717722 -4.8664471840894805 2.0464169426439485 1.2564650091251246 0.19102434469065435</pose>
+        <geometry>
+          <box>
+            <size>0.043019876561814385 0.03127435505502205 0.020743429931258203</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_0_bump_32">
+        <pose>11.617291467529032 13.013413531607759 -4.915791833664921 2.849094489900138 1.9984070499813924 1.5846631823067865</pose>
+        <geometry>
+          <box>
+            <size>0.03790459340729792 0.046070892847624924 0.021949594269344733</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_0_bump_33">
+        <pose>11.585939848634853 13.048068761380392 -3.7573906193158004 0.4178387575851478 2.434487099088134 0.041341338963433054</pose>
+        <geometry>
+          <box>
+            <size>0.030722128356444445 0.024206132665060626 0.025884611539523136</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_0_bump_34">
+        <pose>11.483831216863988 12.639760991722227 -3.732966382968274 2.8578933048425483 1.2983773700335985 2.4424776827047054</pose>
+        <geometry>
+          <box>
+            <size>0.04135466586691072 0.03769464312128272 0.0477516032949122</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_0_bump_35">
+        <pose>11.631252110931028 13.25501008967997 -4.457835695973752 2.5203727034848282 2.042872626174044 1.6578936816890142</pose>
+        <geometry>
+          <box>
+            <size>0.016938505469702596 0.03672753069746948 0.021257300139346725</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_0_bump_36">
+        <pose>11.6582950693192 13.141110010575362 -4.923926034794091 1.7986960187071643 0.33867125724448816 1.2795882638230132</pose>
+        <geometry>
+          <box>
+            <size>0.03329843720853698 0.047221562207832274 0.02539877142110767</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_0_bump_37">
+        <pose>11.40281853337914 12.542038167270691 -4.530517424731044 0.9383534957786106 2.669172952512966 2.1322670586849966</pose>
+        <geometry>
+          <box>
+            <size>0.04811352755698076 0.025071833697311467 0.018009926382367987</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_0_bump_38">
+        <pose>11.591275617528675 13.245996375120287 -4.029786424694048 0.8117455835662605 1.2117587896720248 2.5537300702509613</pose>
+        <geometry>
+          <box>
+            <size>0.03852122504654537 0.018798007606613945 0.035260681492687455</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_0_bump_39">
+        <pose>11.61918906244843 13.161657659107584 -4.429093749709756 0.6865495486579205 1.1297285462733495 1.6187701687459268</pose>
+        <geometry>
+          <box>
+            <size>0.03779442761012085 0.01857556250240213 0.021081836168607336</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_0_bump_40">
+        <pose>11.555669558688077 13.114781237676901 -4.716326573476935 1.0938122639877688 0.1519969723830449 2.327777172774314</pose>
+        <geometry>
+          <box>
+            <size>0.016267177963518117 0.022335615442462667 0.0447034600691785</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_0_bump_41">
+        <pose>11.376745439942228 12.447936902542422 -4.071586379311178 2.840738546566374 1.7698010570612317 0.9046480867069452</pose>
+        <geometry>
+          <box>
+            <size>0.027622417404380574 0.018511774458719467 0.038544526220017944</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_0_bump_42">
+        <pose>11.501188402832344 12.949995325700383 -4.649767696727125 1.8495259191463576 1.7406390284075848 2.077648171764172</pose>
+        <geometry>
+          <box>
+            <size>0.04274644144898378 0.026284648723158985 0.041403611015303016</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_0_bump_43">
+        <pose>11.560774938097557 13.108215147233842 -4.738254203133204 3.0578785351385482 1.3631001277783934 3.1241144537883137</pose>
+        <geometry>
+          <box>
+            <size>0.03081494683415116 0.04155465049377067 0.017944051251894237</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_0_bump_44">
+        <pose>11.473123724115867 12.588739438036885 -4.873286342773418 2.204964039598414 2.2822158318135104 1.1736589260205195</pose>
+        <geometry>
+          <box>
+            <size>0.02954208770098575 0.04941534273417987 0.01643653849108406</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_0_bump_45">
+        <pose>11.644642267034767 13.205564905865964 -4.870416330634739 2.4667670294536594 2.7221386954540354 0.31813738485385606</pose>
+        <geometry>
+          <box>
+            <size>0.029312988265721596 0.01826118294169555 0.02218485148993602</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_0_bump_46">
+        <pose>11.6628697883289 13.220201202341787 -3.7066643533054284 0.3711130752699841 2.299661352926115 1.9430579717439551</pose>
+        <geometry>
+          <box>
+            <size>0.049366812591019264 0.01605174510238828 0.041734352860235226</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_0_bump_47">
+        <pose>11.520416845714104 12.60516259113579 -3.655931037134323 0.9721495623400848 0.7485306742913063 1.3502250964613838</pose>
+        <geometry>
+          <box>
+            <size>0.040354503829823446 0.0321110540525007 0.02164478300996742</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_0_bump_48">
+        <pose>11.48009857714989 12.774698522743805 -4.49518963667715 0.8415854282619973 0.7635116944523952 0.725239522773337</pose>
+        <geometry>
+          <box>
+            <size>0.03784691022512259 0.04917610042633032 0.048650540174535815</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_0_bump_49">
+        <pose>11.39611873047649 12.549632409028064 -4.713620069427152 1.0806529576608384 0.3306999225732342 0.018810884045044884</pose>
+        <geometry>
+          <box>
+            <size>0.018283819444841042 0.025184122724027362 0.040663597024885006</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_8_bump_0">
+        <pose>11.628669532344023 12.999835939511476 -8.334513039156933 0.46704864836642757 2.7351557644001256 1.7809391262383838</pose>
+        <geometry>
+          <box>
+            <size>0.029627987410940554 0.017092479727196516 0.042033101720015134</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_8_bump_1">
+        <pose>11.468304376585728 12.483959704521117 -8.239203993240006 0.5300809503259942 1.7311963472982255 2.0946791582545927</pose>
+        <geometry>
+          <box>
+            <size>0.015523281060997794 0.03252541295518714 0.042280627588426406</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_8_bump_2">
+        <pose>11.573535945499986 12.96700778004524 -8.861051333757327 2.6274952987654183 2.3092238782256462 1.3798272019472166</pose>
+        <geometry>
+          <box>
+            <size>0.04319713034862187 0.03762674811674532 0.03430329807866449</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_8_bump_3">
+        <pose>11.407144169350978 12.446066499829026 -8.14670067748245 1.7740212752113491 3.0257091329545918 0.7665713742838369</pose>
+        <geometry>
+          <box>
+            <size>0.033611787120571196 0.02391403908184758 0.03130410496493875</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_8_bump_4">
+        <pose>11.50787844486209 12.548085605146916 -8.325024366772826 3.0935387488274606 2.671066110463901 0.885304072837075</pose>
+        <geometry>
+          <box>
+            <size>0.034830419535770735 0.02003234932464242 0.04893912179302237</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_8_bump_5">
+        <pose>11.625298801717626 13.190623471700373 -8.841335119944137 2.035378142345612 0.14447718177626667 1.4377348515877897</pose>
+        <geometry>
+          <box>
+            <size>0.028647226631726058 0.03437154916722217 0.028409587863249923</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_8_bump_6">
+        <pose>11.594856583279011 13.00300588257561 -8.208868694572947 1.2707733636193597 0.7485382087654119 2.874511738114863</pose>
+        <geometry>
+          <box>
+            <size>0.04260056816668348 0.01655140353431245 0.02321850306867896</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_8_bump_7">
+        <pose>11.609036645910885 13.060938025298036 -8.204177014213052 0.8370243595537523 0.062020907605339105 2.930966589958232</pose>
+        <geometry>
+          <box>
+            <size>0.04604292079503141 0.0487156081088298 0.01697825143492165</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_8_bump_8">
+        <pose>11.460630443049029 12.654707309981594 -8.13833025490169 1.4608854300397685 2.147162189062905 2.9993168184484285</pose>
+        <geometry>
+          <box>
+            <size>0.029008537155903125 0.0261433111089293 0.04373873999187662</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_8_bump_9">
+        <pose>11.561035022725187 12.781385070178795 -7.669495569104965 2.348668646529494 0.058082517559668624 0.4499231508037122</pose>
+        <geometry>
+          <box>
+            <size>0.04587250358974111 0.04946521067618004 0.048035767606604066</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_8_bump_10">
+        <pose>11.473848191463988 12.850556540312953 -7.930570474847767 1.186467962746154 0.3889763513518847 2.307621267326346</pose>
+        <geometry>
+          <box>
+            <size>0.021053387526326753 0.03589272293405819 0.025963703151645735</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_8_bump_11">
+        <pose>11.493509948878007 12.64682365490584 -8.88090122048098 1.18969270382247 2.239444335024617 2.474810952332571</pose>
+        <geometry>
+          <box>
+            <size>0.03556668594223794 0.019091253754706425 0.02507266688358717</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_8_bump_12">
+        <pose>11.496645339605024 12.877875204559723 -7.861303885203148 1.2646317395833004 1.055549903611589 2.6137685960001504</pose>
+        <geometry>
+          <box>
+            <size>0.0353853961937769 0.03590635366404843 0.03144605433170859</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_8_bump_13">
+        <pose>11.588060354968515 13.136143597762779 -7.807676079286223 1.3063263897356372 0.6364488026131604 0.976191416237288</pose>
+        <geometry>
+          <box>
+            <size>0.02129199284537412 0.028944374446931223 0.022383283311483745</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_8_bump_14">
+        <pose>11.447395739542113 12.43671313159225 -7.697955716964462 2.6843412120856143 2.1184305488736914 3.0014465873489726</pose>
+        <geometry>
+          <box>
+            <size>0.025213356093057235 0.023451280187898944 0.035041765676513306</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_8_bump_15">
+        <pose>11.388844296296659 12.464553849797989 -8.089745502920655 2.4876794058520955 2.590950281864719 0.8411390597447712</pose>
+        <geometry>
+          <box>
+            <size>0.019085577544030053 0.033947901311958836 0.024188921850074332</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_8_bump_16">
+        <pose>11.515705800551418 12.998628637292278 -8.610371556566216 2.5234367926805685 1.4801542584489966 1.9892645423091864</pose>
+        <geometry>
+          <box>
+            <size>0.023504878968799277 0.023210983246257318 0.039556413601177454</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_8_bump_17">
+        <pose>11.480941635215892 12.755632623183955 -7.807066235546005 2.1248524894169805 1.9136891391610649 2.8237552509109847</pose>
+        <geometry>
+          <box>
+            <size>0.02369987553413917 0.02367832258132239 0.03666021156163027</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_8_bump_18">
+        <pose>11.518270885117518 12.754855504384993 -8.196908579970454 2.382705043250874 0.8990963179838074 0.7044208535630827</pose>
+        <geometry>
+          <box>
+            <size>0.04982598514416107 0.04741395448566679 0.03569207348874877</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_8_bump_19">
+        <pose>11.427879208448765 12.681860018240302 -7.924106112708117 0.9737710361168549 1.9577008530445459 1.3662511477342518</pose>
+        <geometry>
+          <box>
+            <size>0.0466701152024437 0.04077101362367854 0.03558149702534379</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_8_bump_20">
+        <pose>11.489063202542713 12.621982903153281 -8.211166315886548 1.579656834997072 2.7326118255035943 2.5375567486075554</pose>
+        <geometry>
+          <box>
+            <size>0.01819850665009312 0.04634669433759624 0.035212731428720646</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_8_bump_21">
+        <pose>11.680269063366508 13.175499272412956 -7.655372767972853 0.3579030392457351 1.964755560726455 2.95723731715313</pose>
+        <geometry>
+          <box>
+            <size>0.03446924457581424 0.04008187345415162 0.04450740378959554</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_8_bump_22">
+        <pose>11.671803887131176 13.118733929703236 -8.279747434837553 0.7529010271054923 2.6150674075725484 2.5876779851641776</pose>
+        <geometry>
+          <box>
+            <size>0.04932201341704153 0.044039241619705925 0.049346540354917846</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_8_bump_23">
+        <pose>11.452865018720217 12.629526733701212 -7.7872368739825735 0.6779210598637471 2.8227337374758124 1.1824732034777121</pose>
+        <geometry>
+          <box>
+            <size>0.036043224285597794 0.049898527635847914 0.04582162523718282</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_8_bump_24">
+        <pose>11.615163873421746 13.19756589201797 -8.458686050803514 2.5993031313655597 1.4272101263147585 2.8233135599487227</pose>
+        <geometry>
+          <box>
+            <size>0.04821526194219322 0.04583914871344738 0.04390665877265754</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_8_bump_25">
+        <pose>11.411966799895009 12.62870640332047 -8.617729614411427 1.3458595487047953 0.4478029131933165 0.8441538780621237</pose>
+        <geometry>
+          <box>
+            <size>0.020651564027861745 0.04919733114875605 0.049686752443349434</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_8_bump_26">
+        <pose>11.60050526107803 13.09757965380529 -8.843968479390309 1.6952540885819702 1.196742494089327 0.6097314504404968</pose>
+        <geometry>
+          <box>
+            <size>0.026909776445894547 0.04574261899320739 0.03718322222511464</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_8_bump_27">
+        <pose>11.587108339946377 13.022824208181397 -8.41732783838937 0.3408417793765579 2.289016477069482 1.4480005129985496</pose>
+        <geometry>
+          <box>
+            <size>0.017656730401039447 0.01758729333511641 0.04048606498432017</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_8_bump_28">
+        <pose>11.483143853636843 12.878112724231299 -8.670381012729491 0.6048850448614705 1.9917178169935634 1.7474290894278557</pose>
+        <geometry>
+          <box>
+            <size>0.04627575316767812 0.0373557309178065 0.0215597000513047</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_8_bump_29">
+        <pose>11.421702767763794 12.529126786888275 -8.471398255677418 1.064647783501602 1.2530035989098598 3.012274128140981</pose>
+        <geometry>
+          <box>
+            <size>0.016820385891089785 0.03346001804095336 0.04578106861669075</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_8_bump_30">
+        <pose>11.62749377766191 13.195400837770729 -8.170276969343682 1.293177043660626 1.0408364729211146 2.0227382397137337</pose>
+        <geometry>
+          <box>
+            <size>0.043307065050950666 0.016613987880675064 0.01648572069958982</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_8_bump_31">
+        <pose>11.54837499449829 12.791777864901778 -7.694811726638449 1.7620515571998017 1.191358776470527 2.2316931981733448</pose>
+        <geometry>
+          <box>
+            <size>0.016161978183153 0.03941306177391501 0.02320549173981034</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_8_bump_32">
+        <pose>11.424216264126835 12.507271882768999 -7.7776460752978425 0.38518358738126424 1.2478614530507586 0.8280234746214574</pose>
+        <geometry>
+          <box>
+            <size>0.030890245966151256 0.022497141652591434 0.022506372562303437</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_8_bump_33">
+        <pose>11.413537886495826 12.636998386420753 -8.629323736242117 0.17582852040922473 0.3154368485237639 1.4772485831085194</pose>
+        <geometry>
+          <box>
+            <size>0.035962025606828096 0.017141890873551505 0.027361261670337755</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_8_bump_34">
+        <pose>11.480231238610425 12.778454514403363 -8.496667214146079 1.2239779316981008 0.3075340529169947 1.1854029715687293</pose>
+        <geometry>
+          <box>
+            <size>0.039902272141806375 0.03058557752262883 0.03161853891465445</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_8_bump_35">
+        <pose>11.514551752786115 12.927722995730784 -8.520250567880991 2.315693012556746 0.8848682180054981 1.8061431081878263</pose>
+        <geometry>
+          <box>
+            <size>0.03423476875232756 0.04601409343738302 0.03732459885608455</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_8_bump_36">
+        <pose>11.384774711976831 12.494973396909566 -8.547323088010899 2.370745272443443 0.11095197860311595 1.0150886210440973</pose>
+        <geometry>
+          <box>
+            <size>0.0468820776482917 0.016547701261059894 0.03977722811920852</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_8_bump_37">
+        <pose>11.597656453859608 13.230568990876833 -8.073291678234572 0.8010461051568388 2.3771587110459014 1.1617472352003713</pose>
+        <geometry>
+          <box>
+            <size>0.03384530423665923 0.023342130634683447 0.023542799276865548</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_8_bump_38">
+        <pose>11.457297576918908 12.76046613824369 -8.039428185945148 2.1305334059073964 2.322481251537175 2.534992418481282</pose>
+        <geometry>
+          <box>
+            <size>0.04500451136656897 0.018967774546778858 0.046939987611438964</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_8_bump_39">
+        <pose>11.540975630663045 12.630408380685743 -8.309399928059353 1.0130480917684535 2.6185023559750062 2.7579160392376054</pose>
+        <geometry>
+          <box>
+            <size>0.03774261296124638 0.028298058484148438 0.04320221458513024</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_8_bump_40">
+        <pose>11.374726808526727 12.454399697473283 -8.05706016458068 2.0132908722030387 0.06303310279368318 0.48886164470179194</pose>
+        <geometry>
+          <box>
+            <size>0.020356628990022895 0.034109926625172364 0.030663680128591133</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_8_bump_41">
+        <pose>11.409724047362308 12.601983042168436 -8.702455478137573 2.852896618915166 0.9978373860808258 1.3752868893841383</pose>
+        <geometry>
+          <box>
+            <size>0.043927759543556245 0.03100670315578089 0.04715425164809889</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_8_bump_42">
+        <pose>11.59059717358117 12.952215075564448 -8.225936290720844 1.5770916536413624 2.2707092417405312 1.7976728581334571</pose>
+        <geometry>
+          <box>
+            <size>0.034162695849824315 0.016511331281796576 0.03696350140032693</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_8_bump_43">
+        <pose>11.562725747796101 12.731340898198285 -8.281785858178074 1.150220028824508 1.4106789588348057 2.3370187712569663</pose>
+        <geometry>
+          <box>
+            <size>0.018462990494106577 0.04836810702829747 0.02013131096729238</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_8_bump_44">
+        <pose>11.464284095103178 12.811414007588056 -8.605955079852025 1.3132738723249375 1.2617419276544652 3.1245557096236394</pose>
+        <geometry>
+          <box>
+            <size>0.04102857855125111 0.0464231150223133 0.02731615453850539</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_8_bump_45">
+        <pose>11.556680821286722 12.767233889335321 -8.345896407280986 1.8344055733222773 1.5018923729234157 2.988046335262778</pose>
+        <geometry>
+          <box>
+            <size>0.04047674176733142 0.04161032618267509 0.033784618626191046</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_8_bump_46">
+        <pose>11.476728739619558 12.72935829658316 -8.802431111112783 0.29178659333118456 0.4243464027905751 2.8449942650372817</pose>
+        <geometry>
+          <box>
+            <size>0.034374613013983396 0.02331073124694557 0.017834171085294077</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_8_bump_47">
+        <pose>11.571976530270545 13.003097460011581 -8.841579410101929 0.3502676542091433 2.3218926928078782 0.9790526094299623</pose>
+        <geometry>
+          <box>
+            <size>0.03829676044983926 0.03317451649063126 0.025540505269723644</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_8_bump_48">
+        <pose>11.591892409194202 13.028873068143678 -8.8639660159216 3.0906788027768433 0.4463211721932319 2.7044483514500883</pose>
+        <geometry>
+          <box>
+            <size>0.040512602530496857 0.03281656685501952 0.04523989854934838</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      <visual name="feature_8_bump_49">
+        <pose>11.569193471479538 12.997122035026326 -8.83680513095594 3.0190051909437132 2.545045303536436 2.6257221539900772</pose>
+        <geometry>
+          <box>
+            <size>0.035077672965375464 0.022271264794968517 0.027164505695147036</size>
+            </box>
+          </geometry>
+        <cast_shadows>true</cast_shadows>
+        <material>
+          <ambient>0.8 0.8 0.8 1</ambient>
+          <diffuse>0.22 0.22 0.22 1</diffuse>
+          <specular>0.02 0.02 0.02 1</specular>
+          <pbr>
+            <metal>
+              <roughness>0.8</roughness>
+              <metalness>0.02</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      </link>
+    </model>
+  </sdf>

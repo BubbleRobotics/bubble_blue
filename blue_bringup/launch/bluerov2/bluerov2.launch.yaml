@@ -74,7 +74,15 @@ launch:
       name: robot_description
       default: $(command 'xacro $(var description_file) use_sim:=$(var use_sim)')
 
+
+  - arg:
+      name: use_path_planner
+      default: "false"
+
   # Nodes
+
+         
+
   - node:
       pkg: robot_state_publisher
       exec: robot_state_publisher
@@ -93,7 +101,22 @@ launch:
         - name: robot_description
           value: $(var robot_description)
 
+  - node:
+      pkg: path_planner
+      if : "$(var use_path_planner)"
+      exec: path_planner_publisher
+      name: path_planner
+      param:
+        - name: input_topic
+          value: /blue/localization/odometry
   # Includes
+  - include:
+      file: $(find-pkg-share path_planner)/launch/rrt_path_follower.launch.py
+      if: $(var use_path_planner)
+      arg:
+        - name: use_path_planner
+          value: $(var use_path_planner) 
+
   - include:
       file: $(find-pkg-share ardusub_bringup)/launch/ardusub.launch.yaml
       if: $(var use_sim)

@@ -1,0 +1,234 @@
+<?xml version='1.0'?>
+<sdf version='1.6'>
+  <model name='apriltags'>
+    <static>true</static>
+
+    <link name='apriltags_link'>
+
+      <!-- Tag 00000 below element 5.8 (unchanged) -->
+      <visual name="Apriltag41_12_00000_visual">
+        <pose>11.835702 13.253233 -5.05 0 1.570796 6.00930365</pose>
+        <geometry><box><size>0.1 0.1 0.01</size></box></geometry>
+        <material>
+          <pbr><metal>
+            <albedo_map>model://apriltags/textures/tag41_12_00000.png</albedo_map>
+            <emissive_map>model://apriltags/textures/tag41_12_00000.png</emissive_map>
+            <roughness>1.0</roughness><metalness>0.0</metalness>
+          </metal></pbr>
+          <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><specular>0 0 0 1</specular>
+        </material>
+      </visual>
+
+      <!-- Tag 00001 below element 5.13 -->
+      <visual name="Apriltag41_12_00001_visual">
+        <pose>11.835702 13.253233 -9.05 0 1.570796 6.00930365</pose>
+        <geometry><box><size>0.1 0.1 0.01</size></box></geometry>
+        <material>
+          <pbr><metal>
+            <albedo_map>model://apriltags/textures/tag41_12_00001.png</albedo_map>
+            <emissive_map>model://apriltags/textures/tag41_12_00001.png</emissive_map>
+            <roughness>1.0</roughness><metalness>0.0</metalness>
+          </metal></pbr>
+          <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><specular>0 0 0 1</specular>
+        </material>
+      </visual>
+
+      <!-- Tag 00002 below element 5.9 -->
+      <visual name="Apriltag41_12_00002_visual">
+        <pose>11.319732 11.416660 -5.05 0 1.570796 6.00930365</pose>
+        <geometry><box><size>0.1 0.1 0.01</size></box></geometry>
+        <material>
+          <pbr><metal>
+            <albedo_map>model://apriltags/textures/tag41_12_00002.png</albedo_map>
+            <emissive_map>model://apriltags/textures/tag41_12_00002.png</emissive_map>
+            <roughness>1.0</roughness><metalness>0.0</metalness>
+          </metal></pbr>
+          <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><specular>0 0 0 1</specular>
+        </material>
+      </visual>
+
+      <!-- Tag 00003 below element 5.14 -->
+      <visual name="Apriltag41_12_00003_visual">
+        <pose>11.319732 11.416660 -9.05 0 1.570796 6.00930365</pose>
+        <geometry><box><size>0.1 0.1 0.01</size></box></geometry>
+        <material>
+          <pbr><metal>
+            <albedo_map>model://apriltags/textures/tag41_12_00003.png</albedo_map>
+            <emissive_map>model://apriltags/textures/tag41_12_00003.png</emissive_map>
+            <roughness>1.0</roughness><metalness>0.0</metalness>
+          </metal></pbr>
+          <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><specular>0 0 0 1</specular>
+        </material>
+      </visual>
+
+      <!-- Tag 00004 below element 5.10 -->
+      <visual name="Apriltag41_12_00004_visual">
+        <pose>10.803728 9.579964 -5.05 0 1.570796 6.00930365</pose>
+        <geometry><box><size>0.1 0.1 0.01</size></box></geometry>
+        <material>
+          <pbr><metal>
+            <albedo_map>model://apriltags/textures/tag41_12_00004.png</albedo_map>
+            <emissive_map>model://apriltags/textures/tag41_12_00004.png</emissive_map>
+            <roughness>1.0</roughness><metalness>0.0</metalness>
+          </metal></pbr>
+          <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><specular>0 0 0 1</specular>
+        </material>
+      </visual>
+
+      <!-- Tag 00005 below element 5.15 -->
+      <visual name="Apriltag41_12_00005_visual">
+        <pose>10.803728 9.579964 -9.05 0 1.570796 6.00930365</pose>
+        <geometry><box><size>0.1 0.1 0.01</size></box></geometry>
+        <material>
+          <pbr><metal>
+            <albedo_map>model://apriltags/textures/tag41_12_00005.png</albedo_map>
+            <emissive_map>model://apriltags/textures/tag41_12_00005.png</emissive_map>
+            <roughness>1.0</roughness><metalness>0.0</metalness>
+          </metal></pbr>
+          <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><specular>0 0 0 1</specular>
+        </material>
+      </visual>
+
+      <!-- Tag 00006 below element 5.11 -->
+      <visual name="Apriltag41_12_00006_visual">
+        <pose>10.190416 7.396905 -5.05 0 1.570796 6.00930365</pose>
+        <geometry><box><size>0.1 0.1 0.01</size></box></geometry>
+        <material>
+          <pbr><metal>
+            <albedo_map>model://apriltags/textures/tag41_12_00006.png</albedo_map>
+            <emissive_map>model://apriltags/textures/tag41_12_00006.png</emissive_map>
+            <roughness>1.0</roughness><metalness>0.0</metalness>
+          </metal></pbr>
+          <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><specular>0 0 0 1</specular>
+        </material>
+      </visual>
+
+      <!-- Tag 00007 below element 5.16 -->
+      <visual name="Apriltag41_12_00007_visual">
+        <pose>10.190416 7.396905 -9.05 0 1.570796 6.00930365</pose>
+        <geometry><box><size>0.1 0.1 0.01</size></box></geometry>
+        <material>
+          <pbr><metal>
+            <albedo_map>model://apriltags/textures/tag41_12_00007.png</albedo_map>
+            <emissive_map>model://apriltags/textures/tag41_12_00007.png</emissive_map>
+            <roughness>1.0</roughness><metalness>0.0</metalness>
+          </metal></pbr>
+          <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><specular>0 0 0 1</specular>
+        </material>
+      </visual>
+
+      <!-- Tag 00008 below element 5.12 -->
+      <visual name="Apriltag41_12_00008_visual">
+        <pose>9.674411 5.560207 -5.05 0 1.570796 6.00930365</pose>
+        <geometry><box><size>0.1 0.1 0.01</size></box></geometry>
+        <material>
+          <pbr><metal>
+            <albedo_map>model://apriltags/textures/tag41_12_00008.png</albedo_map>
+            <emissive_map>model://apriltags/textures/tag41_12_00008.png</emissive_map>
+            <roughness>1.0</roughness><metalness>0.0</metalness>
+          </metal></pbr>
+          <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><specular>0 0 0 1</specular>
+        </material>
+      </visual>
+
+      <!-- Tag 00009 below element 5.17 -->
+      <visual name="Apriltag41_12_00009_visual">
+        <pose>9.674411 5.560207 -9.05 0 1.570796 6.00930365</pose>
+        <geometry><box><size>0.1 0.1 0.01</size></box></geometry>
+        <material>
+          <pbr><metal>
+            <albedo_map>model://apriltags/textures/tag41_12_00009.png</albedo_map>
+            <emissive_map>model://apriltags/textures/tag41_12_00009.png</emissive_map>
+            <roughness>1.0</roughness><metalness>0.0</metalness>
+          </metal></pbr>
+          <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><specular>0 0 0 1</specular>
+        </material>
+      </visual>
+
+      <!-- Tag 00010 below element 5.18 -->
+      <visual name="Apriltag41_12_00010_visual">
+        <pose>8.883419 2.744705 -5.05 0 1.570796 6.00930365</pose>
+        <geometry><box><size>0.1 0.1 0.01</size></box></geometry>
+        <material>
+          <pbr><metal>
+            <albedo_map>model://apriltags/textures/tag41_12_00010.png</albedo_map>
+            <emissive_map>model://apriltags/textures/tag41_12_00010.png</emissive_map>
+            <roughness>1.0</roughness><metalness>0.0</metalness>
+          </metal></pbr>
+          <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><specular>0 0 0 1</specular>
+        </material>
+      </visual>
+
+      <!-- Tag 00011 below element 5.1 -->
+      <visual name="Apriltag41_12_00011_visual">
+        <pose>8.883419 2.744705 -9.05 0 1.570796 6.00930365</pose>
+        <geometry><box><size>0.1 0.1 0.01</size></box></geometry>
+        <material>
+          <pbr><metal>
+            <albedo_map>model://apriltags/textures/tag41_12_00011.png</albedo_map>
+            <emissive_map>model://apriltags/textures/tag41_12_00011.png</emissive_map>
+            <roughness>1.0</roughness><metalness>0.0</metalness>
+          </metal></pbr>
+          <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><specular>0 0 0 1</specular>
+        </material>
+      </visual>
+
+      <!-- Tag 00012 below element 5.19 -->
+      <visual name="Apriltag41_12_00012_visual">
+        <pose>8.367420 0.908029 -5.05 0 1.570796 6.00930365</pose>
+        <geometry><box><size>0.1 0.1 0.01</size></box></geometry>
+        <material>
+          <pbr><metal>
+            <albedo_map>model://apriltags/textures/tag41_12_00012.png</albedo_map>
+            <emissive_map>model://apriltags/textures/tag41_12_00012.png</emissive_map>
+            <roughness>1.0</roughness><metalness>0.0</metalness>
+          </metal></pbr>
+          <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><specular>0 0 0 1</specular>
+        </material>
+      </visual>
+
+      <!-- Tag 00013 below element 5.2 -->
+      <visual name="Apriltag41_12_00013_visual">
+        <pose>8.367420 0.908029 -9.05 0 1.570796 6.00930365</pose>
+        <geometry><box><size>0.1 0.1 0.01</size></box></geometry>
+        <material>
+          <pbr><metal>
+            <albedo_map>model://apriltags/textures/tag41_12_00013.png</albedo_map>
+            <emissive_map>model://apriltags/textures/tag41_12_00013.png</emissive_map>
+            <roughness>1.0</roughness><metalness>0.0</metalness>
+          </metal></pbr>
+          <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><specular>0 0 0 1</specular>
+        </material>
+      </visual>
+
+      <!-- Tag 00014 below element 5.20 -->
+      <visual name="Apriltag41_12_00014_visual">
+        <pose>7.754102 -1.275052 -5.05 0 1.570796 6.00930365</pose>
+        <geometry><box><size>0.1 0.1 0.01</size></box></geometry>
+        <material>
+          <pbr><metal>
+            <albedo_map>model://apriltags/textures/tag41_12_00014.png</albedo_map>
+            <emissive_map>model://apriltags/textures/tag41_12_00014.png</emissive_map>
+            <roughness>1.0</roughness><metalness>0.0</metalness>
+          </metal></pbr>
+          <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><specular>0 0 0 1</specular>
+        </material>
+      </visual>
+
+      <!-- Tag 00015 below element 5.3 -->
+      <visual name="Apriltag41_12_00015_visual">
+        <pose>7.754102 -1.275052 -9.05 0 1.570796 6.00930365</pose>
+        <geometry><box><size>0.1 0.1 0.01</size></box></geometry>
+        <material>
+          <pbr><metal>
+            <albedo_map>model://apriltags/textures/tag41_12_00015.png</albedo_map>
+            <emissive_map>model://apriltags/textures/tag41_12_00015.png</emissive_map>
+            <roughness>1.0</roughness><metalness>0.0</metalness>
+          </metal></pbr>
+          <ambient>1 1 1 1</ambient><diffuse>1 1 1 1</diffuse><specular>0 0 0 1</specular>
+        </material>
+      </visual>
+
+    </link>
+  </model>
+</sdf>

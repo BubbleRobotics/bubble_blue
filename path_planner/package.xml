@@ -1,0 +1,15 @@
+<!-- src/path_planner/package.xml -->
+<package format="3">
+  <name>path_planner</name>
+  <version>0.0.1</version>
+  <description>RRT path follower</description>
+  <maintainer email="lublu@hotmail.ch">Luis Blunschi</maintainer>
+  <license>MIT</license>
+  <buildtool_depend>ament_python</buildtool_depend>
+  <exec_depend>path_planner_interfaces</exec_depend>
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>mavros_msgs</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>robot_localization</exec_depend>
+  <export><build_type>ament_python</build_type></export>
+</package>
