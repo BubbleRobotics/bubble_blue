@@ -24,14 +24,6 @@
     <xacro:include filename="$(find sensors_camera)/description/d455/urdf.xacro" />
     <xacro:realsense_d455_urdf parent="$(arg prefix)base_link" prefix="$(arg prefix)">
     </xacro:realsense_d455_urdf>
-    <!-- TODO: eventually these should only be executed when a flag use_d455 is 
-     set during launch. However, currently, parameter passing does not work, the 
-     chain is broken at some link.-->
-    <xacro:include filename="$(find sensors_camera)/description/d455/gazebo.xacro"/>
-    <xacro:realsense_d455_gazebo reference="$(arg prefix)realsense_d455_link">
-    </xacro:realsense_d455_gazebo>
-
-    <!-- Import Realsense Sensor specificaitons-->
 
     <!-- Add Gazebo sensor plugins if in simulation -->
     <xacro:if value="$(arg use_sim)">
@@ -45,6 +37,9 @@
       <xacro:include filename="$(find sensors_gnss)/description/ZED-F9P/gazebo.xacro" />
       <xacro:gnss_gazebo reference="$(arg prefix)gnss_link" />
 
+    <!-- TODO: eventually these should only be executed when a flag use_d455 is 
+     set during launch. However, currently, parameter passing does not work, the 
+     chain is broken at some link.-->
       <xacro:include filename="$(find sensors_camera)/description/d455/gazebo.xacro" />
       <xacro:realsense_d455_gazebo reference="$(arg prefix)realsense_d455_link"/>
     </xacro:if>
