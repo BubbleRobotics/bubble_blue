@@ -5,6 +5,7 @@
   <xacro:arg name="use_sim" default="false" />
   <xacro:arg name="use_imu" default="true" />
   <xacro:arg name="use_dvl" default="true" />
+  <xacro:arg name="use_gnss" default="true" />
 
   <!-- Import BlueROV2 macro -->
   <xacro:include filename="$(find blue_description)/description/bluerov2/urdf.xacro" />
