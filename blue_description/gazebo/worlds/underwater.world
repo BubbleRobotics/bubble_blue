@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<sdf version="1.6">
+<sdf version="1.10">
   <world name="underwater_world">
 
     <plugin
@@ -60,7 +60,6 @@
       <pose>0 7 -10.5 0 0 0</pose>
     </include>
 
-
     <include>
     <uri>model://harbor</uri>
     <pose>0 0 0 0 0 0</pose>
@@ -75,14 +74,7 @@
     <uri>model://features</uri>
     <pose>0 0 0 0 0 0</pose>
     </include>
-    
-
-    <include>
-    <uri>model://obstacles</uri>
-    <pose>0 0 0 0 0 0</pose>
-    </include>
-
-
+  
     <include>
       <uri>
         https://fuel.gazebosim.org/1.0/OpenRobotics/models/Coast Water
