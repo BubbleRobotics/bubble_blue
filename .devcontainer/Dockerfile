@@ -86,6 +86,31 @@ ENV USER_WORKSPACE=/home/$USERNAME/ws_blue
 WORKDIR $USER_WORKSPACE
 COPY --chown=$USER_UID:$USER_GID . src/blue
 
+# Ego-planner system & ROS dependencies
+RUN sudo apt-get -q update \
+    && sudo apt-get -q -y upgrade \
+    && sudo apt-get -q install --no-install-recommends -y \
+    # EGO-planner / uav_simulator deps
+    libarmadillo-dev \
+    libpcl-dev \
+    libvtk9-dev libvtk9-qt-dev \
+    qtbase5-dev \
+    # ROS interfaces used by ego-planner
+    ros-${ROS_DISTRO}-pcl-ros \
+    ros-${ROS_DISTRO}-cv-bridge \
+    ros-${ROS_DISTRO}-image-transport \
+    ros-${ROS_DISTRO}-image-transport-plugins \
+    # Recommended DDS for ros2_version branch
+    ros-${ROS_DISTRO}-rmw-cyclonedds-cpp \
+    && sudo apt-get autoremove -y \
+    && sudo apt-get clean -y \
+    && sudo rm -rf /var/lib/apt/lists/*
+
+
+# Use CycloneDDS as RMW (recommended by ego-planner ROS2 branch)
+ENV RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+
+
 # Install the Python requirements that aren't available as rosdeps
 RUN python3 -m pip install -r $(pwd)/src/blue/requirements-build.txt
 

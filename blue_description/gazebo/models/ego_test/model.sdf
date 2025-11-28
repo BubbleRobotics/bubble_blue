@@ -1,0 +1,323 @@
+<?xml version="1.0" ?>
+<!-- Luis Blunschi pillar field, square posts -->
+<sdf version="1.10">
+  <model name="pillar_field">
+    <static>true</static>
+
+    <link name="pillars">
+
+      <!-- Shared geometry:
+           box 1 x 1 x 10 (z from -5 to +5), centered at z = 0 -->
+
+      <!-- Pillar at (5, 3) -->
+      <collision name="pillar_5_3_collision">
+        <pose>5 3 0 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1 1 10</size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name="pillar_5_3_visual">
+        <pose>5 3 0 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1 1 10</size>
+          </box>
+        </geometry>
+        <material>
+          <ambient>0.7 0.7 0.7 1</ambient>
+          <diffuse>0.7 0.7 0.7 1</diffuse>
+        </material>
+      </visual>
+
+      <!-- Pillar at (5, 0) -->
+      <collision name="pillar_5_0_collision">
+        <pose>5 0 0 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1 1 10</size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name="pillar_5_0_visual">
+        <pose>5 0 0 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1 1 10</size>
+          </box>
+        </geometry>
+        <material>
+          <ambient>0.7 0.7 0.7 1</ambient>
+          <diffuse>0.7 0.7 0.7 1</diffuse>
+        </material>
+      </visual>
+
+      <!-- Pillar at (5, -3) -->
+      <collision name="pillar_5_-3_collision">
+        <pose>5 -3 0 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1 1 10</size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name="pillar_5_-3_visual">
+        <pose>5 -3 0 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1 1 10</size>
+          </box>
+        </geometry>
+        <material>
+          <ambient>0.7 0.7 0.7 1</ambient>
+          <diffuse>0.7 0.7 0.7 1</diffuse>
+        </material>
+      </visual>
+
+      <!-- Pillar at (0, 5) -->
+      <collision name="pillar_0_5_collision">
+        <pose>0 5 0 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1 1 10</size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name="pillar_0_5_visual">
+        <pose>0 5 0 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1 1 10</size>
+          </box>
+        </geometry>
+        <material>
+          <ambient>0.7 0.7 0.7 1</ambient>
+          <diffuse>0.7 0.7 0.7 1</diffuse>
+        </material>
+      </visual>
+
+      <!-- Pillar at (0, -5) -->
+      <collision name="pillar_0_-5_collision">
+        <pose>0 -5 0 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1 1 10</size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name="pillar_0_-5_visual">
+        <pose>0 -5 0 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1 1 10</size>
+          </box>
+        </geometry>
+        <material>
+          <ambient>0.7 0.7 0.7 1</ambient>
+          <diffuse>0.7 0.7 0.7 1</diffuse>
+        </material>
+      </visual>
+
+      <!-- Pillar at (-5, 3) -->
+      <collision name="pillar_-5_3_collision">
+        <pose>-5 3 0 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1 1 10</size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name="pillar_-5_3_visual">
+        <pose>-5 3 0 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1 1 10</size>
+          </box>
+        </geometry>
+        <material>
+          <ambient>0.7 0.7 0.7 1</ambient>
+          <diffuse>0.7 0.7 0.7 1</diffuse>
+        </material>
+      </visual>
+
+      <!-- Pillar at (-5, 0) -->
+      <collision name="pillar_-5_0_collision">
+        <pose>-5 0 0 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1 1 10</size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name="pillar_-5_0_visual">
+        <pose>-5 0 0 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1 1 10</size>
+          </box>
+        </geometry>
+        <material>
+          <ambient>0.7 0.7 0.7 1</ambient>
+          <diffuse>0.7 0.7 0.7 1</diffuse>
+        </material>
+      </visual>
+
+      <!-- Pillar at (-5, -3) -->
+      <collision name="pillar_-5_-3_collision">
+        <pose>-5 -3 0 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1 1 10</size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name="pillar_-5_-3_visual">
+        <pose>-5 -3 0 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1 1 10</size>
+          </box>
+        </geometry>
+        <material>
+          <ambient>0.7 0.7 0.7 1</ambient>
+          <diffuse>0.7 0.7 0.7 1</diffuse>
+        </material>
+      </visual>
+
+      <!-- Pillar at (3, 5) -->
+      <collision name="pillar_3_5_collision">
+        <pose>3 5 0 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1 1 10</size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name="pillar_3_5_visual">
+        <pose>3 5 0 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1 1 10</size>
+          </box>
+        </geometry>
+        <material>
+          <ambient>0.7 0.7 0.7 1</ambient>
+          <diffuse>0.7 0.7 0.7 1</diffuse>
+        </material>
+      </visual>
+
+      <!-- Pillar at (-3, -5) -->
+      <collision name="pillar_-3_-5_collision">
+        <pose>-3 -5 0 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1 1 10</size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name="pillar_-3_-5_visual">
+        <pose>-3 -5 0 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1 1 10</size>
+          </box>
+        </geometry>
+        <material>
+          <ambient>0.7 0.7 0.7 1</ambient>
+          <diffuse>0.7 0.7 0.7 1</diffuse>
+        </material>
+      </visual>
+
+      <!-- Pillar at (-3, 5) -->
+      <collision name="pillar_-3_5_collision">
+        <pose>-3 5 0 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1 1 10</size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name="pillar_-3_5_visual">
+        <pose>-3 5 0 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1 1 10</size>
+          </box>
+        </geometry>
+        <material>
+          <ambient>0.7 0.7 0.7 1</ambient>
+          <diffuse>0.7 0.7 0.7 1</diffuse>
+        </material>
+      </visual>
+
+      <!-- Pillar at (3, -5) -->
+      <collision name="pillar_3_-5_collision">
+        <pose>3 -5 0 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1 1 10</size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name="pillar_3_-5_visual">
+        <pose>3 -5 0 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1 1 10</size>
+          </box>
+        </geometry>
+        <material>
+          <ambient>0.7 0.7 0.7 1</ambient>
+          <diffuse>0.7 0.7 0.7 1</diffuse>
+        </material>
+      </visual>
+ 
+
+      <!-- Pillar at (-2, 2) -->
+      <collision name="pillar_-2_2_collision">
+        <pose>-2 2 0 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1 1 10</size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name="pillar_-2_2_visual">
+        <pose>-2 2 0 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1 1 10</size>
+          </box>
+        </geometry>
+        <material>
+          <ambient>0.7 0.7 0.7 1</ambient>
+          <diffuse>0.7 0.7 0.7 1</diffuse>
+        </material>
+      </visual>
+
+      <!-- Pillar at (-2, -2) -->
+      <collision name="pillar_-2_-2_collision">
+        <pose>-2 -2 0 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1 1 10</size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name="pillar_-2_-2_visual">
+        <pose>-2 -2 0 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1 1 10</size>
+          </box>
+        </geometry>
+        <material>
+          <ambient>0.7 0.7 0.7 1</ambient>
+          <diffuse>0.7 0.7 0.7 1</diffuse>
+        </material>
+      </visual>
+
+    </link>
+  </model>
+</sdf>

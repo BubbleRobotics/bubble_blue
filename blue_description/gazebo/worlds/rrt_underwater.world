@@ -1,0 +1,106 @@
+<?xml version="1.0"?>
+<sdf version="1.10">
+  <world name="underwater_world">
+
+    <plugin
+      filename="gz-sim-physics-system"
+      name="gz::sim::systems::Physics">
+    </plugin>
+
+    <plugin
+      filename="gz-sim-user-commands-system"
+      name="gz::sim::systems::UserCommands">
+    </plugin>
+
+    <plugin
+      filename="gz-sim-scene-broadcaster-system"
+      name="gz::sim::systems::SceneBroadcaster">
+    </plugin>
+
+    <!-- Add the sensor plugins for gazebo integration-->
+    <plugin
+      filename="libgz-sim8-dvl-system"
+      name="gz::sim::systems::DopplerVelocityLogSystem">
+    </plugin>
+    
+    <plugin filename="libgz-sim-imu-system.so"
+      name="gz::sim::systems::Imu">
+    </plugin>
+
+    <plugin
+      filename="gz-sim-buoyancy-system"
+      name="gz::sim::systems::Buoyancy">
+      <graded_buoyancy>
+        <default_density>1000</default_density>
+        <density_change>
+          <above_depth>0</above_depth>
+          <density>1</density>
+        </density_change>
+      </graded_buoyancy>
+    </plugin>
+
+    <plugin filename="libcurrent_system.so" name="CurrentSystem">
+      <vx>0.0</vx>
+      <vy>0.0</vy>
+      <vz>0.0</vz>
+      <rho>1000.0</rho>
+      <drag_coeff>0.8</drag_coeff>
+      <area>0.03</area>
+      <affected_models>
+        <model>bluerov2</model>
+      </affected_models>
+    </plugin>
+
+    <include>
+      <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Sun</uri>
+    </include>
+
+    <include>
+      <uri>model://sand_heightmap</uri>
+      <pose>0 7 -10.5 0 0 0</pose>
+    </include>
+
+    <include>
+    <uri>model://harbor</uri>
+    <pose>0 0 0 0 0 0</pose>
+    </include>
+
+    <include>
+    <uri>model://apriltags</uri>
+    <pose>0 0 0 0 0 0</pose>
+    </include>
+   
+    <include>
+    <uri>model://features</uri>
+    <pose>0 0 0 0 0 0</pose>
+    </include>
+
+    <include>
+    <uri>model://obstacles</uri>
+    <pose>0 0 0 0 0 0</pose>
+    </include>
+
+  
+    <include>
+      <uri>
+        https://fuel.gazebosim.org/1.0/OpenRobotics/models/Coast Water
+      </uri>
+      <pose>0 0 0 0 0 0</pose>
+    </include>
+
+    <scene>
+      <ambient>1.0 1.0 1.0</ambient>
+      <background>0.8 0.8 0.8</background>
+      <sky></sky>
+    </scene>
+
+    <light type="directional" name="sun1">
+      <pose>50 0 150 0 0 0</pose>
+      <diffuse>1 1 1 1</diffuse>
+      <specular>.1 .1 .1 1</specular>
+      <direction>0.3 0.3 -1</direction>
+      <cast_shadows>false</cast_shadows>
+    </light>
+
+  </world>
+</sdf>
