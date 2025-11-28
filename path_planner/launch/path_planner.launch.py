@@ -5,8 +5,8 @@ def generate_launch_description():
     return LaunchDescription([
                 Node(
             package='path_planner',
-            executable='rrt_path_follower',
-            name='rrt_path_follower',
+            executable='path_planner',
+            name='path_planner',
             output='screen',
             parameters=[{
                 'mavlink_url': 'udp:127.0.0.1:14550',

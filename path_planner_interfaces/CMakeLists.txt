@@ -10,6 +10,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/Sphere.msg"
   "msg/AABB.msg"
   "msg/OrientedBox.msg"
+  "msg/Path.msg"
   "srv/SetObstacles.srv"
   DEPENDENCIES geometry_msgs
 )

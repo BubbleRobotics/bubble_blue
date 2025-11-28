@@ -8,7 +8,7 @@ from std_srvs.srv import Trigger
 def main():
     rclpy.init()
     node = Node('replan_path_client')
-    cli = node.create_client(Trigger, '/path_planner/replan')
+    cli = node.create_client(Trigger, '/bluerov2/path_planner/replan')
     cli.wait_for_service()
     req = Trigger.Request()
     

@@ -9,7 +9,11 @@ setup(
     data_files=[
     ('share/ament_index/resource_index/packages', ['resource/path_planner']),
     ('share/path_planner', ['package.xml']),
-    ('share/path_planner/launch', ['launch/rrt_path_follower.launch.py', 'launch/follower.launch.py']),
+    ('share/path_planner/launch', [
+      'launch/path_planner.launch.py',
+      'launch/follower.launch.py',
+      'launch/follower_gated.launch.py',   
+    ]),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
@@ -19,8 +23,10 @@ setup(
     license='MIT',
     entry_points={
     'console_scripts': [
-        'rrt_path_follower = path_planner.mockup_rrt_follower:main',
-        'follower_node = path_planner.follower_node:main'
+        'path_planner = path_planner.path_planner:main',
+        'follower_node = path_planner.follower_node:main',
+        'wait_mavros_ready = path_planner.wait_mavros_ready:main',  
     ],
-    },
+},
+
 )

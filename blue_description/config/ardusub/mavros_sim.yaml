@@ -11,11 +11,6 @@ mavros:
       - local*
       - global_position
       - mavros_sensor
-      - local_position
-      - home_position
-      - odometry
-      - gps_input
-      - waypoint
       - setpoint_*
       - heartbeat
     mavros_sensor:

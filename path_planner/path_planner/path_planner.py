@@ -25,12 +25,12 @@ from geometry_msgs.msg import Pose, Point, Quaternion, Vector3
 from robot_localization.srv import SetPose
 from geometry_msgs.msg import PoseWithCovarianceStamped, PoseStamped
 from path_planner_interfaces.srv import InitiatePath, SetObstacles
-from path_planner_interfaces.msg import Sphere, AABB, OrientedBox
+from path_planner_interfaces.msg import Sphere, AABB, OrientedBox, Path
 from std_srvs.srv import Trigger
 from std_msgs.msg import Header
 from mavros_msgs.msg import PositionTarget
 from mavros_msgs.msg import State as mavState
-from tf_transformations import euler_from_quaternion
+from tf_transformations import euler_from_quaternion, quaternion_from_euler
 
 
 # ============
@@ -83,8 +83,8 @@ class RobotBox:
 
 class RrtPathFollowerNode(Node):
     def __init__(self):
-        super().__init__('rrt_path_follower')
-
+        super().__init__('path_planner')
+        self.get_logger().info('Starting RrtPathFollowerNode...')
         # ---- parameters (declare + get) ----
         self.declare_parameters(
             namespace='',
@@ -118,7 +118,7 @@ class RrtPathFollowerNode(Node):
         self.near_goal = float(self.get_parameter('near_goal_radius').value)
         self.safety_buffer = float(self.get_parameter('safety_buffer').value)
 
-        self.q_start = State(0.0, 0.0, -1)
+        self.q_start = State(0.0, 0.0, -1.0)
         goal_xyz = self.get_parameter('goal').get_parameter_value().double_array_value
         self.q_goal  = State(goal_xyz[0], goal_xyz[1], goal_xyz[2], 0.0)
 
@@ -130,14 +130,15 @@ class RrtPathFollowerNode(Node):
         self.mavlink_url: str = self.get_parameter('mavlink_url').get_parameter_value().string_value
         
         # MAVROS subscribers
+        self._pose_sub = self.create_subscription(PoseWithCovarianceStamped, '/mavros/vision_pose/pose_cov', self._pose_cb, 10)
         # QoS: small queue, best-effort is fine for pose
 
-        self.current_pose = State(0.0, 0.0, 0.0, 0.0)
-        self._pose_sub = self.create_subscription(
-            PoseWithCovarianceStamped, '/mavros/vision_pose/pose_cov', self._pose_cb, 10)
+        self.current_pose = State(0.0, 0.0, -1.0, 0.0)
+
         self._last_pose = None
         self._pose_lock = threading.Lock()
         # MAVROS setpoint publishers
+        self.path_pub = self.create_publisher(Path, '/follower/planned_path', 10)
         self.setpoint_local_pub = self.create_publisher(PositionTarget,'/mavros/setpoint_raw/local',10)
         # MAVROS service clients
         self.set_mode_cli = self.create_client(SetMode, '/mavros/set_mode')
@@ -169,6 +170,12 @@ class RrtPathFollowerNode(Node):
             Trigger,
             'path_planner/replan',
             self.handler_replan
+        )
+
+        self.stopper_srv = self.create_service(
+            Trigger,
+            'path_planner/stop',
+            self.handler_stop
         )
         
         
@@ -202,7 +209,7 @@ class RrtPathFollowerNode(Node):
         
         self.destroy_subscription(self._state_sub)
 
-        self.get_logger().info('Path planner: rrt_path_follower node initialized.')
+        self.get_logger().info('Path planner: path_planner node initialized.')
 
 
     def state_callback(self, msg: mavState):
@@ -210,15 +217,18 @@ class RrtPathFollowerNode(Node):
         
         if msg.connected and not self._is_connected:
             self._is_connected = True
-            
+
+    def _pose_cb(self, msg: PoseWithCovarianceStamped):
+        position = msg.pose.pose.position
+        q = msg.pose.pose.orientation
+        quat = [q.x, q.y, q.z, q.w]
+        _,_,yaw = euler_from_quaternion(quat)
+        self.current_pose = State(x=position.x, y=position.y, z=position.z, yaw=yaw)
+        
 
     def _start_new_worker(self):
         """Cancel any existing worker and start a new one."""
    
-        self.goto_position(self.current_pose.x,
-                            self.current_pose.y,
-                            self.current_pose.z,
-                            self.current_pose.yaw)
 
         with self._worker_lock:
             # 1) ask the current worker to stop
@@ -237,22 +247,15 @@ class RrtPathFollowerNode(Node):
         return self._cancel_evt.is_set()
     
     def _run_wrapper(self):
-        try:
+        self._run()
+        """try:
             self._run()
         except Exception:
             self.get_logger().warn("Worker crashed")
         finally:
             # nothing to cleanup right now
-            pass
+            pass"""
 
-    def _pose_cb(self, msg: PoseWithCovarianceStamped):
-        position = msg.pose.pose.position
-        q = msg.pose.pose.orientation
-        quat = [q.x, q.y, q.z, q.w]
-        _,_,yaw = euler_from_quaternion(quat)
-        self.current_pose = State(x=position.x, y=position.y, z=position.z, yaw=yaw)
-        
-            
         
     # ===== service handler =====
     
@@ -340,77 +343,25 @@ class RrtPathFollowerNode(Node):
         response.success = True
         return response
     
-    # ===== MAVROS helpers =====
-
-    def set_mode(self, mode: str) -> bool:
-        if not self.set_mode_cli.wait_for_service(timeout_sec=5.0):
-            self.get_logger().error('Set mode service unavailable')
-            return False
-        req = SetMode.Request()
-        req.custom_mode = mode
-        fut = self.set_mode_cli.call_async(req)
-        rclpy.spin_until_future_complete(self, fut)
-        res = fut.result()
-        ok = bool(res and res.mode_sent)
-        self.get_logger().info(f'Set mode {mode}: {"OK" if ok else "FAIL"}')
-        return ok
-
-    def arm(self, value: bool) -> bool:
-        if not self.arm_cli.wait_for_service(timeout_sec=5.0):
-            self.get_logger().error('Arming service unavailable')
-            return False
-        req = CommandBool.Request()
-        req.value = value
-        fut = self.arm_cli.call_async(req)
-        rclpy.spin_until_future_complete(self, fut)
-        res = fut.result()
-        ok = bool(res and res.success)
-        self.get_logger().info(f'Arm({value}): {"OK" if ok else "FAIL"}')
-        return ok
-
-
-    def goto_position(self, x_east_m: float, y_north_m: float, up_m: float, yaw_deg: Optional[float] = 0.0) -> None:
-  
-        msg = PositionTarget()
-        # Use local NED frame (MAVROS translates correctly)
-        msg.header.frame_id = "map"
-
-        msg.coordinate_frame = PositionTarget.FRAME_LOCAL_NED
-
-        # Type mask (bits = ignore fields)
-        # We want to send ONLY position + yaw
-        # ignore velocity, accel, yaw_rate
-        msg.type_mask = (
-            PositionTarget.IGNORE_VX |
-            PositionTarget.IGNORE_VY |
-            PositionTarget.IGNORE_VZ |
-            PositionTarget.IGNORE_AFX |
-            PositionTarget.IGNORE_AFY |
-            PositionTarget.IGNORE_AFZ |
-            PositionTarget.IGNORE_YAW_RATE
+    def handler_stop(self, request: Trigger.Request, response: Trigger.Response):
+        
+        self.get_logger().info(
+            "\n\n##################################################################\n"
         )
-        # Desired position (NED)
-        msg.position.x = float(x_east_m)    # North
-        msg.position.y = float(y_north_m)    # East
-        msg.position.z = float(up_m)        # Down
+        self.get_logger().info(
+            "Service request: Stop"
+        )
+        self.path_pub.publish(Path())
+        # Send simple acknowledgment
+        response.success = True
+        return response
+    
 
-        # Desired yaw (rad)
-        msg.yaw = float(math.radians(yaw_deg))
-        self.setpoint_local_pub.publish(msg)
          
     # ==================
     # Geometry helpers
     # ==================
-    def reached_goal(self, x_goal_e: float, y_goal_n: float, up_goal: float, yaw_goal_deg: float) -> Tuple[bool, float]:
-        
-    
-        dx = x_goal_e - self.current_pose.x
-        dy = y_goal_n - self.current_pose.y
-        dz = up_goal - self.current_pose.z + 0.15
-        dyaw = (yaw_goal_deg - self.current_pose.yaw) / 100.0
-        total = math.sqrt(dx*dx + dy*dy + dz*dz + 0.0*dyaw*dyaw)
-        self.get_logger().info(f"Current: dx={dx:.7f}, dy={dy:.7f}, dz={dz:.2f} m, dyaw={dyaw}, total_dist={total:.2f} m")
-        return (total < self.threshold, total)
+
 
     def dist_xyz(self, a: State, b: State) -> float:
         dx = a.x - b.x
@@ -575,7 +526,7 @@ class RrtPathFollowerNode(Node):
         self.aabbs.append(AABB(minx=2 - 0.25, miny=-20, minz=-2.5, maxx=2 + 0.25, maxy=20,   maxz=2))
         self.aabbs.append(AABB(minx=2 - 0.25, miny=-20, minz=-12,  maxx=2 + 0.25, maxy=-1.5, maxz=1))
         self.aabbs.append(AABB(minx=2 - 0.25, miny=1.5, minz=-12,  maxx=2 + 0.25, maxy=20,   maxz=1))
-
+        
         self.oriented_boxes: List[OrientedBox] = [
             OrientedBox(cx=11.57346922, cy=12.78198424, cz=-4.25, sx=1.04922147, sy=0.25,  sz=1.5,  yaw=-1.844678),
             OrientedBox(cx=10.722990,   cy=3.746699,    cz=-5.0,  sx=50.0,       sy=3.25,  sz=16.0, yaw=-1.844678),
@@ -668,21 +619,10 @@ class RrtPathFollowerNode(Node):
     def _run(self) -> None:
         # parameters
         self.q_start = self.current_pose
-        self.goto_position(self.current_pose.x,
-                            self.current_pose.y,
-                            self.current_pose.z,
-                            self.current_pose.yaw)
 
         self.get_logger().info(f'RRT path from start ENU ({self.q_start.x}, {self.q_start.y}, {self.q_start.z})')
         self.get_logger().info(f'            to goal ENU ({self.q_goal.x},  {self.q_goal.y},  {self.q_goal.z})')
-
-        # mode + arm
-        if self.get_parameter('set_mode').value:
-            self.set_mode(self.get_parameter('set_mode').value)
-        if self.get_parameter('arm').value:
-            self.get_logger().info("Arming")
-            self.arm(True)
-            
+          
 
         self.get_logger().info("Started planning path")
         # plan
@@ -690,52 +630,24 @@ class RrtPathFollowerNode(Node):
         if not path:
             return
         self.get_logger().info("Finished planning path")
-        # execute
-        failed = False
-        for path_i, wp in enumerate(path):
-            # choose yaw
-            if failed:
-                break
-            if self._should_cancel():
-                break
-            dgoal = self.dist_xyz(wp, self.q_goal)
-            yaw_cmd = self.final_yaw if dgoal < self.near_goal else 0.0
+        path_new = Path()
+        for i, element in enumerate(path):
+            element_new = Pose()
+            element_new.position.x = element.x
+            element_new.position.y = element.y
+            element_new.position.z = element.z
             
-            self.goto_position(wp.x, wp.y, wp.z, yaw_cmd)
-            self.get_logger().info(f'[{path_i+1}/{len(path)}] goto ENU x={wp.x:.2f} y={wp.y:.2f} z={wp.z:.2f} yaw={yaw_cmd:.1f}')
+            q = quaternion_from_euler(0,0,element.yaw)
+            element_new.orientation.x = q[0]
+            element_new.orientation.y = q[1]
+            element_new.orientation.z = q[2]
+            element_new.orientation.w = q[3]
 
-            start_t = time.time()
-            last_dist = None
-            stuck_cnt = 0
-            while True:
-                try:
-                    ok, dist = self.reached_goal(wp.x, wp.y, wp.z, yaw_cmd)
-                except Exception:
-                    ok, dist = False, 1e9
+            path_new.path.append(element_new)
+            self.get_logger().info(f"ELEMENT {element_new}")
+        self.get_logger().info("Published path")
+        self.path_pub.publish(path_new)
 
-                if last_dist is None:
-                    last_dist = dist
-                else:
-                    if abs(last_dist - dist) < 0.01:
-                        stuck_cnt += 1
-                    else:
-                        stuck_cnt = 0
-                    last_dist = dist
-
-                if ok:
-                    self.get_logger().info(f'  reached (err≈{dist:.2f} m)')
-                    break
-                if time.time() - start_t > 180.0 or stuck_cnt > 100:
-                    self.get_logger().warn(f'  time since start_t:{time.time() - start_t} and stuck_cnt: {stuck_cnt}')
-                    self.get_logger().warn(f'  timeout/stuck (err≈{dist:.2f} m), continue')
-                    self.get_logger().warn("Aborting mission!")
-                    failed = True
-                    break
-                time.sleep(0.3)
-        if not failed:
-            self.get_logger().info('\n\nRRT path complete\n\n##################################################################\n')
-        else:
-            self.get_logger().info('\n\nProcess died or failed\n\n#############################################################\n')
 def main(args=None):
     rclpy.init(args=args)
     node = RrtPathFollowerNode()

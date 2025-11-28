@@ -3,7 +3,7 @@ from launch_ros.actions import Node
 
 def generate_launch_description():
     return LaunchDescription([
-                Node(
+        Node(
             package='path_planner',
             executable='follower_node',
             name='follower_node',

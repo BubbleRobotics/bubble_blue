@@ -120,7 +120,7 @@ def call_set_obstacles(aabbs, spheres=None, oriented_boxes=None):
     rclpy.init()
     node = Node('initiate_path_client')
     try:
-        cli = node.create_client(SetObstacles, '/path_planner/add_obstacles')
+        cli = node.create_client(SetObstacles, '/bluerov2/path_planner/add_obstacles')
         cli.wait_for_service()
         req = SetObstacles.Request()
         req.aabbs = aabbs or []
