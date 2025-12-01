@@ -197,4 +197,4 @@ launch:
         - name: use_planner
           value: "false" 
         - name: use_follower
-          value: "false"
+          value: "true"
