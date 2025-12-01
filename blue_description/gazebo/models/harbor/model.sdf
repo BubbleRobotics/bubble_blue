@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <!--Luis Blunschi 27.10.2025-->
-<sdf version="1.10">
+<sdf version="1.6">
   <model name="harbor">
     <static>true</static>
 

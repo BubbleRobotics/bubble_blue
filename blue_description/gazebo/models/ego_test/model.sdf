@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <!-- Luis Blunschi pillar field, square posts -->
-<sdf version="1.10">
+<sdf version="1.6">
   <model name="pillar_field">
     <static>true</static>
 

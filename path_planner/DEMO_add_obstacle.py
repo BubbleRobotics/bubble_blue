@@ -16,7 +16,7 @@ DEFAULT_NAME = "obstacle_box"
 def build_sdf_box(name: str, sx: float, sy: float, sz: float) -> str:
     """Return an SDF string for a static box model with the given side lengths."""
     return f"""
-<sdf version="1.10">
+<sdf version="1.6">
   <model name="{name}">
     <static>true</static>
     <link name="link">
