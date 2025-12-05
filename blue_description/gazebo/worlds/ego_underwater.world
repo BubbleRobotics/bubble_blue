@@ -1,18 +1,6 @@
 <?xml version="1.0"?>
-<sdf version="1.10">
+<sdf version="1.6">
   <world name="underwater_world">
-    <!-- Set initial position to Barcelona -->
-    <spherical_coordinates>
-      <!-- Use WGS84 for standard GPS coordinates -->
-      <surface_model>EARTH_WGS84</surface_model>
-      <!-- Zurich coordinates -->
-      <latitude_deg>41.318319</latitude_deg>
-      <longitude_deg>2.171525</longitude_deg>
-      <!-- Altitude in meters above sea level -->
-      <elevation>0.0</elevation>
-      <!-- Heading offset (rotation between Gazebo X-axis and East) -->
-      <heading_deg>85.0</heading_deg>
-    </spherical_coordinates>
 
     <plugin
       filename="gz-sim-physics-system"
@@ -72,21 +60,14 @@
       <pose>0 7 -10.5 0 0 0</pose>
     </include>
 
-    <include>
-    <uri>model://harbor</uri>
-    <pose>0 0 0 0 0 0</pose>
-    </include>
 
     <include>
-    <uri>model://apriltags</uri>
+    <uri>model://ego_test</uri>
     <pose>0 0 0 0 0 0</pose>
     </include>
-   
-    <include>
-    <uri>model://features</uri>
-    <pose>0 0 0 0 0 0</pose>
-    </include>
-  
+    
+
+
     <include>
       <uri>
         https://fuel.gazebosim.org/1.0/OpenRobotics/models/Coast Water

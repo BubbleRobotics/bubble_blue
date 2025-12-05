@@ -1,0 +1,32 @@
+# src/path_planner/setup.py
+from setuptools import setup
+package_name = 'path_planner'
+
+setup(
+    name=package_name,
+    version='0.0.1',
+    packages=[package_name],
+    data_files=[
+    ('share/ament_index/resource_index/packages', ['resource/path_planner']),
+    ('share/path_planner', ['package.xml']),
+    ('share/path_planner/launch', [
+      'launch/path_planner.launch.py',
+      'launch/follower.launch.py',
+      'launch/follower_gated.launch.py',   
+    ]),
+    ],
+    install_requires=['setuptools'],
+    zip_safe=True,
+    maintainer='Luis Blunschi',
+    maintainer_email='lublu@hotmail.ch',
+    description='RRT path follower',
+    license='MIT',
+    entry_points={
+    'console_scripts': [
+        'path_planner = path_planner.path_planner:main',
+        'follower_node = path_planner.follower_node:main',
+        'wait_mavros_ready = path_planner.wait_mavros_ready:main',  
+    ],
+},
+
+)

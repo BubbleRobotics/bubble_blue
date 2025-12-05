@@ -636,7 +636,6 @@ class GazeboLocalizer(PoseLocalizer):
         pose_cov = PoseWithCovarianceStamped()
         pose_cov.header = msg.header
         pose_cov.pose = msg.pose
-
         self.state = pose_cov
 
 

@@ -42,11 +42,11 @@
           <specular>0.1 0.1 0.1 0.1</specular>
           <pbr>
             <metal>
-              <albedo_map>model://harbor/materials/Poliigon_GrassPatchyGround_4585_BaseColor.jpg</albedo_map>
-              <normal_map>model://harbor/materials/Poliigon_GrassPatchyGround_4585_Normal.png</normal_map>
-              <roughness_map>model://harbor/materials/Poliigon_GrassPatchyGround_4585_Roughness.jpg</roughness_map>
-              <metalness_map>model://harbor/materials/Poliigon_GrassPatchyGround_4585_Metallic.jpg</metalness_map>
-              <ambient_occlusion_map>model://harbor/materials/Poliigon_GrassPatchyGround_4585_AmbientOcclusion.jpg</ambient_occlusion_map>
+              <albedo_map>model://harbor/materials/grass/Poliigon_GrassPatchyGround_4585_BaseColor.jpg</albedo_map>
+              <normal_map>model://harbor/materials/grass/Poliigon_GrassPatchyGround_4585_Normal.png</normal_map>
+              <roughness_map>model://harbor/materials/grass/Poliigon_GrassPatchyGround_4585_Roughness.jpg</roughness_map>
+              <metalness_map>model://harbor/materials/grass/Poliigon_GrassPatchyGround_4585_Metallic.jpg</metalness_map>
+              <ambient_occlusion_map>model://harbor/materials/grass/Poliigon_GrassPatchyGround_4585_AmbientOcclusion.jpg</ambient_occlusion_map>
               <roughness>0.9</roughness>
               <metalness>0.01</metalness>
             </metal>
@@ -68,17 +68,32 @@
         </geometry>
       </collision>
       <visual name="inspection_element_58_visual">
-        <pose>11.835702 13.253233 -5.000025 0 0 2.867711</pose>
+        <pose>11.835702 13.253233 -5.000025 1.5707 0 2.867711</pose>
         <geometry>
           <mesh>
-            <uri>model://harbor/meshes/model.stl</uri>
-            <scale>0.001 0.001 0.001</scale>
+            <uri>model://harbor/meshes/inspection.glb</uri>
+            <scale>0.01 0.01 0.01</scale>
           </mesh>
+          
         </geometry>
         <material>
-          <ambient>0.15 0.25 0.1 1</ambient>
-          <diffuse>0.25 0.4 0.2 1</diffuse>
+          <double_sided>true</double_sided>
+          <ambient>1 1 1 1</ambient>
+          <diffuse>1 1 1 1</diffuse>
+          <specular>0.1 0.1 0.1 0.1</specular>
+          <pbr>
+            <metal>
+              <albedo_map>model://harbor/materials/grid_like/rusting-textured-metal_albedo.png</albedo_map>
+              <normal_map>model://harbor/materials/grid_like/rusting-textured-metal_normal-dx.png</normal_map>
+              <roughness_map>model://harbor/materials/grid_like/rusting-textured-metal_roughness.png</roughness_map>
+              <metalness_map>model://harbor/materials/grid_like/rusting-textured-metal_metallic.png</metalness_map>
+              <ambient_occlusion_map>model://harbor/materials/grid_like/rusting-textured-metal_ao.png</ambient_occlusion_map>
+              <roughness>0.9</roughness>
+              <metalness>0.01</metalness>
+            </metal>
+          </pbr>
         </material>
+
       </visual>
 
       <!-- Element LBU 5.13 -->
@@ -92,17 +107,32 @@
         </geometry> 
       </collision>
       <visual name="inspection_element_513_visual">
-        <pose>11.835702 13.253233 -9 0 0 2.867711</pose>
+        <pose>11.835702 13.253233 -9 1.5707 0 2.867711</pose>
         <geometry>
           <mesh>
-            <uri>model://harbor/meshes/model.stl</uri>
-            <scale>0.001 0.001 0.001</scale>
+            <uri>model://harbor/meshes/inspection.glb</uri>
+            <scale>0.01 0.01 0.01</scale>
           </mesh>
+          
         </geometry>
         <material>
-          <ambient>0.15 0.25 0.1 1</ambient>
-          <diffuse>0.25 0.4 0.2 1</diffuse>
+          <double_sided>true</double_sided>
+          <ambient>1 1 1 1</ambient>
+          <diffuse>1 1 1 1</diffuse>
+          <specular>0.1 0.1 0.1 0.1</specular>
+          <pbr>
+            <metal>
+              <albedo_map>model://harbor/materials/grid_like/rusting-textured-metal_albedo.png</albedo_map>
+              <normal_map>model://harbor/materials/grid_like/rusting-textured-metal_normal-dx.png</normal_map>
+              <roughness_map>model://harbor/materials/grid_like/rusting-textured-metal_roughness.png</roughness_map>
+              <metalness_map>model://harbor/materials/grid_like/rusting-textured-metal_metallic.png</metalness_map>
+              <ambient_occlusion_map>model://harbor/materials/grid_like/rusting-textured-metal_ao.png</ambient_occlusion_map>
+              <roughness>0.9</roughness>
+              <metalness>0.01</metalness>
+            </metal>
+          </pbr>
         </material>
+
       </visual>
       
       <!-- Element LBU 5.9 -->
@@ -116,16 +146,30 @@
         </geometry>
       </collision>
       <visual name="inspection_element_59_visual">
-        <pose>11.319732 11.416660 -5.000025 0 0 2.867711</pose>
+        <pose>11.319732 11.416660 -5.000025 1.5707 0 2.867711</pose>
         <geometry>
           <mesh>
-            <uri>model://harbor/meshes/model.stl</uri>
-            <scale>0.001 0.001 0.001</scale>
+            <uri>model://harbor/meshes/inspection.glb</uri>
+            <scale>0.01 0.01 0.01</scale>
           </mesh>
+          
         </geometry>
         <material>
-          <ambient>0.15 0.25 0.1 1</ambient>
-          <diffuse>0.25 0.4 0.2 1</diffuse>
+          <double_sided>true</double_sided>
+          <ambient>1 1 1 1</ambient>
+          <diffuse>1 1 1 1</diffuse>
+          <specular>0.1 0.1 0.1 0.1</specular>
+          <pbr>
+            <metal>
+              <albedo_map>model://harbor/materials/grid_like/rusting-textured-metal_albedo.png</albedo_map>
+              <normal_map>model://harbor/materials/grid_like/rusting-textured-metal_normal-dx.png</normal_map>
+              <roughness_map>model://harbor/materials/grid_like/rusting-textured-metal_roughness.png</roughness_map>
+              <metalness_map>model://harbor/materials/grid_like/rusting-textured-metal_metallic.png</metalness_map>
+              <ambient_occlusion_map>model://harbor/materials/grid_like/rusting-textured-metal_ao.png</ambient_occlusion_map>
+              <roughness>0.9</roughness>
+              <metalness>0.01</metalness>
+            </metal>
+          </pbr>
         </material>
       </visual>
 
@@ -140,16 +184,30 @@
         </geometry> 
       </collision>
       <visual name="inspection_element_514_visual">
-        <pose>11.319732 11.416660 -9 0 0 2.867711</pose>
+        <pose>11.319732 11.416660 -9 1.5707 0 2.867711</pose>
         <geometry>
           <mesh>
-            <uri>model://harbor/meshes/model.stl</uri>
-            <scale>0.001 0.001 0.001</scale>
+            <uri>model://harbor/meshes/inspection.glb</uri>
+            <scale>0.01 0.01 0.01</scale>
           </mesh>
+          
         </geometry>
         <material>
-          <ambient>0.15 0.25 0.1 1</ambient>
-          <diffuse>0.25 0.4 0.2 1</diffuse>
+          <double_sided>true</double_sided>
+          <ambient>1 1 1 1</ambient>
+          <diffuse>1 1 1 1</diffuse>
+          <specular>0.1 0.1 0.1 0.1</specular>
+          <pbr>
+            <metal>
+              <albedo_map>model://harbor/materials/grid_like/rusting-textured-metal_albedo.png</albedo_map>
+              <normal_map>model://harbor/materials/grid_like/rusting-textured-metal_normal-dx.png</normal_map>
+              <roughness_map>model://harbor/materials/grid_like/rusting-textured-metal_roughness.png</roughness_map>
+              <metalness_map>model://harbor/materials/grid_like/rusting-textured-metal_metallic.png</metalness_map>
+              <ambient_occlusion_map>model://harbor/materials/grid_like/rusting-textured-metal_ao.png</ambient_occlusion_map>
+              <roughness>0.9</roughness>
+              <metalness>0.01</metalness>
+            </metal>
+          </pbr>
         </material>
       </visual>
       
@@ -164,16 +222,30 @@
         </geometry>
       </collision>
       <visual name="inspection_element_510_visual">
-        <pose>10.803728 9.579964 -5.000025 0 0 2.867711</pose>
+        <pose>10.803728 9.579964 -5.000025 1.5707 0 2.867711</pose>
         <geometry>
           <mesh>
-            <uri>model://harbor/meshes/model.stl</uri>
-            <scale>0.001 0.001 0.001</scale>
+            <uri>model://harbor/meshes/inspection.glb</uri>
+            <scale>0.01 0.01 0.01</scale>
           </mesh>
+          
         </geometry>
         <material>
-          <ambient>0.15 0.25 0.1 1</ambient>
-          <diffuse>0.25 0.4 0.2 1</diffuse>
+          <double_sided>true</double_sided>
+          <ambient>1 1 1 1</ambient>
+          <diffuse>1 1 1 1</diffuse>
+          <specular>0.1 0.1 0.1 0.1</specular>
+          <pbr>
+            <metal>
+              <albedo_map>model://harbor/materials/grid_like/rusting-textured-metal_albedo.png</albedo_map>
+              <normal_map>model://harbor/materials/grid_like/rusting-textured-metal_normal-dx.png</normal_map>
+              <roughness_map>model://harbor/materials/grid_like/rusting-textured-metal_roughness.png</roughness_map>
+              <metalness_map>model://harbor/materials/grid_like/rusting-textured-metal_metallic.png</metalness_map>
+              <ambient_occlusion_map>model://harbor/materials/grid_like/rusting-textured-metal_ao.png</ambient_occlusion_map>
+              <roughness>0.9</roughness>
+              <metalness>0.01</metalness>
+            </metal>
+          </pbr>
         </material>
       </visual>
 
@@ -188,16 +260,30 @@
         </geometry> 
       </collision>
       <visual name="inspection_element_515_visual">
-        <pose>10.803728 9.579964 -9 0 0 2.867711</pose>
+        <pose>10.803728 9.579964 -9 1.5707 0 2.867711</pose>
         <geometry>
           <mesh>
-            <uri>model://harbor/meshes/model.stl</uri>
-            <scale>0.001 0.001 0.001</scale>
+            <uri>model://harbor/meshes/inspection.glb</uri>
+            <scale>0.01 0.01 0.01</scale>
           </mesh>
+          
         </geometry>
         <material>
-          <ambient>0.15 0.25 0.1 1</ambient>
-          <diffuse>0.25 0.4 0.2 1</diffuse>
+          <double_sided>true</double_sided>
+          <ambient>1 1 1 1</ambient>
+          <diffuse>1 1 1 1</diffuse>
+          <specular>0.1 0.1 0.1 0.1</specular>
+          <pbr>
+            <metal>
+              <albedo_map>model://harbor/materials/grid_like/rusting-textured-metal_albedo.png</albedo_map>
+              <normal_map>model://harbor/materials/grid_like/rusting-textured-metal_normal-dx.png</normal_map>
+              <roughness_map>model://harbor/materials/grid_like/rusting-textured-metal_roughness.png</roughness_map>
+              <metalness_map>model://harbor/materials/grid_like/rusting-textured-metal_metallic.png</metalness_map>
+              <ambient_occlusion_map>model://harbor/materials/grid_like/rusting-textured-metal_ao.png</ambient_occlusion_map>
+              <roughness>0.9</roughness>
+              <metalness>0.01</metalness>
+            </metal>
+          </pbr>
         </material>
       </visual>
 
@@ -212,16 +298,30 @@
         </geometry>
       </collision>
       <visual name="inspection_element_511_visual">
-        <pose>10.190416 7.396905 -5.000025 0 0 2.867711</pose>
+        <pose>10.190416 7.396905 -5.000025 1.5707 0 2.867711</pose>
         <geometry>
           <mesh>
-            <uri>model://harbor/meshes/model.stl</uri>
-            <scale>0.001 0.001 0.001</scale>
+            <uri>model://harbor/meshes/inspection.glb</uri>
+            <scale>0.01 0.01 0.01</scale>
           </mesh>
+          
         </geometry>
         <material>
-          <ambient>0.15 0.25 0.1 1</ambient>
-          <diffuse>0.25 0.4 0.2 1</diffuse>
+          <double_sided>true</double_sided>
+          <ambient>1 1 1 1</ambient>
+          <diffuse>1 1 1 1</diffuse>
+          <specular>0.1 0.1 0.1 0.1</specular>
+          <pbr>
+            <metal>
+              <albedo_map>model://harbor/materials/grid_like/rusting-textured-metal_albedo.png</albedo_map>
+              <normal_map>model://harbor/materials/grid_like/rusting-textured-metal_normal-dx.png</normal_map>
+              <roughness_map>model://harbor/materials/grid_like/rusting-textured-metal_roughness.png</roughness_map>
+              <metalness_map>model://harbor/materials/grid_like/rusting-textured-metal_metallic.png</metalness_map>
+              <ambient_occlusion_map>model://harbor/materials/grid_like/rusting-textured-metal_ao.png</ambient_occlusion_map>
+              <roughness>0.9</roughness>
+              <metalness>0.01</metalness>
+            </metal>
+          </pbr>
         </material>
       </visual>
 
@@ -236,16 +336,30 @@
         </geometry> 
       </collision>
       <visual name="inspection_element_516_visual">
-        <pose>10.190416 7.396905 -9 0 0 2.867711</pose>
+        <pose>10.190416 7.396905 -9 1.5707 0 2.867711</pose>
         <geometry>
           <mesh>
-            <uri>model://harbor/meshes/model.stl</uri>
-            <scale>0.001 0.001 0.001</scale>
+            <uri>model://harbor/meshes/inspection.glb</uri>
+            <scale>0.01 0.01 0.01</scale>
           </mesh>
+          
         </geometry>
         <material>
-          <ambient>0.15 0.25 0.1 1</ambient>
-          <diffuse>0.25 0.4 0.2 1</diffuse>
+          <double_sided>true</double_sided>
+          <ambient>1 1 1 1</ambient>
+          <diffuse>1 1 1 1</diffuse>
+          <specular>0.1 0.1 0.1 0.1</specular>
+          <pbr>
+            <metal>
+              <albedo_map>model://harbor/materials/grid_like/rusting-textured-metal_albedo.png</albedo_map>
+              <normal_map>model://harbor/materials/grid_like/rusting-textured-metal_normal-dx.png</normal_map>
+              <roughness_map>model://harbor/materials/grid_like/rusting-textured-metal_roughness.png</roughness_map>
+              <metalness_map>model://harbor/materials/grid_like/rusting-textured-metal_metallic.png</metalness_map>
+              <ambient_occlusion_map>model://harbor/materials/grid_like/rusting-textured-metal_ao.png</ambient_occlusion_map>
+              <roughness>0.9</roughness>
+              <metalness>0.01</metalness>
+            </metal>
+          </pbr>
         </material>
       </visual>
 
@@ -260,16 +374,30 @@
         </geometry>
       </collision>
       <visual name="inspection_element_512_visual">
-        <pose>9.674411 5.560207 -5.000025 0 0 2.867711</pose>
+        <pose>9.674411 5.560207 -5.000025 1.5707 0 2.867711</pose>
         <geometry>
           <mesh>
-            <uri>model://harbor/meshes/model.stl</uri>
-            <scale>0.001 0.001 0.001</scale>
+            <uri>model://harbor/meshes/inspection.glb</uri>
+            <scale>0.01 0.01 0.01</scale>
           </mesh>
+          
         </geometry>
         <material>
-          <ambient>0.15 0.25 0.1 1</ambient>
-          <diffuse>0.25 0.4 0.2 1</diffuse>
+          <double_sided>true</double_sided>
+          <ambient>1 1 1 1</ambient>
+          <diffuse>1 1 1 1</diffuse>
+          <specular>0.1 0.1 0.1 0.1</specular>
+          <pbr>
+            <metal>
+              <albedo_map>model://harbor/materials/grid_like/rusting-textured-metal_albedo.png</albedo_map>
+              <normal_map>model://harbor/materials/grid_like/rusting-textured-metal_normal-dx.png</normal_map>
+              <roughness_map>model://harbor/materials/grid_like/rusting-textured-metal_roughness.png</roughness_map>
+              <metalness_map>model://harbor/materials/grid_like/rusting-textured-metal_metallic.png</metalness_map>
+              <ambient_occlusion_map>model://harbor/materials/grid_like/rusting-textured-metal_ao.png</ambient_occlusion_map>
+              <roughness>0.9</roughness>
+              <metalness>0.01</metalness>
+            </metal>
+          </pbr>
         </material>
       </visual>
 
@@ -284,16 +412,30 @@
         </geometry> 
       </collision>
       <visual name="inspection_element_517_visual">
-        <pose>9.674411 5.560207 -9 0 0 2.867711</pose>
+        <pose>9.674411 5.560207 -9 1.5707 0 2.867711</pose>
         <geometry>
           <mesh>
-            <uri>model://harbor/meshes/model.stl</uri>
-            <scale>0.001 0.001 0.001</scale>
+            <uri>model://harbor/meshes/inspection.glb</uri>
+            <scale>0.01 0.01 0.01</scale>
           </mesh>
+          
         </geometry>
         <material>
-          <ambient>0.15 0.25 0.1 1</ambient>
-          <diffuse>0.25 0.4 0.2 1</diffuse>
+          <double_sided>true</double_sided>
+          <ambient>1 1 1 1</ambient>
+          <diffuse>1 1 1 1</diffuse>
+          <specular>0.1 0.1 0.1 0.1</specular>
+          <pbr>
+            <metal>
+              <albedo_map>model://harbor/materials/grid_like/rusting-textured-metal_albedo.png</albedo_map>
+              <normal_map>model://harbor/materials/grid_like/rusting-textured-metal_normal-dx.png</normal_map>
+              <roughness_map>model://harbor/materials/grid_like/rusting-textured-metal_roughness.png</roughness_map>
+              <metalness_map>model://harbor/materials/grid_like/rusting-textured-metal_metallic.png</metalness_map>
+              <ambient_occlusion_map>model://harbor/materials/grid_like/rusting-textured-metal_ao.png</ambient_occlusion_map>
+              <roughness>0.9</roughness>
+              <metalness>0.01</metalness>
+            </metal>
+          </pbr>
         </material>
       </visual>
 
@@ -308,16 +450,30 @@
         </geometry>
       </collision>
       <visual name="inspection_element_518_visual">
-        <pose>8.883419 2.744705 -5.000025 0 0 2.867711</pose>
+        <pose>8.883419 2.744705 -5.000025 1.5707 0 2.867711</pose>
         <geometry>
           <mesh>
-            <uri>model://harbor/meshes/model.stl</uri>
-            <scale>0.001 0.001 0.001</scale>
+            <uri>model://harbor/meshes/inspection.glb</uri>
+            <scale>0.01 0.01 0.01</scale>
           </mesh>
+          
         </geometry>
         <material>
-          <ambient>0.15 0.25 0.1 1</ambient>
-          <diffuse>0.25 0.4 0.2 1</diffuse>
+          <double_sided>true</double_sided>
+          <ambient>1 1 1 1</ambient>
+          <diffuse>1 1 1 1</diffuse>
+          <specular>0.1 0.1 0.1 0.1</specular>
+          <pbr>
+            <metal>
+              <albedo_map>model://harbor/materials/grid_like/rusting-textured-metal_albedo.png</albedo_map>
+              <normal_map>model://harbor/materials/grid_like/rusting-textured-metal_normal-dx.png</normal_map>
+              <roughness_map>model://harbor/materials/grid_like/rusting-textured-metal_roughness.png</roughness_map>
+              <metalness_map>model://harbor/materials/grid_like/rusting-textured-metal_metallic.png</metalness_map>
+              <ambient_occlusion_map>model://harbor/materials/grid_like/rusting-textured-metal_ao.png</ambient_occlusion_map>
+              <roughness>0.9</roughness>
+              <metalness>0.01</metalness>
+            </metal>
+          </pbr>
         </material>
       </visual>
 
@@ -332,16 +488,30 @@
         </geometry> 
       </collision>
       <visual name="inspection_element_51_visual">
-        <pose>8.883419 2.744705 -9 0 0 2.867711</pose>
+        <pose>8.883419 2.744705 -9 1.5707 0 2.867711</pose>
         <geometry>
           <mesh>
-            <uri>model://harbor/meshes/model.stl</uri>
-            <scale>0.001 0.001 0.001</scale>
+            <uri>model://harbor/meshes/inspection.glb</uri>
+            <scale>0.01 0.01 0.01</scale>
           </mesh>
+          
         </geometry>
         <material>
-          <ambient>0.15 0.25 0.1 1</ambient>
-          <diffuse>0.25 0.4 0.2 1</diffuse>
+          <double_sided>true</double_sided>
+          <ambient>1 1 1 1</ambient>
+          <diffuse>1 1 1 1</diffuse>
+          <specular>0.1 0.1 0.1 0.1</specular>
+          <pbr>
+            <metal>
+              <albedo_map>model://harbor/materials/grid_like/rusting-textured-metal_albedo.png</albedo_map>
+              <normal_map>model://harbor/materials/grid_like/rusting-textured-metal_normal-dx.png</normal_map>
+              <roughness_map>model://harbor/materials/grid_like/rusting-textured-metal_roughness.png</roughness_map>
+              <metalness_map>model://harbor/materials/grid_like/rusting-textured-metal_metallic.png</metalness_map>
+              <ambient_occlusion_map>model://harbor/materials/grid_like/rusting-textured-metal_ao.png</ambient_occlusion_map>
+              <roughness>0.9</roughness>
+              <metalness>0.01</metalness>
+            </metal>
+          </pbr>
         </material>
       </visual>
       
@@ -356,16 +526,30 @@
         </geometry>
       </collision>
       <visual name="inspection_element_519_visual">
-        <pose>8.367420 0.908029 -5.000025 0 0 2.867711</pose>
+        <pose>8.367420 0.908029 -5.000025 1.5707 0 2.867711</pose>
         <geometry>
           <mesh>
-            <uri>model://harbor/meshes/model.stl</uri>
-            <scale>0.001 0.001 0.001</scale>
+            <uri>model://harbor/meshes/inspection.glb</uri>
+            <scale>0.01 0.01 0.01</scale>
           </mesh>
+          
         </geometry>
         <material>
-          <ambient>0.15 0.25 0.1 1</ambient>
-          <diffuse>0.25 0.4 0.2 1</diffuse>
+          <double_sided>true</double_sided>
+          <ambient>1 1 1 1</ambient>
+          <diffuse>1 1 1 1</diffuse>
+          <specular>0.1 0.1 0.1 0.1</specular>
+          <pbr>
+            <metal>
+              <albedo_map>model://harbor/materials/grid_like/rusting-textured-metal_albedo.png</albedo_map>
+              <normal_map>model://harbor/materials/grid_like/rusting-textured-metal_normal-dx.png</normal_map>
+              <roughness_map>model://harbor/materials/grid_like/rusting-textured-metal_roughness.png</roughness_map>
+              <metalness_map>model://harbor/materials/grid_like/rusting-textured-metal_metallic.png</metalness_map>
+              <ambient_occlusion_map>model://harbor/materials/grid_like/rusting-textured-metal_ao.png</ambient_occlusion_map>
+              <roughness>0.9</roughness>
+              <metalness>0.01</metalness>
+            </metal>
+          </pbr>
         </material>
       </visual>
 
@@ -380,16 +564,30 @@
         </geometry> 
       </collision>
       <visual name="inspection_element_52_visual">
-        <pose>8.367420 0.908029 -9 0 0 2.867711</pose>
+        <pose>8.367420 0.908029 -9 1.5707 0 2.867711</pose>
         <geometry>
           <mesh>
-            <uri>model://harbor/meshes/model.stl</uri>
-            <scale>0.001 0.001 0.001</scale>
+            <uri>model://harbor/meshes/inspection.glb</uri>
+            <scale>0.01 0.01 0.01</scale>
           </mesh>
+          
         </geometry>
         <material>
-          <ambient>0.15 0.25 0.1 1</ambient>
-          <diffuse>0.25 0.4 0.2 1</diffuse>
+          <double_sided>true</double_sided>
+          <ambient>1 1 1 1</ambient>
+          <diffuse>1 1 1 1</diffuse>
+          <specular>0.1 0.1 0.1 0.1</specular>
+          <pbr>
+            <metal>
+              <albedo_map>model://harbor/materials/grid_like/rusting-textured-metal_albedo.png</albedo_map>
+              <normal_map>model://harbor/materials/grid_like/rusting-textured-metal_normal-dx.png</normal_map>
+              <roughness_map>model://harbor/materials/grid_like/rusting-textured-metal_roughness.png</roughness_map>
+              <metalness_map>model://harbor/materials/grid_like/rusting-textured-metal_metallic.png</metalness_map>
+              <ambient_occlusion_map>model://harbor/materials/grid_like/rusting-textured-metal_ao.png</ambient_occlusion_map>
+              <roughness>0.9</roughness>
+              <metalness>0.01</metalness>
+            </metal>
+          </pbr>
         </material>
       </visual>
 
@@ -404,16 +602,31 @@
         </geometry>
       </collision>
       <visual name="inspection_element_520_visual">
-        <pose>7.754102 -1.275052 -5.000025 0 0 2.867711</pose>
+        <pose>7.754102 -1.275052 -5.000025 1.5707 0 2.867711</pose>
         <geometry>
           <mesh>
-            <uri>model://harbor/meshes/model.stl</uri>
-            <scale>0.001 0.001 0.001</scale>
+            <uri>model://harbor/meshes/inspection.glb</uri>
+            <scale>0.01 0.01 0.01</scale>
           </mesh>
+          
         </geometry>
         <material>
-          <ambient>0.15 0.25 0.1 1</ambient>
-          <diffuse>0.25 0.4 0.2 1</diffuse>
+          <double_sided>true</double_sided>
+          <ambient>1 1 1 1</ambient>
+          <diffuse>1 1 1 1</diffuse>
+          <specular>0.1 0.1 0.1 0.1</specular>
+          <pbr>
+            <metal>
+              <albedo_map>model://harbor/materials/grid_like/rusting-textured-metal_albedo.png</albedo_map>
+              <normal_map>model://harbor/materials/grid_like/rusting-textured-metal_normal-dx.png</normal_map>
+              <roughness_map>model://harbor/materials/grid_like/rusting-textured-metal_roughness.png</roughness_map>
+              <metalness_map>model://harbor/materials/grid_like/rusting-textured-metal_metallic.png</metalness_map>
+              <ambient_occlusion_map>model://harbor/materials/grid_like/rusting-textured-metal_ao.png</ambient_occlusion_map>
+              <roughness>0.9</roughness>
+              <metalness>0.01</metalness>
+            </metal>
+          </pbr>
+          
         </material>
       </visual>
 
@@ -428,16 +641,30 @@
         </geometry> 
       </collision>
       <visual name="inspection_element_53_visual">
-        <pose>7.754102 -1.275052 -9 0 0 2.867711</pose>
+        <pose>7.754102 -1.275052 -9 1.5707 0 2.867711</pose>
         <geometry>
           <mesh>
-            <uri>model://harbor/meshes/model.stl</uri>
-            <scale>0.001 0.001 0.001</scale>
+            <uri>model://harbor/meshes/inspection.glb</uri>
+            <scale>0.01 0.01 0.01</scale>
           </mesh>
+          
         </geometry>
         <material>
-          <ambient>0.15 0.25 0.1 1</ambient>
-          <diffuse>0.25 0.4 0.2 1</diffuse>
+          <double_sided>true</double_sided>
+          <ambient>1 1 1 1</ambient>
+          <diffuse>1 1 1 1</diffuse>
+          <specular>0.1 0.1 0.1 0.1</specular>
+          <pbr>
+            <metal>
+              <albedo_map>model://harbor/materials/grid_like/rusting-textured-metal_albedo.png</albedo_map>
+              <normal_map>model://harbor/materials/grid_like/rusting-textured-metal_normal-dx.png</normal_map>
+              <roughness_map>model://harbor/materials/grid_like/rusting-textured-metal_roughness.png</roughness_map>
+              <metalness_map>model://harbor/materials/grid_like/rusting-textured-metal_metallic.png</metalness_map>
+              <ambient_occlusion_map>model://harbor/materials/grid_like/rusting-textured-metal_ao.png</ambient_occlusion_map>
+              <roughness>0.9</roughness>
+              <metalness>0.01</metalness>
+            </metal>
+          </pbr>
         </material>
       </visual>
     </link> 

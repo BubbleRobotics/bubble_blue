@@ -30,6 +30,14 @@ launch:
       default: "false"
 
   - arg:
+      name: test_ego
+      default: "false"
+
+  - arg:
+      name: test_rrt
+      default: "false"
+
+  - arg:
       name: use_rviz
       default: "false"
 
@@ -41,9 +49,25 @@ launch:
       name: rviz_config
       default: $(find-pkg-share blue_description)/rviz/$(var model_name).rviz
 
-  - arg:
+  # Decide which Gazebo world to use
+  - let:
       name: gazebo_world_file
-      default: $(find-pkg-share blue_description)/gazebo/worlds/underwater.world
+      # default world (Barcelona Harbor Pilot)
+      value: "$(find-pkg-share blue_description)/gazebo/worlds/underwater.world"
+
+  - let:
+      name: gazebo_world_file
+      # EGO test world (basic collumns)
+      if: $(var test_ego)
+      value: "$(find-pkg-share blue_description)/gazebo/worlds/ego_underwater.world"
+
+  
+  - let:
+      name: gazebo_world_file
+      # RRT test world (obstacle wall with hole)
+      if: $(var test_rrt)
+      value: "$(find-pkg-share blue_description)/gazebo/worlds/rrt_underwater.world"
+
 
   - arg:
       name: mavros_file_sim
@@ -74,7 +98,13 @@ launch:
       name: robot_description
       default: $(command 'xacro $(var description_file) use_sim:=$(var use_sim)')
 
+
+  - arg:
+      name: use_path_planner
+      default: "true"
+
   # Nodes
+
   - node:
       pkg: robot_state_publisher
       exec: robot_state_publisher
@@ -93,7 +123,7 @@ launch:
         - name: robot_description
           value: $(var robot_description)
 
-  # Includes
+
   - include:
       file: $(find-pkg-share ardusub_bringup)/launch/ardusub.launch.yaml
       if: $(var use_sim)
@@ -152,3 +182,19 @@ launch:
 
   - include:
       file: $(find-pkg-share message_transforms)/launch/tf.launch.yaml
+
+  
+  - include:
+      file: $(find-pkg-share path_planner)/launch/follower_gated.launch.py
+      if: $(var use_path_planner)
+      arg:
+        - name: use_sim_time
+          value: $(var use_sim)
+        - name: namespace
+          value: $(var model_name)
+        - name: timeout_sec
+          value: "120.0"           # wait forever; no timeouts that kill launch
+        - name: use_planner
+          value: "false" 
+        - name: use_follower
+          value: "true"
