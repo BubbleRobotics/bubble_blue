@@ -5,7 +5,6 @@
   <description>RRT path follower</description>
   <maintainer email="lublu@hotmail.ch">Luis Blunschi</maintainer>
   <license>MIT</license>
-  <buildtool_depend>ament_python</buildtool_depend>
   <exec_depend>path_planner_interfaces</exec_depend>
   <exec_depend>rclpy</exec_depend>
   <exec_depend>mavros_msgs</exec_depend>
