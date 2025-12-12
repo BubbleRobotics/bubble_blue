@@ -5,6 +5,7 @@
     <xacro:property name="model" value="bluerov2" />
     <xacro:arg name="use_imu" default="true" />
     <xacro:arg name="use_dvl" default="true" />
+    <xacro:arg name="use_gnss" default="true" />
 
     <gazebo>
       <plugin name="ArduPilotPlugin" filename="libArduPilotPlugin.so">
@@ -124,7 +125,7 @@
     <!-- Publish the sensor data for the bubble_blue package -->
     <xacro:include filename="$(find blue_description)/description/bluerov2/sensors.xacro" />
     <xacro:sensors_macro prefix="$(arg prefix)" use_sim="true" use_imu="$(arg use_imu)"
-      use_dvl="$(arg use_dvl)" />
+      use_dvl="$(arg use_dvl)" use_gnss="$(arg use_gnss)" />
 
     <!-- Publish the ground-truth pose -->
     <gazebo>
