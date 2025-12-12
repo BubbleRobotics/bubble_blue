@@ -154,7 +154,7 @@ class PoseLocalizer(Localizer):
         )
         self.vision_pose_cov_pub = self.create_publisher(
             PoseWithCovarianceStamped,
-            "/mavros/vision_pose/pose_cov",
+            "/mavros/vision_pose/pose_cov", #TODO see if this change was correct (now through odometry)
             qos_profile_default,
         )
 
@@ -633,6 +633,7 @@ class GazeboLocalizer(PoseLocalizer):
         Args:
             msg: The Gazebo ground-truth odometry for the BlueROV2.
         """
+        
         pose_cov = PoseWithCovarianceStamped()
         pose_cov.header = msg.header
         pose_cov.pose = msg.pose

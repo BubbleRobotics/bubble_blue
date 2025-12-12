@@ -12,7 +12,9 @@ setup(
     ('share/path_planner/launch', [
       'launch/path_planner.launch.py',
       'launch/follower.launch.py',
-      'launch/follower_gated.launch.py',   
+      'launch/follower_gated.launch.py', 
+      'launch/simple_planner.launch.py',
+      'launch/follower_live_test.launch.py',  
     ]),
     ],
     install_requires=['setuptools'],
@@ -25,7 +27,9 @@ setup(
     'console_scripts': [
         'path_planner = path_planner.path_planner:main',
         'follower_node = path_planner.follower_node:main',
-        'wait_mavros_ready = path_planner.wait_mavros_ready:main',  
+        'wait_mavros_ready = path_planner.wait_mavros_ready:main',
+        'simple_planner = path_planner.simple_planner:main',  
+        'follower_live_test = path_planner.follower_node_live_test:main',
     ],
 },
 

@@ -36,7 +36,7 @@ def generate_launch_description():
             'use_sim_time': use_sim_time,
             'publish_rate_hz': 20.0,
             'set_mode': 'GUIDED',
-            'arm_on_start': True,
+            'arm_on_start': False,
         }],
         # Only start if use_follower is true
         condition=IfCondition(use_follower),
@@ -63,7 +63,7 @@ def generate_launch_description():
     )
 
     return LaunchDescription([
-        DeclareLaunchArgument('use_sim_time',    default_value='false'),
+        DeclareLaunchArgument('use_sim_time',    default_value='true'),
         DeclareLaunchArgument('namespace',       default_value=''),
         DeclareLaunchArgument('timeout_sec',     default_value='90.0'),
         DeclareLaunchArgument('use_follower',    default_value='true',  choices=['true', 'false']),
