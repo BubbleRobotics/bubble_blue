@@ -42,7 +42,7 @@ from quadrotor_msgs.msg import PositionCommand
 from tf_transformations import euler_from_quaternion
 from path_planner_interfaces.msg import Path
 from std_msgs.msg import Float32
-
+from geometry_msgs.msg import PointStamped
 
 class SetpointRawFollower(Node):
     def __init__(self):
@@ -85,15 +85,16 @@ class SetpointRawFollower(Node):
         # -------- Subscriptions to MAVROS --------
         self._state_sub = self.create_subscription(MavState, '/mavros/state', self._state_cb, qos)
         self._pose_sub = self.create_subscription(PoseWithCovarianceStamped, '/mavros/vision_pose/pose_cov', self._pose_cb, qos)
+        self._clicked_point_sub = self.create_subscription(PointStamped, '/clicked_point', self._clicked_point_cb, qos)
         #self._path_sub = self.create_subscription(Path, '/follower/planned_path', self._path_cb, qos)
         self._cmd_sub = self.create_subscription(PositionCommand, '/drone_0_planning/pos_cmd', self._cmd_cb_ego_planner, qos)
         self._pilot_sub = self.create_subscription(PositionCommand, '/pilot_planner/pos_cmd', self._cmd_cb_pilot_planner, qos)
-        self.vel_sub = self.create_subscription(PositionCommand, '/vel_test', self._cmd_velocity, qos)
+        #self.vel_sub = self.create_subscription(PositionCommand, '/vel_test', self._cmd_velocity, qos)
         self.ref_depth_sub = self.create_subscription(Float32, '/ref_depth', self._depth_cb, qos)
         self.current_depth_desired = -2.0
         # -------- Publisher to MAVROS --------
         self._setpoint_pub = self.create_publisher(PositionTarget, '/mavros/setpoint_raw/local', qos)
-
+        self._goal_point_pub = self.create_publisher(PoseStamped, '/move_base_simple/goal', qos)
         # -------- Services to MAVROS --------
         self._set_mode_cli = self.create_client(SetMode, '/mavros/set_mode')
         self._arm_cli = self.create_client(CommandBool, '/mavros/cmd/arming')
@@ -124,6 +125,15 @@ class SetpointRawFollower(Node):
         
         self.get_logger().info('SetpointRawFollower ready. Awaiting commands...')
 
+    def _clicked_point_cb(self, msg:PointStamped):
+        goal_point = PoseStamped()
+        
+        goal_point.pose.position.x = msg.point.x
+        goal_point.pose.position.y = msg.point.y
+        goal_point.pose.position.y = msg.point.z
+
+        self._goal_point_pub.publish(goal_point)
+
     def _depth_cb(self, msg:Float32):
         self.current_depth_desired = msg.data
         return
@@ -137,10 +147,10 @@ class SetpointRawFollower(Node):
 
         self.current_pose = msg.pose
         self._position_received = True
-        if self._active:
+        #if self._active:
             
             # Check if waypoint has to be changed
-            self._check_waypoint_reached()
+            #self._check_waypoint_reached()
 
 
     # =====================
