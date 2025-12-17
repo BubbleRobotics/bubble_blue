@@ -53,7 +53,7 @@ class SimplePlannerNode(Node):
 
         # MAVROS setpoint publishers
         self.vel_local_pub = self.create_publisher(PositionCommand,'/pilot_planner/pos_cmd',10)
-        self.depth_sub = self.create_subscription(Odometry, 'model/bluerov2/odometry', self._odom_callback, 10)
+        self.depth_sub = self.create_subscription(Odometry, 'odometry/bluerov2/odometry', self._odom_callback, 10)
         # Service to plan + follow path
         self.path_initializer = self.create_service(
             Trigger,

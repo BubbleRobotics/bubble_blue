@@ -128,8 +128,8 @@ class SetpointRawFollower(Node):
         
         goal_point.pose.position.x = msg.point.x
         goal_point.pose.position.y = msg.point.y
-        goal_point.pose.position.z = msg.point.z
-
+        goal_point.pose.position.z = -1.0 # TODO change to 3D capability, for now selecting in 3D is not possible (only able to select on reference points)
+        self.get_logger().info(f"Published new goal (ENU) to EGO planner. x: {msg.point.x}, y: {msg.point.y}, z: {goal_point.pose.position.z}")
         self._goal_point_pub.publish(goal_point)
 
     def _depth_cb(self, msg:Float32):

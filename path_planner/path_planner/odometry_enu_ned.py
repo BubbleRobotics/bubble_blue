@@ -87,9 +87,24 @@ class NedToEnuOdom(Node):
         out.pose.pose.orientation.z = q_enu[2]
         out.pose.pose.orientation.w = q_enu[3]
 
-        # Covariances
-        out.pose.covariance = msg.pose.covariance
-        out.twist.covariance = msg.twist.covariance
+        
+        A = np.array([[0, 1,  0],
+                    [1, 0,  0],
+                    [0, 0, -1]], dtype=float)
+
+        A6 = np.block([
+            [A,               np.zeros((3,3))],
+            [np.zeros((3,3)), A]
+        ])
+
+        Sigma_pose  = np.array(msg.pose.covariance, dtype=float).reshape(6,6)
+        Sigma_twist = np.array(msg.twist.covariance, dtype=float).reshape(6,6)
+
+        Sigma_pose_enu  = A6 @ Sigma_pose  @ A6.T
+        Sigma_twist_enu = A6 @ Sigma_twist @ A6.T
+
+        out.pose.covariance  = Sigma_pose_enu.reshape(-1).tolist()
+        out.twist.covariance = Sigma_twist_enu.reshape(-1).tolist()
 
         self.pub.publish(out)
 

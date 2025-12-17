@@ -10,8 +10,8 @@ def generate_launch_description():
             output='screen',
             parameters=[{
                 'publish_rate_hz': 20.0,
-                'set_mode': 'GUIDED',
-                'arm_on_start': True,
+                'set_mode_on_start': 'MANUAL',
+                'arm_on_start': False,
             }],
         ),
     ])
