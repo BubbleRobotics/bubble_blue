@@ -20,6 +20,14 @@ class NedToEnuOdom(Node):
         self.sub = self.create_subscription(Odometry, in_odom, self.cb, 10)
         self.pub = self.create_publisher(Odometry, out_odom, 10)
 
+        self.A = np.array([[0, 1,  0],
+                    [1, 0,  0],
+                    [0, 0, -1]], dtype=float)
+
+        self.A6 = np.block([
+            [self.A,               np.zeros((3,3))],
+            [np.zeros((3,3)), self.A]
+        ])
         qos = QoSProfile(
             history=HistoryPolicy.KEEP_LAST,
             depth=10,
@@ -88,20 +96,13 @@ class NedToEnuOdom(Node):
         out.pose.pose.orientation.w = q_enu[3]
 
         
-        A = np.array([[0, 1,  0],
-                    [1, 0,  0],
-                    [0, 0, -1]], dtype=float)
-
-        A6 = np.block([
-            [A,               np.zeros((3,3))],
-            [np.zeros((3,3)), A]
-        ])
+        
 
         Sigma_pose  = np.array(msg.pose.covariance, dtype=float).reshape(6,6)
         Sigma_twist = np.array(msg.twist.covariance, dtype=float).reshape(6,6)
 
-        Sigma_pose_enu  = A6 @ Sigma_pose  @ A6.T
-        Sigma_twist_enu = A6 @ Sigma_twist @ A6.T
+        Sigma_pose_enu  = self.A6 @ Sigma_pose  @ self.A6.T
+        Sigma_twist_enu = self.A6 @ Sigma_twist @ self.A6.T
 
         out.pose.covariance  = Sigma_pose_enu.reshape(-1).tolist()
         out.twist.covariance = Sigma_twist_enu.reshape(-1).tolist()
