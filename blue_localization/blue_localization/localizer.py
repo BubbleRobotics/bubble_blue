@@ -643,7 +643,7 @@ class GazeboLocalizer(PoseLocalizer):
         odom_topic = (
             self.get_parameter("gazebo_odom_topic").get_parameter_value().string_value
         )
-        #odom_topic = "/odometry/filtered"
+        odom_topic = "/odometry/filtered_old" #TODO filtered
         
         self.odom_sub = self.create_subscription(
             Odometry, odom_topic, self.update_odom_cb, qos_profile_sensor_data

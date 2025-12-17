@@ -7,12 +7,12 @@ mavros:
       - imu
       - rc_io
       - param
-      - vision*
       - local*
       - global_position
       - mavros_sensor
       - setpoint_*
       - heartbeat
+      - odometry*
     mavros_sensor:
       sensor_topic: "/sensors/generalized_sensor_test"
       mavros_topic: "/mavros/custom_vision_speed/speed_twist"

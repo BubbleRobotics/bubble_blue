@@ -86,10 +86,8 @@ class SetpointRawFollower(Node):
         self._state_sub = self.create_subscription(MavState, '/mavros/state', self._state_cb, qos)
         self._pose_sub = self.create_subscription(PoseWithCovarianceStamped, '/mavros/vision_pose/pose_cov', self._pose_cb, qos)
         self._clicked_point_sub = self.create_subscription(PointStamped, '/clicked_point', self._clicked_point_cb, qos)
-        #self._path_sub = self.create_subscription(Path, '/follower/planned_path', self._path_cb, qos)
         self._cmd_sub = self.create_subscription(PositionCommand, '/drone_0_planning/pos_cmd', self._cmd_cb_ego_planner, qos)
-        self._pilot_sub = self.create_subscription(PositionCommand, '/pilot_planner/pos_cmd', self._cmd_cb_pilot_planner, qos)
-        #self.vel_sub = self.create_subscription(PositionCommand, '/vel_test', self._cmd_velocity, qos)
+        self._cmd_sub_live = self.create_subscription(PositionCommand, '/drone_0_planning/pos_cmd_live', self._cmd_cb_ego_planner_live, qos)
         self.ref_depth_sub = self.create_subscription(Float32, '/ref_depth', self._depth_cb, qos)
         self.current_depth_desired = -2.0
         # -------- Publisher to MAVROS --------
@@ -130,7 +128,7 @@ class SetpointRawFollower(Node):
         
         goal_point.pose.position.x = msg.point.x
         goal_point.pose.position.y = msg.point.y
-        goal_point.pose.position.y = msg.point.z
+        goal_point.pose.position.z = msg.point.z
 
         self._goal_point_pub.publish(goal_point)
 
@@ -156,18 +154,76 @@ class SetpointRawFollower(Node):
     # =====================
     # Command Callbacks
     # =====================
-    def _path_cb(self, msg:Path):
+    def _cmd_cb_ego_planner_live(self, msg:PositionCommand):
         """Update path."""
-        path = msg.path
-        
-        if path != self.current_path:
-            self._active = True
-            self.current_path = msg
-            self.get_logger().info("New path received.")
-            if len(msg.path) != 0:
-                self.current_waypoint = msg.path[0]
-                self._cmd_position(msg.path[0])
-                self.get_logger().info(f"SET NEW WAYPOINT to {msg.path[0]}")
+
+        # For very close points, the ego-planner only outputs position commands.
+        # Since spamming pure position commands will stall the ArduSub controller, only send this once.
+        if msg.velocity.x == 0.0 and msg.velocity.y == 0.0 and msg.velocity.z == 0.0:
+            if self.first:
+                self.get_logger().info("First time going to position control!")
+                self.first = True
+                # Once close to goal, use position control
+                self.goto_position(x_east_m=msg.position.x,y_north_m=msg.position.y,up_m=msg.position.z, yaw_deg=math.degrees(msg.yaw))
+                return
+            else:
+                return
+        # Otherwise, use position + velocity control     
+        self.first = True
+        pt = PositionTarget()
+        pt.header.stamp = self.get_clock().now().to_msg()
+        pt.header.frame_id = "map"
+        pt.coordinate_frame = PositionTarget.FRAME_LOCAL_NED
+
+        # Start with accel ignored (we don't use them)
+        mask = (
+            PositionTarget.IGNORE_AFX |
+            PositionTarget.IGNORE_AFY |
+            PositionTarget.IGNORE_AFZ
+        )
+
+        # ---- Position part ----
+        if msg.position.x is None or msg.position.y is None or msg.position.z is None:
+            # We are NOT commanding position → ignore PX/PY/PZ
+            mask |= (
+                PositionTarget.IGNORE_PX |
+                PositionTarget.IGNORE_PY |
+                PositionTarget.IGNORE_PZ
+            )
+        else:
+            pt.position.x = float(msg.position.x)
+            pt.position.y = float(msg.position.y)
+            pt.position.z = float(msg.position.z)
+
+        # ---- Velocity part ----
+        if msg.velocity.x is None or msg.velocity.y is None or msg.velocity.z is None:
+            # We are NOT commanding velocity → ignore VX/VY/VZ
+            mask |= (
+                PositionTarget.IGNORE_VX |
+                PositionTarget.IGNORE_VY |
+                PositionTarget.IGNORE_VZ
+            )
+        else:
+            pt.velocity.x = float(msg.velocity.x)
+            pt.velocity.y = float(msg.velocity.y)
+            pt.velocity.z = float(msg.velocity.z)
+
+        # ---- Yaw / yaw rate ----
+        if msg.yaw is not None:
+            pt.yaw = float(msg.yaw)
+            # Using absolute yaw → ignore yaw_rate
+            mask |= PositionTarget.IGNORE_YAW_RATE
+        elif msg.yaw_dot is not None:
+            pt.yaw_rate = float(msg.yaw_dot)
+            # Using yaw rate → ignore absolute yaw
+            mask |= PositionTarget.IGNORE_YAW
+        else:
+            # Not commanding any yaw
+            mask |= PositionTarget.IGNORE_YAW | PositionTarget.IGNORE_YAW_RATE
+
+        pt.type_mask = mask
+
+        self.goto_pos_vel(pos_target=pt)
 
     def _cmd_cb_ego_planner(self, msg:PositionCommand):
         """Update path."""
@@ -239,66 +295,6 @@ class SetpointRawFollower(Node):
         pt.type_mask = mask
 
         self.goto_pos_vel(pos_target=pt)
-
-    def _cmd_cb_pilot_planner(self, msg:PositionCommand):
-        """Send commands to ArduSub controller."""
-        
-        self.first = True
-        pt = PositionTarget()
-        pt.header.stamp = self.get_clock().now().to_msg()
-        pt.header.frame_id = "map"
-        pt.coordinate_frame = PositionTarget.FRAME_BODY_NED
-
-        # Start with accel ignored (we don't use them)
-        mask = (
-            PositionTarget.IGNORE_AFX |
-            PositionTarget.IGNORE_AFY |
-            PositionTarget.IGNORE_AFZ
-        )
-
-        # ---- Position part ----
-        if msg.position.x is None or msg.position.y is None or msg.position.z is None:
-            # We are NOT commanding position → ignore PX/PY/PZ
-            mask |= (
-                PositionTarget.IGNORE_PX |
-                PositionTarget.IGNORE_PY |
-                PositionTarget.IGNORE_PZ
-            )
-        else:
-            pt.position.x = float(msg.position.x)
-            pt.position.y = float(msg.position.y)
-            pt.position.z = float(msg.position.z)
-
-        # ---- Velocity part ----
-        if msg.velocity.x is None or msg.velocity.y is None or msg.velocity.z is None:
-            # We are NOT commanding velocity → ignore VX/VY/VZ
-            mask |= (
-                PositionTarget.IGNORE_VX |
-                PositionTarget.IGNORE_VY |
-                PositionTarget.IGNORE_VZ
-            )
-        else:
-            pt.velocity.x = float(msg.velocity.x)
-            pt.velocity.y = float(msg.velocity.y)
-            pt.velocity.z = float(msg.velocity.z)
-
-        # ---- Yaw / yaw rate ----
-        if msg.yaw is not None:
-            pt.yaw = float(msg.yaw)
-            # Using absolute yaw → ignore yaw_rate
-            mask |= PositionTarget.IGNORE_YAW_RATE
-        elif msg.yaw_dot is not None:
-            pt.yaw_rate = float(msg.yaw_dot)
-            # Using yaw rate → ignore absolute yaw
-            mask |= PositionTarget.IGNORE_YAW
-        else:
-            # Not commanding any yaw
-            mask |= PositionTarget.IGNORE_YAW | PositionTarget.IGNORE_YAW_RATE
-
-        pt.type_mask = mask
-
-
-        self.goto_pos_vel(pos_target=pt)
         
     def _cmd_position(self, msg: Pose):
         """Absolute position + yaw (from quaternion)."""
@@ -321,195 +317,10 @@ class SetpointRawFollower(Node):
         pt.yaw = float(yaw)
         self._stash_cmd(pt)
 
-    def _cmd_velocity(self, msg: PositionCommand):
-        """Velocity command + yaw rate (angular.z)."""
-
-        pt = PositionTarget()
-        pt.header = msg.header
-        pt.coordinate_frame = PositionTarget.FRAME_BODY_NED
-        # Ignore position, accel; use yaw_rate instead of absolute yaw
-        pt.type_mask = (
-            PositionTarget.IGNORE_PX | PositionTarget.IGNORE_PY | PositionTarget.IGNORE_PZ |
-            PositionTarget.IGNORE_AFX | PositionTarget.IGNORE_AFY | PositionTarget.IGNORE_AFZ |
-            PositionTarget.IGNORE_YAW
-        )
-        # Velocity (m/s)
-        pt.velocity.x = msg.velocity.x
-        pt.velocity.y = msg.velocity.y
-        pt.velocity.z = msg.velocity.z
-        # Yaw rate (rad/s)
-        pt.yaw_rate = msg.yaw_dot
-
- 
-        self.get_logger().info(f"Velocity Command Received: {pt.velocity.x}, {pt.velocity.y}, {pt.velocity.z}, Yaw Rate: {pt.yaw_rate}")
-        self.goto_velocity(pt)
 
     # =====================
     # Helpers
     # =====================
-    def _stash_cmd(self, pt: PositionTarget):
-        # Standardize header.frame_id to "odom" for consistency with reference code
-        
-        if not pt.header.frame_id:
-            pt.header.frame_id = 'map'
-        with self._last_cmd_lock:
-            
-            self._last_cmd = pt
-
-    def _check_waypoint_reached(self):
-        dx = self.current_waypoint.position.x - self.current_pose.pose.position.x
-        dy = self.current_waypoint.position.y - self.current_pose.pose.position.y
-        dz = self.current_waypoint.position.z - self.current_pose.pose.position.z + 0.1
-        q_cp = self.current_pose.pose.orientation
-        _, _, yaw_current = euler_from_quaternion([q_cp.x, q_cp.y, q_cp.z, q_cp.w])
-        q_wp = self.current_waypoint.orientation
-        _, _, yaw_waypoint = euler_from_quaternion([q_wp.x, q_wp.y, q_wp.z, q_wp.w])
-        dyaw = (yaw_waypoint - yaw_waypoint) / 100.0
-        total = math.sqrt(dx*dx + dy*dy + dz*dz + dyaw*dyaw)
-        
-        
-        if total > self.waypoint_threshold:
-            if total < self.waypoint_threshold + 0.5:
-                self.get_logger().info(f"Distance {total}, dz {dz}")
-            return
-        if total < self.waypoint_threshold:
-            
-            self.current_path.path.pop(0)
-        if len(self.current_path.path) == 0:
-            self.get_logger().info(f"Waypoint Reached!{self.current_waypoint.position}")
-            self._publish_hold()
-            self.get_logger().info("Goal Reached! Switching to HOLD")
-            return
-        
-        self.get_logger().info(f"Waypoint Reached!{self.current_waypoint.position}")
-        self.current_waypoint = self.current_path.path[0]
-        self.get_logger().info(f"New Waypoint: {self.current_waypoint.position}")
-
-        self._cmd_position(self.current_waypoint)
-
-    def _publish_latest(self):
-        if len(self.current_path.path) == 0:
-            self._publish_hold()
-            return
-
-        
-        now = self.get_clock().now()
-        with self._last_cmd_lock:
-            cmd = self._last_cmd
-
-        # No command ever received → HOLD
-        if cmd is None:
-            if self.controller_active != 0:
-                self.get_logger().info("Switching to NO Control (HOLD)")
-                self.controller_active = 0
-            self._publish_hold()
-            return
-        # Convert both to rclpy Time for consistent comparison
-        cmd_time = rclpy.time.Time.from_msg(cmd.header.stamp)
-        age = (now - cmd_time).nanoseconds * 1e-9
-
-        """        # If older than 1 second → HOLD
-        if age > 1.0:
-            if self.controller_active != 0:
-                self.get_logger().info(
-                    f"Last command {age:.2f}s old — switching to NO Control (HOLD)"
-                )
-                self.controller_active = 0
-            self._publish_hold()
-            return"""
-        if cmd.type_mask == 2552: # Position + yaw mask
-            if self.last_position.position == cmd.position and self.last_position.yaw == cmd.yaw and self.controller_active == 1:
-                # Still same pose and position control already active
-                return
-            elif self.controller_active !=1:
-                self.get_logger().info(f"Switching to Position Control \nPosition: {cmd.position} \nYaw: {cmd.yaw}")
-                self.controller_active = 1
-            else:
-                self.get_logger().info(f"New Position Control Command Received \nPosition: {cmd.position} \nYaw: {cmd.yaw}")
-        
-        elif cmd.type_mask == 1479: # Velocity + yaw rate mask
-            if self.controller_active != 2:
-                self.get_logger().info(f"Switching to Velocity Control \nVelocity: {cmd.velocity} \nYaw Rate: {cmd.yaw_rate}")
-                self.controller_active = 2
-            elif self.last_position.position != cmd.position or self.last_position.yaw != cmd.yaw:
-                self.get_logger().info(f"New Velocity Control Command Received \nVelocity: {cmd.velocity} \nYaw Rate: {cmd.yaw_rate}")
-        else:
-            self.get_logger().info("Not a Valid command!")
-            return
-    
-        self.last_position = cmd
-   
-        # Update timestamp and publish
-        cmd.header.stamp = self.get_clock().now().to_msg()
-        for i in range(5):
-            self._setpoint_pub.publish(cmd)
-            time.sleep(0.01)
-
-    def _publish_hold(self):
-        
-        if not self._position_received:
-            return
-        hold = PositionTarget()
-        hold.header.stamp = self.get_clock().now().to_msg()
-        hold.header.frame_id = "map"
-        hold.coordinate_frame = PositionTarget.FRAME_LOCAL_NED
-        hold.type_mask = (
-            PositionTarget.IGNORE_VX
-            | PositionTarget.IGNORE_VY
-            | PositionTarget.IGNORE_VZ
-            | PositionTarget.IGNORE_AFX
-            | PositionTarget.IGNORE_AFY
-            | PositionTarget.IGNORE_AFZ
-            | PositionTarget.IGNORE_YAW_RATE
-        )
-        hold.position = self.current_pose.pose.position
-        q = self.current_pose.pose.orientation
-        yaw = euler_from_quaternion([q.x, q.y, q.z, q.w])[2]
-        
-        hold.yaw = float(yaw)
-    
-    
-        self._stash_cmd(hold)
-        if (self._active or self._first_hold) and self._armed and self._mode_set:
-            self._first_hold = False
-            self._active = False
-            self.last_position = hold
-            for i in range(5):
-                self._setpoint_pub.publish(hold)
-                time.sleep(0.01)
-            self.get_logger().info(f"Set Active to False and Waypoint to {hold.position}")
-
-    """def _check_stuck(self): #TODO
-                   
-        start_t = time.time()
-        last_dist = None
-        stuck_cnt = 0
-        while True:
-            try:
-                ok, dist = self.reached_goal(wp.x, wp.y, wp.z, yaw_cmd)
-            except Exception:
-                ok, dist = False, 1e9
-
-            if last_dist is None:
-                last_dist = dist
-            else:
-                if abs(last_dist - dist) < 0.01:
-                    stuck_cnt += 1
-                else:
-                    stuck_cnt = 0
-                last_dist = dist
-
-            if ok:
-                self.get_logger().info(f'  reached (err≈{dist:.2f} m)')
-                break
-            if time.time() - start_t > 180.0 or stuck_cnt > 100:
-                self.get_logger().warn(f'  time since start_t:{time.time() - start_t} and stuck_cnt: {stuck_cnt}')
-                self.get_logger().warn(f'  timeout/stuck (err≈{dist:.2f} m), continue')
-                self.get_logger().warn("Aborting mission!")
-                failed = True
-                break
-            time.sleep(0.3)"""
-
 
     def _set_mode(self, mode: str) -> bool:
         if not self._set_mode_cli.wait_for_service(timeout_sec=5.0):
@@ -537,8 +348,6 @@ class SetpointRawFollower(Node):
         self.get_logger().info(f'Arm({value}): {"OK" if ok else "FAIL"}')
         return ok
        
-
-    
     def goto_position(self, x_east_m: float, y_north_m: float, up_m: float, yaw_deg: Optional[float] = 0.0) -> None:
   
         msg = PositionTarget()
@@ -567,39 +376,6 @@ class SetpointRawFollower(Node):
         # Desired yaw (rad)
         msg.yaw = float(math.radians(yaw_deg))
         self._setpoint_pub.publish(msg)
-
-    def goto_velocity(self, cmd:PositionTarget) -> None:
-        """
-        Send a velocity + yaw-rate command in the local NED frame.
-        vx, vy, vz: m/s
-        yaw_rate_deg_s: deg/s (converted to rad/s)
-        """
-        msg = PositionTarget()
-        msg = cmd
-        """msg.header.stamp = self.get_clock().now().to_msg()
-        msg.header.frame_id = "map"
-        msg.coordinate_frame = PositionTarget.FRAME_LOCAL_NED
-
-        # Use velocity + yaw_rate, ignore position and accel and absolute yaw
-        msg.type_mask = (
-            PositionTarget.IGNORE_PX |
-            PositionTarget.IGNORE_PY |
-            PositionTarget.IGNORE_PZ |
-            PositionTarget.IGNORE_AFX |
-            PositionTarget.IGNORE_AFY |
-            PositionTarget.IGNORE_AFZ |
-            PositionTarget.IGNORE_YAW
-        )
-
-        msg.velocity.x = float(vx_mps)
-        msg.velocity.y = float(vy_mps)
-        msg.velocity.z = float(vz_mps)
-
-        msg.yaw_rate = float(math.radians(yaw_rate_deg_s))
-
-        self._stash_cmd(msg)"""
-        self._setpoint_pub.publish(msg)
-
     def goto_pos_vel(self, pos_target: PositionTarget
     ) -> None:
         """
@@ -613,7 +389,6 @@ class SetpointRawFollower(Node):
         """
         
         # Feed into the existing pipeline
-        self._stash_cmd(pos_target)
         self._setpoint_pub.publish(pos_target)
 
 
