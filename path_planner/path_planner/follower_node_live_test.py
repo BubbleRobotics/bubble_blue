@@ -62,8 +62,8 @@ class PIDAxis:
 
 class BodyPIDFollower(Node):
     """
-    - Reference: /drone_0_planner/pos_cmd (PositionCommand), interpreted in 'odom'
-    - Feedback:  /mavros/vision_pose/pose_cov (PoseWithCovarianceStamped), assumed in 'odom'
+    - Reference: /drone_0_planner/pos_cmd (PositionCommand), interpreted in 'map'
+    - Feedback:  /mavros/vision_pose/pose_cov (PoseWithCovarianceStamped), assumed in 'map'
     - Output:    /mavros/setpoint_raw/local (PositionTarget) using FRAME_BODY_NED and velocity setpoints
     """
 
@@ -77,8 +77,8 @@ class BodyPIDFollower(Node):
                 ('publish_rate_hz', 20.0),
 
                 # frames
-                ('odom_frame', 'odom'),
-                ('body_frame', 'base_link'),
+                ('odom_frame', 'map'),
+                ('body_frame', 'base_link_fsd'),
 
                 # PID gains (position -> body-velocity)
                 ('pid_x.kp', 1.0), ('pid_x.ki', 0.0), ('pid_x.kd', 0.2),
@@ -158,7 +158,7 @@ class BodyPIDFollower(Node):
         # ---------------- ROS I/O ----------------
         qos = QoSProfile(depth=10)
 
-        self._state_sub = self.create_subscription(MavState, '/mavros/state', self._state_cb, qos)
+        self._state_sub = self.create_subscription(MavState, '/odometry/filtered', self._state_cb, qos)
         self._odom_sub = self.create_subscription(
             Odometry,
             '/odometry/filtered',
@@ -228,39 +228,39 @@ class BodyPIDFollower(Node):
 
         ref = self.ref_cmd
 
-        # --- Current position in odom ---
+        # --- Current position in map frame---
         p_cur = np.array([pose.position.x, pose.position.y, pose.position.z], dtype=float)
 
-        # --- Reference position in odom ---
+        # --- Reference position in map frame ---
         p_ref = np.array([float(ref.position.x), float(ref.position.y), float(ref.position.z)], dtype=float)
 
-        # error in odom
+        # error in map frame
         e_odom = p_ref - p_cur
 
-        # --- Rotation odom -> body using tf2 (preferred) ---
+        # --- Rotation map frame -> body frame using tf2 (preferred) ---
         R_odom_to_body = None
         try:
             tf = self.tf_buffer.lookup_transform(
                 self.body_frame,  # target
                 self.odom_frame,  # source
-                rclpy.time.Time()
+                self.get_clock().now()
             )
             q = tf.transform.rotation
             T = quaternion_matrix([q.x, q.y, q.z, q.w])
             R_odom_to_body = T[:3, :3]
         except Exception:
-            # fallback: use pose orientation (works if pose is body orientation in odom)
+            # fallback: use pose orientation (works if pose is body orientation in map)
             q = pose.orientation
             T = quaternion_matrix([q.x, q.y, q.z, q.w])
-            # pose quaternion is typically body->odom; we want odom->body
-            # If your pose is indeed body in odom, transpose gives inverse rotation.
+            # pose quaternion is typically body->map; we want map->body
+            # If your pose is indeed body in map, transpose gives inverse rotation.
             R_odom_to_body = T[:3, :3].T
 
         # rotate error into body frame
         e_body = R_odom_to_body @ e_odom
 
         # ---------------- OPTIONAL ENU->NED fix ----------------
-        # If your odom is ENU but you want to command MAVLink BODY_NED (FRD),
+        # If your odometry in map frame is ENU but you want to command MAVLink BODY_NED (FRD),
         # you may need axis swaps/sign changes.
         #
         # ENU: x=East, y=North, z=Up
@@ -269,7 +269,6 @@ class BodyPIDFollower(Node):
         # A common conversion for a vector in ENU -> NED:
         #   [n, e, d] = [y, x, -z]
         #
-        # Uncomment if needed (and verify with a quick step test).
         if self.assume_odom_is_enu:
             e_body = np.array([e_body[1], e_body[0], -e_body[2]], dtype=float)
 
@@ -299,7 +298,7 @@ class BodyPIDFollower(Node):
         # --- Publish MAVROS setpoint_raw/local in BODY_NED ---
         pt = PositionTarget()
         pt.header.stamp = now.to_msg()
-        pt.header.frame_id = self.odom_frame  # informational; mavros uses coordinate_frame
+        pt.header.frame_id = self.odom_frame 
         pt.coordinate_frame = PositionTarget.FRAME_BODY_NED
 
         # We command: velocity + yaw_rate only
