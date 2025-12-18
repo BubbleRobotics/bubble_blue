@@ -17,9 +17,6 @@ class NedToEnuOdom(Node):
         in_odom = self.get_parameter("in_odom").value
         out_odom = self.get_parameter("out_odom").value
 
-        self.sub = self.create_subscription(Odometry, in_odom, self.cb, 10)
-        self.pub = self.create_publisher(Odometry, out_odom, 10)
-
         qos = QoSProfile(
             history=HistoryPolicy.KEEP_LAST,
             depth=10,
@@ -27,13 +24,17 @@ class NedToEnuOdom(Node):
             durability=DurabilityPolicy.VOLATILE,
         )
 
+        self.sub = self.create_subscription(Odometry, in_odom, self.cb, qos)
+        self.pub = self.create_publisher(Odometry, out_odom, 10)
+
+
         self.sub_mav = self.create_subscription(
             Odometry,
             "/mavros/local_position/odom",
             self.cb_mav,
             qos
         )
-        self.pub_mav = self.create_publisher(Odometry, "/mavros/local_position/odom_ned", 10)
+        self.pub_mav = self.create_publisher(Odometry, "/mavros/local_position/odom_ned", qos)
 
 
         # NED -> ENU axis swap/flip for vectors: [xE,yN,zU]^T = M * [xN,yE,zD]^T

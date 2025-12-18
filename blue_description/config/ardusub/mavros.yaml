@@ -11,6 +11,7 @@ mavros:
       - local*
       - global_position
       - mavros_sensor
+      - odometry*
     mavros_sensor:
       sensor_topic: "/sensors/generalized_sensor_test"
       mavros_topic: "/mavros/custom_vision_speed/speed_twist"
@@ -24,8 +25,17 @@ mavros_node:
     local_position/origin_lon: 0.0
     local_position/origin_alt: 0.0
 
-mavros/local_position:
-  ros__parameters:
+# mavros/local_position:
+#   ros__parameters:
+#     frame_id: "map"
+#     tf:
+#       send: true
+
+# Local Position Plugin
+local_position:
+  frame_id: "map"
+  tf:
+    send: true
     frame_id: "map"
-    tf:
-      send: true
+    child_frame_id: "base_link"
+    rate_limit: 50.0
