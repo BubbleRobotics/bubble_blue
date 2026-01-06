@@ -102,6 +102,18 @@ COMPASS_USE2 0        # Disable compass 2
 COMPASS_USE3 0        # Disable compass 3
 EK3_SRC1_YAW 6        # External nav
 
+EK3_SRC2_POSXY 0      # Source 2 nav to None
+EK3_SRC2_VELXY 0      # Source 2 nav to None
+EK3_SRC2_POSZ 1       # Baro is the primary z source
+EK3_SRC2_VELZ 0       # Source 2 nav z velocity influences EKF to None 
+EK3_SRC2_YAW 0        # Source 2 nav to None
+
+EK3_SRC3_POSXY 0      # Source 3 nav to None
+EK3_SRC3_VELXY 0      # Source 3 nav to None
+EK3_SRC3_POSZ 1       # Baro is the primary z source
+EK3_SRC3_VELZ 0       # Source 3 nav z velocity influences EKF to None 
+EK3_SRC3_YAW 0        # Source 3 nav to None
+
 # See https://github.com/clydemcqueen/bluerov2_ignition/issues/7
 SIM_BARO_RND 0.01
 
