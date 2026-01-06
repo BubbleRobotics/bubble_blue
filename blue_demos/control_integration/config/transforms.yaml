@@ -2,10 +2,10 @@
   ros__parameters:
 
     incoming_topics:
-      - /mavros/local_position/velocity_body
+      - /model/bluerov2/odometry
 
     transforms:
-      /mavros/local_position/velocity_body:
+      /model/bluerov2/odometry:
         outgoing_topic: /integral_sliding_mode_controller/system_state
-        message_type: geometry_msgs/msg/TwistStamped
+        message_type: nav_msgs/msg/Odometry
         frame_id: base_link_fsd

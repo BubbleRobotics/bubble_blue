@@ -19,4 +19,8 @@
     filename="$(find blue_demos)/control_integration/description/ros2_control/bluerov2.ros2_control.xacro" />
   <xacro:ardusub_thruster_system prefix="$(arg prefix)" name="bluerov2_thrusters" />
 
+    <!-- Import hydrodynamics macro -->
+  <xacro:include
+    filename="$(find blue_description)/description/bluerov2/model.xacro" />
+    
 </robot>

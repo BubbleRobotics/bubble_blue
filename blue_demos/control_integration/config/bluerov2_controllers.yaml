@@ -1,5 +1,6 @@
 controller_manager:
   ros__parameters:
+    use_sim_time: true
     update_rate: 100 # Hz
 
     integral_sliding_mode_controller:
@@ -28,12 +29,32 @@ controller_manager:
 
 integral_sliding_mode_controller:
   ros__parameters:
+    use_sim_time: true
     use_external_measured_states: true
     reference_controller: thruster_allocation_matrix_controller
     gains:
-      rho: 15.0
+      
       lambda: 100.0
-      Kp: [5.0, 5.0, 5.0, 5.0, 5.0, 10.0]
+
+      x:
+        kp: 5.0
+        rho: 15.0
+      y:
+        kp: 5.0
+        rho: 15.0
+      z:
+        kp: 5.0
+        rho: 15.0
+
+      rx:
+        kp: 5.0
+        rho: 15.0
+      ry:
+        kp: 5.0
+        rho: 15.0
+      rz:
+        kp: 10.0
+        rho: 15.0
     tf:
       base_frame: "base_link_fsd"
       odom_frame: "map_ned"
@@ -50,6 +71,7 @@ integral_sliding_mode_controller:
 
 thruster_allocation_matrix_controller:
   ros__parameters:
+    use_sim_time: true
     thrusters:
       - thruster1_joint
       - thruster2_joint
@@ -74,60 +96,66 @@ thruster_allocation_matrix_controller:
 
 thruster1_controller:
   ros__parameters:
+    use_sim_time: true
     thruster: thruster1_joint
     min_thrust: -40.0
     max_thrust: 60.0
-    min_deadband: 1470
-    max_deadband: 1530
+    min_deadband: 1499
+    max_deadband: 1501
     neutral_pwm: 1500
     thrust_curve_coefficients: [1498.0, 12.01, -0.04731, -0.002098, 0.00002251]
 
 thruster2_controller:
   ros__parameters:
+    use_sim_time: true
     thruster: thruster2_joint
     min_thrust: -40.0
     max_thrust: 60.0
-    min_deadband: 1470
-    max_deadband: 1530
+    min_deadband: 1499
+    max_deadband: 1501
     neutral_pwm: 1500
     thrust_curve_coefficients: [1498.0, 12.01, -0.04731, -0.002098, 0.00002251]
 
 thruster3_controller:
   ros__parameters:
+    use_sim_time: true
     thruster: thruster3_joint
     min_thrust: -40.0
     max_thrust: 60.0
-    min_deadband: 1470
-    max_deadband: 1530
+    min_deadband: 1499
+    max_deadband: 1501
     neutral_pwm: 1500
     thrust_curve_coefficients: [1498.0, 12.01, -0.04731, -0.002098, 0.00002251]
 
 thruster4_controller:
   ros__parameters:
+    use_sim_time: true
     thruster: thruster4_joint
     min_thrust: -40.0
     max_thrust: 60.0
-    min_deadband: 1470
-    max_deadband: 1530
+    min_deadband: 1499
+    max_deadband: 1501
     neutral_pwm: 1500
     thrust_curve_coefficients: [1498.0, 12.01, -0.04731, -0.002098, 0.00002251]
 
 thruster5_controller:
   ros__parameters:
+    use_sim_time: true
     thruster: thruster5_joint
     min_thrust: -40.0
     max_thrust: 60.0
-    min_deadband: 1470
-    max_deadband: 1530
+    min_deadband: 1499
+    max_deadband: 1501
     neutral_pwm: 1500
     thrust_curve_coefficients: [1498.0, 12.01, -0.04731, -0.002098, 0.00002251]
 
 thruster6_controller:
   ros__parameters:
+    use_sim_time: true
     thruster: thruster6_joint
     min_thrust: -40.0
     max_thrust: 60.0
-    min_deadband: 1470
-    max_deadband: 1530
+    min_deadband: 1499
+    max_deadband: 1501
     neutral_pwm: 1500
     thrust_curve_coefficients: [1498.0, 12.01, -0.04731, -0.002098, 0.00002251]

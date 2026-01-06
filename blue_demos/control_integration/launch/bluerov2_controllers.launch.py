@@ -52,29 +52,6 @@ def generate_launch_description() -> LaunchDescription:
         ),
     ]
 
-    # The ISMC expects state information to be provided in the FSD frame
-    message_transformer = IncludeLaunchDescription(
-        AnyLaunchDescriptionSource(
-            PathJoinSubstitution(
-                [
-                    FindPackageShare("message_transforms"),
-                    "launch",
-                    "message_transforms.launch.yaml",
-                ]
-            )
-        ),
-        launch_arguments={
-            "parameters_file": PathJoinSubstitution(
-                [
-                    FindPackageShare("blue_demos"),
-                    "control_integration",
-                    "config",
-                    "transforms.yaml",
-                ]
-            ),
-            "ns": TextSubstitution(text="control_integration"),
-        }.items(),
-    )
 
     controller_manager = Node(
         package="controller_manager",
@@ -165,7 +142,6 @@ def generate_launch_description() -> LaunchDescription:
     return LaunchDescription(
         [
             *args,
-            message_transformer,
             controller_manager,
             *delay_thruster_spawners,
             delay_tam_controller_spawner_after_thruster_controller_spawners,

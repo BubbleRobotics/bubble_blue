@@ -5,7 +5,6 @@
   <xacro:arg name="use_sim" default="false" />
   <xacro:arg name="use_imu" default="true" />
   <xacro:arg name="use_dvl" default="true" />
-  <xacro:arg name="use_gnss" default="true" />
 
   <!-- Import BlueROV2 macro -->
   <xacro:include filename="$(find blue_description)/description/bluerov2/urdf.xacro" />
@@ -16,5 +15,14 @@
     <xacro:include filename="$(find blue_description)/description/bluerov2/gazebo.xacro" />
     <xacro:bluerov2_gazebo prefix="$(arg prefix)" />
   </xacro:if>
+
+  <!-- Import ros2_control macro -->
+  <xacro:include
+    filename="$(find blue_demos)/control_integration/description/ros2_control/bluerov2.ros2_control.xacro" />
+  <xacro:ardusub_thruster_system prefix="$(arg prefix)" name="bluerov2_thrusters" />
+
+  <!-- Import hydrodynamics macro -->
+  <xacro:include
+    filename="$(find blue_description)/description/bluerov2/model.xacro" />
 
 </robot>
