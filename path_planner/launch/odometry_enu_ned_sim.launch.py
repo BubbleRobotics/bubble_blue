@@ -10,8 +10,8 @@ def generate_launch_description():
     return LaunchDescription([
         DeclareLaunchArgument(
             "in_odom",
-            # default_value="/model/bluerov2/odometry",
-            default_value="/odometry/filtered",
+            default_value="/model/bluerov2/odometry",
+            #default_value="/odometry/filtered",
             description="Input Odometry topic (ENU)",
         ),
         DeclareLaunchArgument(

@@ -73,12 +73,12 @@ def generate_launch_description():
         DeclareLaunchArgument('v_max_z', default_value='0.4'),
         DeclareLaunchArgument('yaw_rate_max', default_value='0.8'),
 
-        DeclareLaunchArgument('ref_topic', default_value='/drone_0_planner/pos_cmd'),
+        DeclareLaunchArgument('ref_topic', default_value='/ego_planner/pos_cmd'),
         DeclareLaunchArgument('odom_topic', default_value='/odometry/filtered'),
 
         Node(
-            package='your_pkg',
-            executable='body_pid_follower',
+            package='path_planner',
+            executable='follower_live_test',
             name='body_pid_follower',
             output='screen',
             parameters=[{
@@ -111,10 +111,11 @@ def generate_launch_description():
                 'v_max_xy': v_max_xy,
                 'v_max_z': v_max_z,
                 'yaw_rate_max': yaw_rate_max,
+                'use_sim_time': True,
             }],
             remappings=[
                 # follower input reference
-                ('/drone_0_planner/pos_cmd', ref_topic),
+                ('/ego_planner/pos_cmd', ref_topic),
 
                 # EKF feedback
                 ('/odometry/filtered', odom_topic),

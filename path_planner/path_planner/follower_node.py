@@ -42,6 +42,7 @@ from quadrotor_msgs.msg import PositionCommand
 from tf_transformations import euler_from_quaternion
 from path_planner_interfaces.msg import Path
 from std_msgs.msg import Float32
+from std_srvs.srv import Trigger
 from geometry_msgs.msg import PointStamped
 
 class SetpointRawFollower(Node):
@@ -57,6 +58,7 @@ class SetpointRawFollower(Node):
                 ('arm_on_start', False),
             ],
         )
+        self.time_last_msg_sent = self.get_clock().now()
         self._position_received = False
         self._active = False
         self._first_hold = True
@@ -85,17 +87,19 @@ class SetpointRawFollower(Node):
         # -------- Subscriptions to MAVROS --------
         self._state_sub = self.create_subscription(MavState, '/mavros/state', self._state_cb, qos)
         self._pose_sub = self.create_subscription(PoseWithCovarianceStamped, '/mavros/vision_pose/pose_cov', self._pose_cb, qos)
-        self._clicked_point_sub = self.create_subscription(PointStamped, '/clicked_point', self._clicked_point_cb, qos)
-        self._cmd_sub = self.create_subscription(PositionCommand, '/drone_0_planning/pos_cmd', self._cmd_cb_ego_planner, qos)
-        self._cmd_sub_live = self.create_subscription(PositionCommand, '/drone_0_planning/pos_cmd_live', self._cmd_cb_ego_planner_live, qos)
+        self._clicked_point_sub = self.create_subscription(PointStamped, '/ego_planner/clicked_point', self._clicked_point_cb, qos)
+        self._cmd_sub = self.create_subscription(PositionCommand, '/ego_planner/pos_cmd', self._cmd_cb_ego_planner, qos)
+        self._cmd_sub_live = self.create_subscription(PositionCommand, '/ego_planner/pos_cmd_live', self._cmd_cb_ego_planner_live, qos)
         self.ref_depth_sub = self.create_subscription(Float32, '/ref_depth', self._depth_cb, qos)
         self.current_depth_desired = -2.0
         # -------- Publisher to MAVROS --------
         self._setpoint_pub = self.create_publisher(PositionTarget, '/mavros/setpoint_raw/local', qos)
-        self._goal_point_pub = self.create_publisher(PoseStamped, '/move_base_simple/goal', qos)
+        self._goal_point_pub = self.create_publisher(PoseStamped, '/ego_planner/move_base_simple/goal', qos)
         # -------- Services to MAVROS --------
         self._set_mode_cli = self.create_client(SetMode, '/mavros/set_mode')
         self._arm_cli = self.create_client(CommandBool, '/mavros/cmd/arming')
+        # -------- Internal Services --------
+        self._reset_first_srv = self.create_service(Trigger, '/follower/reset_first', self._reset_first_callback)
         
         # -------- Timers --------
         #self._pub_timer = self.create_timer(1.0 / max(self.publish_rate_hz, 1.0), self._publish_latest)
@@ -123,6 +127,13 @@ class SetpointRawFollower(Node):
         
         self.get_logger().info('SetpointRawFollower ready. Awaiting commands...')
 
+    def _reset_first_callback(self, request: Trigger.Request, response: Trigger.Response) -> Trigger.Response:
+        self.get_logger().info("Resetting first flag to True.")
+        self.first = True
+        response.success = True
+        response.message = "Reset first flag to True."
+        return response
+    
     def _clicked_point_cb(self, msg:PointStamped):
         goal_point = PoseStamped()
         
@@ -227,13 +238,18 @@ class SetpointRawFollower(Node):
 
     def _cmd_cb_ego_planner(self, msg:PositionCommand):
         """Update path."""
-
         # For very close points, the ego-planner only outputs position commands.
         # Since spamming pure position commands will stall the ArduSub controller, only send this once.
         if msg.velocity.x == 0.0 and msg.velocity.y == 0.0 and msg.velocity.z == 0.0:
+            if self.get_clock().now() - self.time_last_msg_sent > rclpy.duration.Duration(seconds=2.5):
+                # After 3 seconds of no messages, ArduSub stops it's controllers, so resend command
+                self.get_logger().info("Resending first position command timeout.")
+                self.first = True
+                
             if self.first:
                 self.get_logger().info("First time going to position control!")
                 self.first = False
+                self.time_last_msg_sent = self.get_clock().now()
                 # Once close to goal, use position control
                 self.goto_position(x_east_m=msg.position.x,y_north_m=msg.position.y,up_m=msg.position.z, yaw_deg=math.degrees(msg.yaw))
                 return
@@ -253,6 +269,12 @@ class SetpointRawFollower(Node):
             PositionTarget.IGNORE_AFZ
         )
 
+        mask |= (
+                PositionTarget.IGNORE_PX |
+                PositionTarget.IGNORE_PY |
+                PositionTarget.IGNORE_PZ
+            )
+        
         # ---- Position part ----
         if msg.position.x is None or msg.position.y is None or msg.position.z is None:
             # We are NOT commanding position → ignore PX/PY/PZ

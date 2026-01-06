@@ -12,6 +12,7 @@ def generate_launch_description():
                 'publish_rate_hz': 20.0,
                 'set_mode_on_start': 'MANUAL',
                 'arm_on_start': False,
+                'use_sim_time': True,
             }],
         ),
     ])

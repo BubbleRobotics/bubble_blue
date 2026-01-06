@@ -17,337 +17,357 @@ from mavros_msgs.msg import State as MavState
 from mavros_msgs.srv import CommandBool, SetMode
 from quadrotor_msgs.msg import PositionCommand
 from nav_msgs.msg import Odometry
-
+from traj_utils.msg import SnakeYaw
 from tf_transformations import euler_from_quaternion, quaternion_matrix
 
 import tf2_ros
+from pymavlink import mavutil
+from mavros_msgs.srv import CommandBool, SetMode
+from std_srvs.srv import Trigger
+from geometry_msgs.msg import PoseStamped as PoseStampted
+
+from enum import Enum
 
 
-@dataclass
-class PIDGains:
-    kp: float
-    ki: float
-    kd: float
-
-
-class PIDAxis:
-    """Simple PID with integral clamp and derivative on error."""
-    def __init__(self, gains: PIDGains, i_limit: float):
-        self.g = gains
-        self.i_limit = abs(i_limit)
-        self.i = 0.0
-        self.prev_e = None
-
-    def reset(self):
-        self.i = 0.0
-        self.prev_e = None
-
-    def step(self, e: float, dt: float) -> float:
-        if dt <= 1e-6:
-            return 0.0
-
-        # integral
-        self.i += e * dt
-        self.i = max(-self.i_limit, min(self.i_limit, self.i))
-
-        # derivative (on error)
-        if self.prev_e is None:
-            de = 0.0
-        else:
-            de = (e - self.prev_e) / dt
-        self.prev_e = e
-
-        return self.g.kp * e + self.g.ki * self.i + self.g.kd * de
+class SnakeState(Enum):  
+    IDLE = 0
+    CHECK_TAG_INIT = 1
+    MOVE_TO_TAG_END = 2
+    MOVE_TO_LINE_START = 3
+    WAIT_AT_LINE_START = 4
+    MOVE_TO_LINE_END = 5
+    WAIT_AT_LINE_END = 6
+    STEP_DEPTH = 7
+    FINISHED = 8
 
 
 class BodyPIDFollower(Node):
-    """
-    - Reference: /drone_0_planner/pos_cmd (PositionCommand), interpreted in 'map'
-    - Feedback:  /mavros/vision_pose/pose_cov (PoseWithCovarianceStamped), assumed in 'map'
-    - Output:    /mavros/setpoint_raw/local (PositionTarget) using FRAME_BODY_NED and velocity setpoints
-    """
 
     def __init__(self):
         super().__init__('body_pid_follower')
-
-        # ---------------- Params ----------------
-        self.declare_parameters(
-            namespace='',
-            parameters=[
-                ('publish_rate_hz', 20.0),
-
-                # frames
-                ('odom_frame', 'map'),
-                ('body_frame', 'base_link_fsd'),
-
-                # PID gains (position -> body-velocity)
-                ('pid_x.kp', 1.0), ('pid_x.ki', 0.0), ('pid_x.kd', 0.2),
-                ('pid_y.kp', 1.0), ('pid_y.ki', 0.0), ('pid_y.kd', 0.2),
-                ('pid_z.kp', 1.0), ('pid_z.ki', 0.0), ('pid_z.kd', 0.2),
-
-                # yaw controller (yaw -> yaw_rate)
-                ('pid_yaw.kp', 2.0), ('pid_yaw.ki', 0.0), ('pid_yaw.kd', 0.2),
-
-                # clamps
-                ('i_limit_pos', 1.0),
-                ('i_limit_yaw', 1.0),
-                ('v_max_xy', 0.6),   # m/s
-                ('v_max_z', 0.4),    # m/s (body z-down)
-                ('yaw_rate_max', 0.8),  # rad/s
-
-                # mavros startup
-                ('set_mode_on_start', 'GUIDED'),
-                ('arm_on_start', False),
-
-                # If your odom is ENU and you want MAVLink NED, set True and apply conversion below.
-                ('assume_odom_is_enu', True),
-            ],
+        self.current_odom: Odometry = Odometry()
+        self.current_goal: Optional[PoseStampted] = None
+        # ---------------- ROS I/O ----------------
+        qos = QoSProfile(
+            depth=10,
+            reliability=rclpy.qos.ReliabilityPolicy.BEST_EFFORT,
+            durability=rclpy.qos.DurabilityPolicy.VOLATILE
         )
 
-        self.publish_rate_hz = float(self.get_parameter('publish_rate_hz').value)
-        self.odom_frame = str(self.get_parameter('odom_frame').value)
-        self.body_frame = str(self.get_parameter('body_frame').value)
-        self.assume_odom_is_enu = bool(self.get_parameter('assume_odom_is_enu').value)
+        self.execute_snake_srv = self.create_service(
+            Trigger,
+            '/snake_planner/execute_snake_path',
+            self.execute_snake_path_callback
+        )
 
-        # PID
-        self.pid_x = PIDAxis(PIDGains(
-            float(self.get_parameter('pid_x.kp').value),
-            float(self.get_parameter('pid_x.ki').value),
-            float(self.get_parameter('pid_x.kd').value),
-        ), i_limit=float(self.get_parameter('i_limit_pos').value))
-
-        self.pid_y = PIDAxis(PIDGains(
-            float(self.get_parameter('pid_y.kp').value),
-            float(self.get_parameter('pid_y.ki').value),
-            float(self.get_parameter('pid_y.kd').value),
-        ), i_limit=float(self.get_parameter('i_limit_pos').value))
-
-        self.pid_z = PIDAxis(PIDGains(
-            float(self.get_parameter('pid_z.kp').value),
-            float(self.get_parameter('pid_z.ki').value),
-            float(self.get_parameter('pid_z.kd').value),
-        ), i_limit=float(self.get_parameter('i_limit_pos').value))
-
-        self.pid_yaw = PIDAxis(PIDGains(
-            float(self.get_parameter('pid_yaw.kp').value),
-            float(self.get_parameter('pid_yaw.ki').value),
-            float(self.get_parameter('pid_yaw.kd').value),
-        ), i_limit=float(self.get_parameter('i_limit_yaw').value))
-
-        self.v_max_xy = float(self.get_parameter('v_max_xy').value)
-        self.v_max_z = float(self.get_parameter('v_max_z').value)
-        self.yaw_rate_max = float(self.get_parameter('yaw_rate_max').value)
-
-        # ---------------- State ----------------
-        self._is_connected = False
-        self._armed = False
-        self._mode_set = False
-
-        self._have_pose = False
-        self._have_ref = False
-
-        self.current_odom_msg: Optional[Odometry] = None        
-        self.ref_cmd: Optional[PositionCommand] = None
-
-        self._last_time = self.get_clock().now()
-
-        # ---------------- TF2 ----------------
-        self.tf_buffer = tf2_ros.Buffer(cache_time=rclpy.duration.Duration(seconds=2.0))
-        self.tf_listener = tf2_ros.TransformListener(self.tf_buffer, self)
-
-        # ---------------- ROS I/O ----------------
-        qos = QoSProfile(depth=10)
-
-        self._state_sub = self.create_subscription(MavState, '/odometry/filtered', self._state_cb, qos)
         self._odom_sub = self.create_subscription(
             Odometry,
-            '/odometry/filtered',
+            '/mavros/odometry/out',
             self._odom_cb,
             qos
         )
 
+        qos = QoSProfile(depth=10)
+        self.goal_pub = self.create_publisher(
+            PoseStampted,
+            '/ego_planner/move_base_simple/goal',
+            qos
+        )
+        self.snake_yaw_pub = self.create_publisher(
+            SnakeYaw, 'planning/snake_yaw', qos
+            )
+        self.reset_first_client = self.create_client(Trigger, '/follower/reset_first')
+        # ==== SNAKE FSM ADDED ====
+        self.snake_active = False
+        self.snake_state = SnakeState.IDLE
 
-        self._cmd_sub = self.create_subscription(PositionCommand, '/drone_0_planner/pos_cmd', self._ref_cb, qos)
+        # snake path parameters (filled when service is called)
+        self.top_left = None
+        self.top_right = None
+        self.bottom_left = None
+        self.bottom_right = None
+        self.depth_step = None
+        self.current_depth = None
+        self.max_depth = None
+        self.going_right = None
+        self.yaw = None
+        self.checked_apriltags = False
 
-        self._setpoint_pub = self.create_publisher(PositionTarget, '/mavros/setpoint_raw/local', qos)
-
-        self._set_mode_cli = self.create_client(SetMode, '/mavros/set_mode')
-        self._arm_cli = self.create_client(CommandBool, '/mavros/cmd/arming')
-
-        # Controller timer
-        self._ctrl_timer = self.create_timer(1.0 / max(self.publish_rate_hz, 1.0), self._control_step)
-
-        # ---------------- Wait for MAVROS heartbeat ----------------
-        self.get_logger().info('Waiting for MAVROS heartbeat...')
-        start_time = time.time()
-        while not self._is_connected and (time.time() - start_time) < 50.0:
-            rclpy.spin_once(self, timeout_sec=0.1)
-        if not self._is_connected:
-            raise RuntimeError('No heartbeat from MAVROS within timeout')
-
-        # Optional: set mode + arm
-        set_mode_on_start = str(self.get_parameter('set_mode_on_start').value)
-        arm_on_start = bool(self.get_parameter('arm_on_start').value)
-
-        if set_mode_on_start:
-            while not self._mode_set:
-                self._mode_set = self._set_mode(set_mode_on_start)
-        if arm_on_start:
-            while not self._armed:
-                self._armed = self._arm(True)
-
-        self.get_logger().info('BodyPIDFollower ready.')
-
-    # ---------------- Callbacks ----------------
-    def _state_cb(self, msg: MavState):
-        if msg.connected and not self._is_connected:
-            self._is_connected = True
+        # Timer to drive the snake path (non-blocking)
+        # Period 0.5 s matches your old time.sleep(0.5)
+        self.snake_timer = self.create_timer(0.1, self._snake_timer_cb)
+        self.goal_timer = self.create_timer(3.0, self.send_goal_callback)
+        # ==== END SNAKE FSM ADDED ====
 
     def _odom_cb(self, msg: Odometry):
-        self.current_odom_msg = msg
-        self._have_pose = True
+        self.current_odom = msg
 
+    def send_goal_callback(self):
+        if self.current_goal:
+            goal_msg = PoseStampted()
+            goal_msg.header.stamp = self.get_clock().now().to_msg()
+            goal_msg.pose = self.current_goal.pose
+            self.goal_pub.publish(goal_msg)
+        return
+    
+    def goto_position(self, x_east, y_north, z_down, yaw_deg=None):
+        goal_msg = PoseStampted()
+        goal_msg.header.stamp = self.get_clock().now().to_msg()
+        goal_msg.pose.position.x = x_east
+        goal_msg.pose.position.y = y_north
+        goal_msg.pose.position.z = -z_down 
+        self.current_goal = goal_msg
+        
+        self.goal_pub.publish(goal_msg)
+    
 
-    def _ref_cb(self, msg: PositionCommand):
-        self.ref_cmd = msg
-        self._have_ref = True
+    def reached_goal(self, x_east_goal, y_north_goal, z_down_goal, yaw_goal, threshold=0.25):
+        """
+        Check if current position is within threshold of target
+        threshold in meters
+        """
+        pos_msg = self.current_odom.pose.pose.position
 
-    # ---------------- Control ----------------
-    def _control_step(self):
-        if not self._have_pose or not self._have_ref:
-            return
+        if pos_msg is None:
+            return False, None
 
-        now = self.get_clock().now()
-        dt = (now - self._last_time).nanoseconds * 1e-9
-        self._last_time = now
-        if dt <= 1e-6:
-            return
+        x_east_current = pos_msg.x
+        y_north_current = pos_msg.y
+        z_down_current = -pos_msg.z
 
-        odom = self.current_odom_msg
-        pose = odom.pose.pose
+        x_dist = (x_east_goal - x_east_current)
+        y_dist = (y_north_goal - y_north_current)
+        depth_dist = z_down_goal - z_down_current
 
-        ref = self.ref_cmd
+        # yaw_dist is unused in your logic, keep zero
+        yaw_dist = 0.0
 
-        # --- Current position in map frame---
-        p_cur = np.array([pose.position.x, pose.position.y, pose.position.z], dtype=float)
-
-        # --- Reference position in map frame ---
-        p_ref = np.array([float(ref.position.x), float(ref.position.y), float(ref.position.z)], dtype=float)
-
-        # error in map frame
-        e_odom = p_ref - p_cur
-
-        # --- Rotation map frame -> body frame using tf2 (preferred) ---
-        R_odom_to_body = None
-        try:
-            tf = self.tf_buffer.lookup_transform(
-                self.body_frame,  # target
-                self.odom_frame,  # source
-                self.get_clock().now()
-            )
-            q = tf.transform.rotation
-            T = quaternion_matrix([q.x, q.y, q.z, q.w])
-            R_odom_to_body = T[:3, :3]
-        except Exception:
-            # fallback: use pose orientation (works if pose is body orientation in map)
-            q = pose.orientation
-            T = quaternion_matrix([q.x, q.y, q.z, q.w])
-            # pose quaternion is typically body->map; we want map->body
-            # If your pose is indeed body in map, transpose gives inverse rotation.
-            R_odom_to_body = T[:3, :3].T
-
-        # rotate error into body frame
-        e_body = R_odom_to_body @ e_odom
-
-        # ---------------- OPTIONAL ENU->NED fix ----------------
-        # If your odometry in map frame is ENU but you want to command MAVLink BODY_NED (FRD),
-        # you may need axis swaps/sign changes.
-        #
-        # ENU: x=East, y=North, z=Up
-        # NED: x=North, y=East, z=Down
-        #
-        # A common conversion for a vector in ENU -> NED:
-        #   [n, e, d] = [y, x, -z]
-        #
-        if self.assume_odom_is_enu:
-            e_body = np.array([e_body[1], e_body[0], -e_body[2]], dtype=float)
-
-        # --- PID: position error -> desired body velocity ---
-        vx = self.pid_x.step(float(e_body[0]), dt)
-        vy = self.pid_y.step(float(e_body[1]), dt)
-        vz = self.pid_z.step(float(e_body[2]), dt)
-
-        # saturate velocities
-        vxy = math.hypot(vx, vy)
-        if vxy > self.v_max_xy and vxy > 1e-6:
-            s = self.v_max_xy / vxy
-            vx *= s
-            vy *= s
-        vz = max(-self.v_max_z, min(self.v_max_z, vz))
-
-        # --- Yaw control (reference yaw -> yaw_rate) ---
-        # Current yaw from pose quaternion
-        q_cur = pose.orientation
-        _, _, yaw_cur = euler_from_quaternion([q_cur.x, q_cur.y, q_cur.z, q_cur.w])
-
-        yaw_ref = float(ref.yaw) if ref.yaw is not None else yaw_cur
-        e_yaw = self._wrap_pi(yaw_ref - yaw_cur)
-        yaw_rate = self.pid_yaw.step(e_yaw, dt)
-        yaw_rate = max(-self.yaw_rate_max, min(self.yaw_rate_max, yaw_rate))
-
-        # --- Publish MAVROS setpoint_raw/local in BODY_NED ---
-        pt = PositionTarget()
-        pt.header.stamp = now.to_msg()
-        pt.header.frame_id = self.odom_frame 
-        pt.coordinate_frame = PositionTarget.FRAME_BODY_NED
-
-        # We command: velocity + yaw_rate only
-        pt.type_mask = (
-            PositionTarget.IGNORE_PX | PositionTarget.IGNORE_PY | PositionTarget.IGNORE_PZ |
-            PositionTarget.IGNORE_AFX | PositionTarget.IGNORE_AFY | PositionTarget.IGNORE_AFZ |
-            PositionTarget.IGNORE_YAW
+        total_dist = math.sqrt(
+            x_dist**2 + y_dist**2 + depth_dist**2 + yaw_dist**2 / 100.0
         )
-        pt.velocity.x = float(vx)
-        pt.velocity.y = float(vy)
-        pt.velocity.z = float(vz)
-        pt.yaw_rate = float(yaw_rate)
 
-        self._setpoint_pub.publish(pt)
+        self.get_logger().info(
+            f"Current: dist_x={x_dist:.7f}, dist_y={y_dist:.7f}, "
+            f"dist_depth={depth_dist:.2f} m, total_dist={total_dist:.2f} m"
+        )
 
-    @staticmethod
-    def _wrap_pi(a: float) -> float:
-        while a > math.pi:
-            a -= 2.0 * math.pi
-        while a < -math.pi:
-            a += 2.0 * math.pi
-        return a
+        """if total_dist < threshold:
+            request = Trigger.Request()
 
-    # ---------------- MAVROS services ----------------
-    def _set_mode(self, mode: str) -> bool:
-        if not self._set_mode_cli.wait_for_service(timeout_sec=5.0):
-            self.get_logger().error('Set mode service unavailable')
-            return False
-        req = SetMode.Request()
-        req.custom_mode = mode
-        fut = self._set_mode_cli.call_async(req)
-        rclpy.spin_until_future_complete(self, fut)
-        res = fut.result()
-        ok = bool(res and res.mode_sent)
-        self.get_logger().info(f'Set mode {mode}: {"OK" if ok else "FAIL"}')
-        return ok
+            future = self.reset_first_client.call_async(request)
 
-    def _arm(self, value: bool) -> bool:
-        if not self._arm_cli.wait_for_service(timeout_sec=5.0):
-            self.get_logger().error('Arming service unavailable')
-            return False
-        req = CommandBool.Request()
-        req.value = value
-        fut = self._arm_cli.call_async(req)
-        rclpy.spin_until_future_complete(self, fut)
-        res = fut.result()
-        ok = bool(res and res.success)
-        self.get_logger().info(f'Arm({value}): {"OK" if ok else "FAIL"}')
-        return ok
+            # Optionally spin until response arrives
+            rclpy.spin_until_future_complete(self, future)
+
+            if future.result() is not None:
+                response = future.result()
+                self.get_logger().info(
+                    f"Success: {response.success}, message: {response.message}"
+                )
+            else:
+                self.get_logger().error('Resetting first position indicator in follower node failed!')"""
+        return total_dist < threshold, total_dist
+
+    # =======================
+    # SERVICE
+    # =======================
+    def execute_snake_path_callback(self, request, response):
+        """
+        Trigger service: start the snake path in the background.
+        Returns quickly.
+        """
+        if self.snake_active:
+            response.success = False
+            response.message = "Snake path already running."
+            return response
+
+        yaw_msg = SnakeYaw()
+        yaw_msg.snake_yaw = -0.2738
+        yaw_msg.use_snake_yaw = True
+
+        self.snake_yaw_pub.publish(yaw_msg)
+
+        self.execute_snake_path()  # just initializes the FSM state & params
+
+        response.success = True
+        response.message = "Snake path execution started."
+        return response
+    def stop_snake_path_callback(self, request, response):
+        """
+        Trigger service: start the snake path in the background.
+        Returns quickly.
+        """
+        if not self.snake_active:
+            response.success = False
+            response.message = "Snake path already inactive."
+            return response
+
+        yaw_msg = SnakeYaw()
+        yaw_msg.snake_yaw = 0.0
+        yaw_msg.use_snake_yaw = False
+
+        self.snake_yaw_pub.publish(yaw_msg)
+
+        x_curr = self.current_odom.pose.pose.position.x
+        y_curr = self.current_odom.pose.pose.position.y
+        depth_curr = -self.current_odom.pose.pose.position.z
+
+        self.goto_position(x_curr, y_curr, depth_curr, yaw_deg=0.0)
+        response.success = True
+        response.message = "Snake path execution stopped."
+        return response
+    # =======================
+    # SNAKE PATH INITIALIZER
+    # =======================
+    def execute_snake_path(self):
+        """
+        Initialize snake path parameters and start FSM.
+        This no longer blocks or uses time.sleep().
+        """
+        self.get_logger().info("Initializing snake path...")
+
+        # -------------------------
+        # Snake path parameters
+        # -------------------------
+        self.top_left = {"x": 10.92, "y": 13.55, "depth": 3.25, "yaw": 105.6923}
+        self.top_right = {"x": 10.7,  "y": 12.63, "depth": 3.25, "yaw": 105.6923}
+        self.bottom_left = {"x": 10.92, "y": 13.56, "depth": 5.0, "yaw": 105.6923}
+        self.bottom_right = {"x": 10.7,  "y": 12.63, "depth": 5.0, "yaw": 105.6923}
+
+        self.depth_step = 0.2
+        self.current_depth = self.top_left["depth"]
+        self.max_depth = self.bottom_left["depth"]
+        self.going_right = True
+        self.yaw = self.top_left["yaw"]
+        self.checked_apriltags = False
+
+        # Start FSM at "go to tag check position"
+        self.snake_active = True
+        self.snake_state = SnakeState.CHECK_TAG_INIT
+        self.get_logger().info("Snake path FSM started.")
+
+    # =======================
+    # SNAKE FSM TIMER
+    # =======================
+    def _snake_timer_cb(self):
+        """
+        Called periodically by self.snake_timer.
+        Advances the snake state machine in small steps.
+        """
+        if not self.snake_active:
+            return
+
+        if self.snake_state == SnakeState.FINISHED:
+            self.get_logger().info("Snake path finished.")
+            self.snake_active = False
+            self.snake_state = SnakeState.IDLE
+            # TODO also reset yaw
+            return
+
+        # 1) Move to bottom_left first (AprilTag check region)
+        if self.snake_state == SnakeState.CHECK_TAG_INIT:
+            self.get_logger().info("Checking for AprilTags before starting snake path...")
+            x_end = self.bottom_left["x"]
+            y_end = self.bottom_left["y"]
+            depth_end = self.bottom_left["depth"]
+
+            # Command motion once toward bottom_left
+            self.goto_position(x_end, y_end, depth_end, yaw_deg=self.yaw)
+            self.snake_state = SnakeState.MOVE_TO_TAG_END
+            return
+
+        if self.snake_state == SnakeState.MOVE_TO_TAG_END:
+            x_end = self.bottom_left["x"]
+            y_end = self.bottom_left["y"]
+            depth_end = self.bottom_left["depth"]
+
+            reached, dist = self.reached_goal(
+                x_end, y_end, depth_end, self.yaw, threshold=0.25
+            )
+            if reached:
+                self.checked_apriltags = True
+                self.get_logger().info("AprilTag region reached, starting first pass.")
+                self.snake_state = SnakeState.MOVE_TO_LINE_START
+            return
+
+        # 2) Decide line direction at current depth
+        if self.snake_state == SnakeState.MOVE_TO_LINE_START:
+            if self.going_right:
+                x_start = self.top_left["x"]
+                y_start = self.top_left["y"]
+            else:
+                x_start = self.top_right["x"]
+                y_start = self.top_right["y"]
+
+            self.get_logger().info(
+                f"Moving to start of line at depth {self.current_depth:.2f} m"
+            )
+            self.goto_position(x_start, y_start, self.current_depth, yaw_deg=self.yaw)
+            self.snake_state = SnakeState.WAIT_AT_LINE_START
+            return
+
+        if self.snake_state == SnakeState.WAIT_AT_LINE_START:
+            if self.going_right:
+                x_start = self.top_left["x"]
+                y_start = self.top_left["y"]
+            else:
+                x_start = self.top_right["x"]
+                y_start = self.top_right["y"]
+
+            reached, dist = self.reached_goal(
+                x_start, y_start, self.current_depth, self.yaw, threshold=0.05
+            )
+            if reached:
+                self.get_logger().info("Reached start of line, moving to end.")
+                self.snake_state = SnakeState.MOVE_TO_LINE_END
+            return
+
+        if self.snake_state == SnakeState.MOVE_TO_LINE_END:
+            if self.going_right:
+                x_end = self.top_right["x"]
+                y_end = self.top_right["y"]
+            else:
+                x_end = self.top_left["x"]
+                y_end = self.top_left["y"]
+
+            self.get_logger().info("Moving to end of line.")
+            self.goto_position(x_end, y_end, self.current_depth, yaw_deg=self.yaw)
+            self.snake_state = SnakeState.WAIT_AT_LINE_END
+            return
+
+        if self.snake_state == SnakeState.WAIT_AT_LINE_END:
+            if self.going_right:
+                x_end = self.top_right["x"]
+                y_end = self.top_right["y"]
+            else:
+                x_end = self.top_left["x"]
+                y_end = self.top_left["y"]
+
+            reached, dist = self.reached_goal(
+                x_end, y_end, self.current_depth, self.yaw, threshold=0.15
+            )
+            if reached:
+                self.get_logger().info("Reached end of line, stepping depth.")
+                self.snake_state = SnakeState.STEP_DEPTH
+            return
+
+        if self.snake_state == SnakeState.STEP_DEPTH:
+            self.current_depth += self.depth_step
+            if self.current_depth > self.max_depth:
+                self.get_logger().info(
+                    f"Max depth {self.max_depth:.2f} m reached, finishing snake."
+                )
+                self.snake_state = SnakeState.FINISHED
+                self.execute_snake_path()
+                return
+
+            self.going_right = not self.going_right
+            self.get_logger().info(
+                f"Next pass at depth {self.current_depth:.2f} m, "
+                f"direction: {'right' if self.going_right else 'left'}"
+            )
+            self.snake_state = SnakeState.MOVE_TO_LINE_START
+            return
 
 
 def main(args=None):
