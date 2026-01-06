@@ -13,6 +13,7 @@ mavros:
       - setpoint_*
       - heartbeat
       - odometry*
+      - manual_control
     mavros_sensor:
       sensor_topic: "/sensors/generalized_sensor_test"
       mavros_topic: "/mavros/custom_vision_speed/speed_twist"
