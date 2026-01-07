@@ -92,7 +92,7 @@ class NedToEnuOdom(Node):
         out.pose.covariance = msg.pose.covariance
         out.twist.covariance = msg.twist.covariance
 
-        self.pub.publish(msg)
+        self.pub.publish(out)
 
     def cb_mav(self, msg: Odometry):
         out = Odometry()
