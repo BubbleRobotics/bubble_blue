@@ -58,16 +58,16 @@ class NedToEnuOdom(Node):
         out.pose.pose.position.y = p.x
         out.pose.pose.position.z = -p.z
 
-        # Velocity (NED -> ENU): x<->y, z flips sign
+        # Velocity (NED -> ENU): (base_link_frd -> base_link)
         v = msg.twist.twist.linear
-        out.twist.twist.linear.x = v.y
-        out.twist.twist.linear.y = v.x
+        out.twist.twist.linear.x = v.x
+        out.twist.twist.linear.y = -v.y
         out.twist.twist.linear.z = -v.z
 
-        # Angular velocity: also needs frame conversion (NED -> ENU)
+        # Angular velocity: also needs frame conversion (base_link_frd -> base_link)
         w = msg.twist.twist.angular
-        out.twist.twist.angular.x = w.y
-        out.twist.twist.angular.y = w.x
+        out.twist.twist.angular.x = w.x
+        out.twist.twist.angular.y = -w.y
         out.twist.twist.angular.z = -w.z
 
         # Orientation (NED -> ENU)
@@ -88,9 +88,12 @@ class NedToEnuOdom(Node):
         out.pose.pose.orientation.z = q_enu[2]
         out.pose.pose.orientation.w = q_enu[3]
 
-        # Covariances
-        out.pose.covariance = msg.pose.covariance
-        out.twist.covariance = msg.twist.covariance
+        diag = [1e-10, 1e-10, 1e-10, 1e-10, 1e-10, 1e-10]
+        cov = np.diag(diag)
+
+        out.pose.covariance = cov.flatten().tolist()
+
+        out.twist.covariance = cov.flatten().tolist()
 
         self.pub.publish(out)
 
