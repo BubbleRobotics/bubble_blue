@@ -16,7 +16,8 @@ setup(
       'launch/simple_planner.launch.py',
       'launch/follower_live_test.launch.py',  
       'launch/odometry_enu_ned.launch.py',
-      'launch/odometry_enu_ned_sim.launch.py'
+      'launch/odometry_enu_ned_sim.launch.py',
+      'launch/simple_accel_controller.launch.py'
     ]),
     ],
     install_requires=['setuptools'],
@@ -34,6 +35,7 @@ setup(
         'follower_live_test = path_planner.follower_node_live_test:main',
         'odometry_enu_ned = path_planner.odometry_enu_ned:main',
         'odometry_enu_ned_sim = path_planner.odometry_enu_ned_sim:main',
+        "simple_accel_controller = path_planner.simple_accel_controller:main",
     ],
 },
 
