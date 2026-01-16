@@ -28,4 +28,4 @@ mavros/local_position:
   ros__parameters:
     frame_id: "map"
     tf:
-      send: false
+      send: true
