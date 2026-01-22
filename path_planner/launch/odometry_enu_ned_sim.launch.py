@@ -12,11 +12,11 @@ def generate_launch_description():
             "in_odom",
             # default_value="/model/bluerov2/odometry",
             default_value="/odometry/filtered",
-            description="Input Odometry topic (ENU)",
+            description="Input Odometry topic (NED)",
         ),
         DeclareLaunchArgument(
             "out_odom",
-            default_value="/mavros/odometry/out",
+            default_value="/odometry/filtered_enu",
             description="Output Odometry topic (ENU)",
         ),
         Node(
