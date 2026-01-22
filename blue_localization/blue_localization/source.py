@@ -292,7 +292,7 @@ class QualisysMotionCapture(Source):
 
             pose_msg = PoseStamped()
 
-            pose_msg.header.frame_id = "map"
+            pose_msg.header.frame_id = "odom"
             pose_msg.header.stamp = self.get_clock().now().to_msg()
 
             # Convert from mm to m and save the position to the message

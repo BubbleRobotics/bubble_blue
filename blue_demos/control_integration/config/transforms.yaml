@@ -2,11 +2,11 @@
   ros__parameters:
 
     incoming_topics:
-      - /model/bluerov2/odometry
+      - /odometry/filtered_enu
 
     transforms:
-      /model/bluerov2/odometry:
-        outgoing_topic: /integral_sliding_mode_controller/system_state
+      /odometry/filtered_enu:
+        outgoing_topic: /adaptive_integral_terminal_sliding_mode_controller/system_state
         message_type: nav_msgs/msg/Odometry
-        frame_id: map
+        frame_id: odom
         child_frame_id: base_link

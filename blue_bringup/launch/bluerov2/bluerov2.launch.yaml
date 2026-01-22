@@ -101,7 +101,7 @@ launch:
 
   - arg:
       name: use_path_planner
-      default: "true"
+      default: "false"
 
   # Nodes
 

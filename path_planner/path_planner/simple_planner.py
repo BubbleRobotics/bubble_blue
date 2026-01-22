@@ -22,7 +22,7 @@ from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSHistoryPolicy
 from rclpy.parameter import Parameter
 from mavros_msgs.srv import CommandBool, SetMode
 from pymavlink import mavutil
-from geometry_msgs.msg import Pose, Point, Quaternion, Vector3
+from geometry_msgs.msg import Pose, Point, Quaternion, Vector3, TwistStamped
 from robot_localization.srv import SetPose
 from geometry_msgs.msg import PoseWithCovarianceStamped, PoseStamped
 from path_planner_interfaces.srv import InitiatePath, SetObstacles
@@ -32,7 +32,6 @@ from std_msgs.msg import Header, Float32
 from mavros_msgs.msg import PositionTarget
 from mavros_msgs.msg import State as mavState
 from tf_transformations import euler_from_quaternion, quaternion_from_euler
-from quadrotor_msgs.msg import PositionCommand
 from sensor_msgs.msg import Image
 from nav_msgs.msg import Odometry
 # ==============
@@ -50,11 +49,11 @@ class SimplePlannerNode(Node):
         self.last_direction = "None"
         # MAVROS subscribers
         #self._pose_sub = self.create_subscription(PoseWithCovarianceStamped, '/mavros/vision_pose/pose_cov', self._pose_cb, 10)
-
+        self.depth_sub = self.create_subscription(Odometry, 'model/bluerov2/odometry', self._odom_callback, 10)
         # MAVROS setpoint publishers
-        self.vel_local_pub = self.create_publisher(PositionCommand,'/pilot_planner/pos_cmd',10)
-        self.depth_sub = self.create_subscription(Odometry, 'odometry/bluerov2/odometry', self._odom_callback, 10)
-        # Service to plan + follow path
+        self.vel_local_pub = self.create_publisher(TwistStamped,'/pilot_planner/vel_cmd',10)
+        
+        # Service to follow & stop path
         self.path_initializer = self.create_service(
             Trigger,
             'test/initialize',
@@ -76,6 +75,8 @@ class SimplePlannerNode(Node):
         self.current_z = 0.0
         self.desired_depth = 0.4
         self.current_depth = 0.0
+        self.desired_yaw = -2.81
+        self.current_yaw = 0.0
         self.to_lower_z = False
         self.z_step_size = 0.2
 
@@ -100,25 +101,26 @@ class SimplePlannerNode(Node):
             edge_position_reference_right = 0.65
 
 
-            cmd = PositionCommand()
+            cmd = TwistStamped()
             cmd.header = Header()
             cmd.header.stamp = self.get_clock().now().to_msg()
 
+            
+            # TODO see how this can be done better (tune or PID controller?)
+            
             # Forward/backward position control to maintain distance
-            cmd.position.x = (self.current_depth-self.desired_depth)
+            cmd.twist.linear.x = (self.current_depth-self.desired_depth)
             
             # z - position control
-            cmd.position.z = (self.desired_z - self.current_z)
+            cmd.twist.linear.z = (self.desired_z - self.current_z)
 
-            # TODO see how this can be done better, for now just set a very small forward velocity
-            # In order to avoid the ArduSub controller from stopping the vehicle 
-            # When spamming pure position commands
-            cmd.velocity.x = 0.0000001
-            
          
             # For now, known orientation TODO improve logic with gradients
-            cmd.yaw_dot = 0.0 #grad_x*0.1
-            cmd.yaw = -1.8447
+
+            cmd.twist.angular.x = 0.0
+            cmd.twist.angular.y = 0.0
+            cmd.twist.angular.z = (self.desired_yaw - self.current_yaw)/10
+
             
             # If too few edges detected, assume no edges
             if np.sum(edges_x) < 20:
@@ -132,10 +134,10 @@ class SimplePlannerNode(Node):
                 if self.direction == "None":
                     # Robot was moving right: Inspection element is on left side of edge
                     if self.last_direction == "Right":
-                        cmd.position.y = -(avg_x_edgex/msg.width - edge_position_reference_right)*0.5
+                        cmd.twist.linear.y = -(avg_x_edgex/msg.width - edge_position_reference_right)*0.5
                     # Robot was moving left or just initialized: Inspection element is on right side of edge
                     else:# self.last_direction == "Left":
-                        cmd.position.y = -(avg_x_edgex/msg.width - edge_position_reference_left)*0.5
+                        cmd.twist.linear.y = -(avg_x_edgex/msg.width - edge_position_reference_left)*0.5
                     if (abs(self.current_depth  - self.desired_depth) < 0.05):
                         # If we still need to lower the z value (have not arrived at edge)
                         if self.to_lower_z:
@@ -166,7 +168,7 @@ class SimplePlannerNode(Node):
                                     self.get_logger().info("Starting RIGHT MOVEMENT")
 
                 elif self.direction == "Left":
-                    cmd.position.y = 0.2
+                    cmd.twist.linear.y = 0.2
                     
                     if avg_x_edgex is not None:
                         # If we detect an edge at the left corner of the image, stop the movement
@@ -178,7 +180,7 @@ class SimplePlannerNode(Node):
                             self.to_lower_z = True
                             
                 elif self.direction == "Right":
-                    cmd.position.y = -0.2
+                    cmd.twist.linear.y = -0.2
                     if avg_x_edgex is not None:
                         # If we detect an edge at the right corner of the image, stop the movement
                         if avg_x_edgex/msg.width > 0.8 and self.last_direction != "Right":
@@ -190,24 +192,23 @@ class SimplePlannerNode(Node):
 
                 else:
                     self.get_logger().warn(f"Direction {self.direction} is an invalid state!")
-                    cmd.position.y = 0.0
+                    cmd.twist.linear.y = 0.0
             else:
                 self.get_logger().info(f"AVG X Edge is None{avg_x_edgex}")
-                cmd.position.y = 0.0
+                cmd.twist.linear.y = 0.0
     
         else:
             # Just stand still for now TODO improve logic
-            cmd = PositionCommand()
+            cmd = TwistStamped()
             cmd.header = Header()
             cmd.header.stamp = self.get_clock().now().to_msg()
-            cmd.position.x = 0.0
-            cmd.position.y = 0.0
-            cmd.position.z = 0.0   
-            cmd.velocity.x = 0.0001 # Constant forward speed
-            cmd.velocity.y = 0.0  # Move away from obstacles
-            cmd.velocity.z = 0.0  # Adjust depth based on gradient
-            cmd.yaw = -1.8447
-            cmd.yaw_dot = 0.0 #grad_x*0.1
+            cmd.twist.linear.x = 0.0  # No motion
+            cmd.twist.linear.y = 0.0  # 
+            cmd.twist.linear.z = 0.0  #
+            
+            cmd.twist.angular.x = 0.0 
+            cmd.twist.angular.y = 0.0
+            cmd.twist.angular.z = 0.0
         
         self.vel_local_pub.publish(cmd)   
 
@@ -236,17 +237,16 @@ class SimplePlannerNode(Node):
         self._running = False
 
         # Simple avoidance logic based on depth gradient
-        cmd = PositionCommand()
+        cmd = TwistStamped()
         cmd.header = Header()
         cmd.header.stamp = self.get_clock().now().to_msg()
-        cmd.position.x = 0.0
-        cmd.position.y = 0.0
-        cmd.position.z = 0.0   
-        cmd.velocity.x = 0.0001 # Constant forward speed
-        cmd.velocity.y = 0.0  # Move away from obstacles
-        cmd.velocity.z = 0.0  # Adjust depth based on gradient
-        cmd.yaw = -1.8447
-        cmd.yaw_dot = 0.0 #grad_x*0.1
+ 
+        cmd.twist.linear.x = 0.0 # No motion
+        cmd.twist.linear.y = 0.0  
+        cmd.twist.linear.z = 0.0 
+        cmd.twist.angular.x = 0.0 
+        cmd.twist.angular.y = 0.0  
+        cmd.twist.angular.z = 0.0  
 
         self.vel_local_pub.publish(cmd)
         self.get_logger().info("STOPPING ALL MOVEMENT")
@@ -254,6 +254,9 @@ class SimplePlannerNode(Node):
 
     def _odom_callback(self, msg: Odometry):
         self.current_z = msg.pose.pose.position.z
+        q = [msg.pose.pose.orientation.w, msg.pose.pose.orientation.x, msg.pose.pose.orientation.y, msg.pose.pose.orientation.z]
+        roll, pitch, yaw = euler_from_quaternion(quaternion = q, axes = 'szyx')
+        self.current_yaw = yaw
         return
 
     def _detect_depth_hard_edges(
@@ -270,7 +273,7 @@ class SimplePlannerNode(Node):
         by more than `threshold_m` (e.g. 0.10 = 10 cm).
 
         Args:
-            depth_image: Image object with raw float32 depth buffer.
+            depth_image: Image object with raw depth.
             width, height: Dimensions of the depth image.
             threshold_m: Depth difference threshold in meters.
 
@@ -322,12 +325,12 @@ class SimplePlannerNode(Node):
         # --- Compute central 5% × 5% crop ---
         h, w = depth_image.height, depth_image.width
 
-        crop_h = int(h * 0.05)
-        crop_w = int(w * 0.05)
+        crop_h = int(h * 0.1)
+        crop_w = int(w * 0.1)
 
-        # Ensure at least 1 pixel
-        crop_h = max(crop_h, 1)
-        crop_w = max(crop_w, 1)
+        # Ensure at least 10 pixel
+        crop_h = max(crop_h, 10)
+        crop_w = max(crop_w, 10)
 
         # Coordinates of crop
         top = (h - crop_h) // 2
@@ -343,9 +346,9 @@ class SimplePlannerNode(Node):
             np.isfinite(central_patch)
         ]
 
-        # No valid values found → return 0
+        # No valid values found → return np.inf
         if valid.size == 0:
-            return 0.0
+            return np.inf
 
         return float(valid.mean())
 
@@ -371,7 +374,7 @@ class SimplePlannerNode(Node):
 
         return np.average(gx), np.average(gy)
 
-    import numpy as np
+
 
     def _compute_average_edge_position(self, edges_x: np.ndarray):
         """

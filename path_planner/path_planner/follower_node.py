@@ -86,8 +86,8 @@ class SetpointRawFollower(Node):
         self._state_sub = self.create_subscription(MavState, '/mavros/state', self._state_cb, qos)
         self._pose_sub = self.create_subscription(PoseWithCovarianceStamped, '/mavros/vision_pose/pose_cov', self._pose_cb, qos)
         self._clicked_point_sub = self.create_subscription(PointStamped, '/clicked_point', self._clicked_point_cb, qos)
-        self._cmd_sub = self.create_subscription(PositionCommand, '/drone_0_planning/pos_cmd', self._cmd_cb_ego_planner, qos)
-        self._cmd_sub_live = self.create_subscription(PositionCommand, '/drone_0_planning/pos_cmd_live', self._cmd_cb_ego_planner_live, qos)
+        self._cmd_sub = self.create_subscription(PositionCommand, '/ego_planner/pos_cmd', self._cmd_cb_ego_planner, qos)
+        self._cmd_sub_live = self.create_subscription(TwistStamped, '/pilot_planner/vel_cmd', self._cmd_cb_ego_planner_live, qos)
         self.ref_depth_sub = self.create_subscription(Float32, '/ref_depth', self._depth_cb, qos)
         self.current_depth_desired = -2.0
         # -------- Publisher to MAVROS --------
@@ -154,76 +154,14 @@ class SetpointRawFollower(Node):
     # =====================
     # Command Callbacks
     # =====================
-    def _cmd_cb_ego_planner_live(self, msg:PositionCommand):
+    def _cmd_cb_ego_planner_live(self, msg:TwistStamped):
         """Update path."""
 
-        # For very close points, the ego-planner only outputs position commands.
-        # Since spamming pure position commands will stall the ArduSub controller, only send this once.
-        if msg.velocity.x == 0.0 and msg.velocity.y == 0.0 and msg.velocity.z == 0.0:
-            if self.first:
-                self.get_logger().info("First time going to position control!")
-                self.first = True
-                # Once close to goal, use position control
-                self.goto_position(x_east_m=msg.position.x,y_north_m=msg.position.y,up_m=msg.position.z, yaw_deg=math.degrees(msg.yaw))
-                return
-            else:
-                return
-        # Otherwise, use position + velocity control     
-        self.first = True
-        pt = PositionTarget()
-        pt.header.stamp = self.get_clock().now().to_msg()
-        pt.header.frame_id = "map"
-        pt.coordinate_frame = PositionTarget.FRAME_LOCAL_NED
+        twist_cmd = TwistStamped()
+        
 
-        # Start with accel ignored (we don't use them)
-        mask = (
-            PositionTarget.IGNORE_AFX |
-            PositionTarget.IGNORE_AFY |
-            PositionTarget.IGNORE_AFZ
-        )
+        self.goto_velocity(twist_cmd=twist_cmd)
 
-        # ---- Position part ----
-        if msg.position.x is None or msg.position.y is None or msg.position.z is None:
-            # We are NOT commanding position → ignore PX/PY/PZ
-            mask |= (
-                PositionTarget.IGNORE_PX |
-                PositionTarget.IGNORE_PY |
-                PositionTarget.IGNORE_PZ
-            )
-        else:
-            pt.position.x = float(msg.position.x)
-            pt.position.y = float(msg.position.y)
-            pt.position.z = float(msg.position.z)
-
-        # ---- Velocity part ----
-        if msg.velocity.x is None or msg.velocity.y is None or msg.velocity.z is None:
-            # We are NOT commanding velocity → ignore VX/VY/VZ
-            mask |= (
-                PositionTarget.IGNORE_VX |
-                PositionTarget.IGNORE_VY |
-                PositionTarget.IGNORE_VZ
-            )
-        else:
-            pt.velocity.x = float(msg.velocity.x)
-            pt.velocity.y = float(msg.velocity.y)
-            pt.velocity.z = float(msg.velocity.z)
-
-        # ---- Yaw / yaw rate ----
-        if msg.yaw is not None:
-            pt.yaw = float(msg.yaw)
-            # Using absolute yaw → ignore yaw_rate
-            mask |= PositionTarget.IGNORE_YAW_RATE
-        elif msg.yaw_dot is not None:
-            pt.yaw_rate = float(msg.yaw_dot)
-            # Using yaw rate → ignore absolute yaw
-            mask |= PositionTarget.IGNORE_YAW
-        else:
-            # Not commanding any yaw
-            mask |= PositionTarget.IGNORE_YAW | PositionTarget.IGNORE_YAW_RATE
-
-        pt.type_mask = mask
-
-        self.goto_pos_vel(pos_target=pt)
 
     def _cmd_cb_ego_planner(self, msg:PositionCommand):
         """Update path."""
@@ -347,7 +285,37 @@ class SetpointRawFollower(Node):
         ok = bool(res and res.success)
         self.get_logger().info(f'Arm({value}): {"OK" if ok else "FAIL"}')
         return ok
-       
+    
+    def goto_velocity(self, twist_cmd: TwistStamped = TwistStamped()) -> None:
+        
+        msg = PositionTarget()
+        # Use local NED frame (MAVROS translates correctly)
+        msg.header.frame_id = "map"
+        msg.header.stamp = self.get_clock().now().to_msg()
+        msg.coordinate_frame = PositionTarget.FRAME_LOCAL_NED
+    
+        # Type mask (bits = ignore fields)
+        # We want to send ONLY velocity + yaw_rate
+
+        msg.type_mask = (
+            PositionTarget.IGNORE_YAW |
+            PositionTarget.IGNORE_PX |
+            PositionTarget.IGNORE_PY |
+            PositionTarget.IGNORE_PZ |
+            PositionTarget.IGNORE_AFX |
+            PositionTarget.IGNORE_AFY |
+            PositionTarget.IGNORE_AFZ 
+            
+        )
+        # Desired position (NED)
+ 
+        msg.velocity.x = float(twist_cmd.twist.linear.x)    # Front
+        msg.velocity.y = float(twist_cmd.twist.linear.x)    # Right
+        msg.velocity.z = float(twist_cmd.twist.linear.x)    # Down
+        msg.yaw_rate = float(twist_cmd.twist.angular.z)     
+        msg.yaw = 180.0
+        self._setpoint_pub.publish(msg)
+
     def goto_position(self, x_east_m: float, y_north_m: float, up_m: float, yaw_deg: Optional[float] = 0.0) -> None:
   
         msg = PositionTarget()

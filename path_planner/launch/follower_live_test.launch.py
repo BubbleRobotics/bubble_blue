@@ -8,6 +8,7 @@ def generate_launch_description():
     # ---------- Launch args ----------
     publish_rate_hz = LaunchConfiguration('publish_rate_hz')
     set_mode_on_start = LaunchConfiguration('set_mode_on_start')
+    mode_to_set = LaunchConfiguration('mode_to_set')
     arm_on_start = LaunchConfiguration('arm_on_start')
 
     odom_frame = LaunchConfiguration('odom_frame')
@@ -44,7 +45,8 @@ def generate_launch_description():
 
     return LaunchDescription([
         DeclareLaunchArgument('publish_rate_hz', default_value='20.0'),
-        DeclareLaunchArgument('set_mode_on_start', default_value='GUIDED'),
+        DeclareLaunchArgument('set_mode_on_start', default_value='false'),
+        DeclareLaunchArgument('mode_to_set', default_value='GUIDED'),
         DeclareLaunchArgument('arm_on_start', default_value='false'),
 
         DeclareLaunchArgument('odom_frame', default_value='map'),
@@ -77,13 +79,14 @@ def generate_launch_description():
         DeclareLaunchArgument('odom_topic', default_value='/odometry/filtered'),
 
         Node(
-            package='your_pkg',
-            executable='body_pid_follower',
+            package='path_planner',
+            executable='follower_live_test',
             name='body_pid_follower',
             output='screen',
             parameters=[{
                 'publish_rate_hz': publish_rate_hz,
                 'set_mode_on_start': set_mode_on_start,
+                'mode_to_set': mode_to_set,
                 'arm_on_start': arm_on_start,
 
                 'odom_frame': odom_frame,
@@ -111,6 +114,7 @@ def generate_launch_description():
                 'v_max_xy': v_max_xy,
                 'v_max_z': v_max_z,
                 'yaw_rate_max': yaw_rate_max,
+ 
             }],
             remappings=[
                 # follower input reference

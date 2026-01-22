@@ -96,7 +96,8 @@ class BodyPIDFollower(Node):
                 ('yaw_rate_max', 0.8),  # rad/s
 
                 # mavros startup
-                ('set_mode_on_start', 'GUIDED'),
+                ('set_mode_on_start', False),
+                ('mode_to_set', 'GUIDED'),
                 ('arm_on_start', False),
 
                 # If your odom is ENU and you want MAVLink NED, set True and apply conversion below.
@@ -158,7 +159,7 @@ class BodyPIDFollower(Node):
         # ---------------- ROS I/O ----------------
         qos = QoSProfile(depth=10)
 
-        self._state_sub = self.create_subscription(MavState, '/odometry/filtered', self._state_cb, qos)
+        self._state_sub = self.create_subscription(MavState, '/mavros/state', self._state_cb, qos)
         self._odom_sub = self.create_subscription(
             Odometry,
             '/odometry/filtered',
@@ -184,14 +185,15 @@ class BodyPIDFollower(Node):
             rclpy.spin_once(self, timeout_sec=0.1)
         if not self._is_connected:
             raise RuntimeError('No heartbeat from MAVROS within timeout')
-
+        self.get_logger().info('Connected to MAVROS')
         # Optional: set mode + arm
-        set_mode_on_start = str(self.get_parameter('set_mode_on_start').value)
+        set_mode_on_start = bool(self.get_parameter('set_mode_on_start').value)
+        mode_to_set = str(self.get_parameter('mode_to_set').value)
         arm_on_start = bool(self.get_parameter('arm_on_start').value)
 
         if set_mode_on_start:
             while not self._mode_set:
-                self._mode_set = self._set_mode(set_mode_on_start)
+                self._mode_set = self._set_mode(mode_to_set)
         if arm_on_start:
             while not self._armed:
                 self._armed = self._arm(True)
@@ -202,6 +204,7 @@ class BodyPIDFollower(Node):
     def _state_cb(self, msg: MavState):
         if msg.connected and not self._is_connected:
             self._is_connected = True
+            
 
     def _odom_cb(self, msg: Odometry):
         self.current_odom_msg = msg
