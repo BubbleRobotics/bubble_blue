@@ -10,19 +10,18 @@ def generate_launch_description():
     return LaunchDescription([
         DeclareLaunchArgument(
             "in_odom",
-            # default_value="/model/bluerov2/odometry",
             default_value="/odometry/filtered",
             description="Input Odometry topic (NED)",
         ),
         DeclareLaunchArgument(
             "out_odom",
-            default_value="/odometry/filtered_enu",
+            default_value="/mavros/odometry/out",
             description="Output Odometry topic (ENU)",
         ),
         Node(
             package="path_planner",
-            executable="odometry_enu_ned_sim",
-            name="odometry_enu_ned_sim",
+            executable="odometry_enu_ned",
+            name="odometry_enu_ned",
             output="screen",
             parameters=[{
                 "in_odom": in_odom,
