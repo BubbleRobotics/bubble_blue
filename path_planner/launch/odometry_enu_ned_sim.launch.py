@@ -27,6 +27,7 @@ def generate_launch_description():
             parameters=[{
                 "in_odom": in_odom,
                 "out_odom": out_odom,
+                "use_sim_time": False,
             }],
         ),
     ])

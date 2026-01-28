@@ -111,7 +111,7 @@ def generate_launch_description():
                 'v_max_xy': v_max_xy,
                 'v_max_z': v_max_z,
                 'yaw_rate_max': yaw_rate_max,
-                'use_sim_time': True,
+                'use_sim_time': False,
             }],
             remappings=[
                 # follower input reference
