@@ -12,9 +12,7 @@ from rclpy.node import Node
 from rclpy.qos import QoSProfile
 
 from geometry_msgs.msg import PoseWithCovarianceStamped
-from mavros_msgs.msg import PositionTarget
-from mavros_msgs.msg import State as MavState
-from mavros_msgs.srv import CommandBool, SetMode
+
 from quadrotor_msgs.msg import PositionCommand
 from nav_msgs.msg import Odometry
 from traj_utils.msg import SnakeYaw
@@ -22,7 +20,6 @@ from tf_transformations import euler_from_quaternion, quaternion_matrix
 
 import tf2_ros
 from pymavlink import mavutil
-from mavros_msgs.srv import CommandBool, SetMode
 from std_srvs.srv import Trigger
 from geometry_msgs.msg import PoseStamped as PoseStampted
 
@@ -66,7 +63,7 @@ class BodyPIDFollower(Node):
         )
         self._odom_sub = self.create_subscription(
             Odometry,
-            '/odometr/filtered_enu',
+            '/odometry/filtered_enu',
             self._odom_cb,
             qos
         )
@@ -96,15 +93,22 @@ class BodyPIDFollower(Node):
         self.going_right = None
         self.yaw = None
         self.checked_apriltags = False
+        self.vel_small = False
 
         # Timer to drive the snake path (non-blocking)
         # Period 0.5 s matches your old time.sleep(0.5)
         self.snake_timer = self.create_timer(0.1, self._snake_timer_cb)
-        self.goal_timer = self.create_timer(3.0, self.send_goal_callback)
+        self.goal_timer = self.create_timer(5.0, self.send_goal_callback)
         # ==== END SNAKE FSM ADDED ====
 
     def _odom_cb(self, msg: Odometry):
         self.current_odom = msg
+        if (self.current_odom.twist.twist.linear.x ** 2 +
+            self.current_odom.twist.twist.linear.y ** 2 +
+            self.current_odom.twist.twist.linear.z ** 2) < 0.05 ** 2:
+            self.vel_small = True
+        else:
+            self.vel_small = False
 
     def send_goal_callback(self):
         if self.current_goal:
@@ -149,7 +153,8 @@ class BodyPIDFollower(Node):
         total_dist = math.sqrt(
             x_dist**2 + y_dist**2 + depth_dist**2 + yaw_dist**2 / 100.0
         )
-
+        self.get_logger().info(f"Goal: x={x_east_goal:.2f}, y={y_north_goal:.2f}, depth={z_down_goal:.2f} m")
+        self.get_logger().info(f"Current: x={x_east_current:.2f}, y={y_north_current:.2f}, depth={z_down_current:.2f} m")
         self.get_logger().info(
             f"Current: dist_x={x_dist:.7f}, dist_y={y_dist:.7f}, "
             f"dist_depth={depth_dist:.2f} m, total_dist={total_dist:.2f} m"
@@ -186,7 +191,7 @@ class BodyPIDFollower(Node):
             return response
 
         yaw_msg = SnakeYaw()
-        yaw_msg.snake_yaw = 0.0#-0.2738
+        yaw_msg.snake_yaw = 0.0#1.5708#3.1415#-0.2738
         yaw_msg.use_snake_yaw = True
 
         self.snake_yaw_pub.publish(yaw_msg)
@@ -238,10 +243,10 @@ class BodyPIDFollower(Node):
         self.bottom_left = {"x": 10.92, "y": 13.56, "depth": 5.0, "yaw": 105.6923}
         self.bottom_right = {"x": 10.7,  "y": 12.63, "depth": 5.0, "yaw": 105.6923}"""
 
-        self.top_left = {"x": 0.0, "y": 0.0, "depth": 0.1, "yaw": 105.6923}
-        self.top_right = {"x": 0.0,  "y": 2.0, "depth": 0.1, "yaw": 105.6923}
-        self.bottom_left = {"x": 0.0, "y": 0.0, "depth": 1.0, "yaw": 105.6923}
-        self.bottom_right = {"x": 0.0,  "y": 2.0, "depth": 1.0, "yaw": 105.6923}
+        self.top_left = {"x": 0.0, "y": 0.0, "depth": 0.3, "yaw": 105.6923}
+        self.top_right = {"x": 0.0,  "y": 1.0, "depth": 0.3, "yaw": 105.6923}
+        self.bottom_left = {"x": 0.0, "y": 0.0, "depth": 0.1, "yaw": 105.6923}
+        self.bottom_right = {"x": 0.0,  "y": 1.0, "depth": 0.1, "yaw": 105.6923}
 
         self.depth_step = 0.2
         self.current_depth = self.top_left["depth"]
@@ -294,9 +299,10 @@ class BodyPIDFollower(Node):
                 x_end, y_end, depth_end, self.yaw, threshold=0.25
             )
             if reached:
-                self.checked_apriltags = True
-                self.get_logger().info("AprilTag region reached, starting first pass.")
-                self.snake_state = SnakeState.MOVE_TO_LINE_START
+                if self.vel_small:
+                    self.checked_apriltags = True
+                    self.get_logger().info("AprilTag region reached, starting first pass.")
+                    self.snake_state = SnakeState.MOVE_TO_LINE_START
             return
 
         # 2) Decide line direction at current depth
@@ -327,8 +333,9 @@ class BodyPIDFollower(Node):
                 x_start, y_start, self.current_depth, self.yaw, threshold=0.05
             )
             if reached:
-                self.get_logger().info("Reached start of line, moving to end.")
-                self.snake_state = SnakeState.MOVE_TO_LINE_END
+                if self.vel_small:
+                    self.get_logger().info("Reached start of line, moving to end.")
+                    self.snake_state = SnakeState.MOVE_TO_LINE_END
             return
 
         if self.snake_state == SnakeState.MOVE_TO_LINE_END:
@@ -353,11 +360,12 @@ class BodyPIDFollower(Node):
                 y_end = self.top_left["y"]
 
             reached, dist = self.reached_goal(
-                x_end, y_end, self.current_depth, self.yaw, threshold=0.15
+                x_end, y_end, self.current_depth, self.yaw, threshold=0.05
             )
             if reached:
-                self.get_logger().info("Reached end of line, stepping depth.")
-                self.snake_state = SnakeState.STEP_DEPTH
+                if self.vel_small:
+                    self.get_logger().info("Reached end of line, stepping depth.")
+                    self.snake_state = SnakeState.STEP_DEPTH
             return
 
         if self.snake_state == SnakeState.STEP_DEPTH:
