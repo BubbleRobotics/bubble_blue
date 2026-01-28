@@ -8,7 +8,6 @@ def generate_launch_description():
     # ---------- Launch args ----------
     publish_rate_hz = LaunchConfiguration('publish_rate_hz')
     set_mode_on_start = LaunchConfiguration('set_mode_on_start')
-    mode_to_set = LaunchConfiguration('mode_to_set')
     arm_on_start = LaunchConfiguration('arm_on_start')
 
     odom_frame = LaunchConfiguration('odom_frame')
@@ -45,8 +44,7 @@ def generate_launch_description():
 
     return LaunchDescription([
         DeclareLaunchArgument('publish_rate_hz', default_value='20.0'),
-        DeclareLaunchArgument('set_mode_on_start', default_value='false'),
-        DeclareLaunchArgument('mode_to_set', default_value='GUIDED'),
+        DeclareLaunchArgument('set_mode_on_start', default_value='GUIDED'),
         DeclareLaunchArgument('arm_on_start', default_value='false'),
 
         DeclareLaunchArgument('odom_frame', default_value='map'),
@@ -75,7 +73,7 @@ def generate_launch_description():
         DeclareLaunchArgument('v_max_z', default_value='0.4'),
         DeclareLaunchArgument('yaw_rate_max', default_value='0.8'),
 
-        DeclareLaunchArgument('ref_topic', default_value='/drone_0_planner/pos_cmd'),
+        DeclareLaunchArgument('ref_topic', default_value='/ego_planner/pos_cmd'),
         DeclareLaunchArgument('odom_topic', default_value='/odometry/filtered'),
 
         Node(
@@ -86,7 +84,6 @@ def generate_launch_description():
             parameters=[{
                 'publish_rate_hz': publish_rate_hz,
                 'set_mode_on_start': set_mode_on_start,
-                'mode_to_set': mode_to_set,
                 'arm_on_start': arm_on_start,
 
                 'odom_frame': odom_frame,
@@ -114,11 +111,11 @@ def generate_launch_description():
                 'v_max_xy': v_max_xy,
                 'v_max_z': v_max_z,
                 'yaw_rate_max': yaw_rate_max,
- 
+                'use_sim_time': True,
             }],
             remappings=[
                 # follower input reference
-                ('/drone_0_planner/pos_cmd', ref_topic),
+                ('/ego_planner/pos_cmd', ref_topic),
 
                 # EKF feedback
                 ('/odometry/filtered', odom_topic),
