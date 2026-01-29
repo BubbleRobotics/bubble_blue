@@ -105,7 +105,7 @@ class BlueROVOdometryToNED(Node):
             #)
             return
 
-        DOWNSAMPLE_STRIDE = 10  # keep 1 out of every 10 points
+        DOWNSAMPLE_STRIDE = 1  # keep 1 out of every 10 points
 
         points_xyz = pc2.read_points_numpy(
             msg,
