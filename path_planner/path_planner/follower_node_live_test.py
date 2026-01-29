@@ -22,7 +22,7 @@ import tf2_ros
 from pymavlink import mavutil
 from std_srvs.srv import Trigger
 from geometry_msgs.msg import PoseStamped as PoseStampted
-
+from std_msgs.msg import String
 from enum import Enum
 
 
@@ -72,6 +72,11 @@ class BodyPIDFollower(Node):
         self.goal_pub = self.create_publisher(
             PoseStampted,
             '/ego_planner/move_base_simple/goal',
+            qos
+        )
+        self.snake_status_pub = self.create_publisher(
+            String,
+            '/snake_planner/status',
             qos
         )
         self.snake_yaw_pub = self.create_publisher(
@@ -248,7 +253,7 @@ class BodyPIDFollower(Node):
         self.bottom_left = {"x": 0.0, "y": 0.0, "depth": 0.1, "yaw": 105.6923}
         self.bottom_right = {"x": 0.0,  "y": 1.0, "depth": 0.1, "yaw": 105.6923}
 
-        self.depth_step = 0.2
+        self.depth_step = 0.1
         self.current_depth = self.top_left["depth"]
         self.max_depth = self.bottom_left["depth"]
         self.going_right = True
@@ -275,6 +280,7 @@ class BodyPIDFollower(Node):
             self.get_logger().info("Snake path finished.")
             self.snake_active = False
             self.snake_state = SnakeState.IDLE
+            self.snake_status_pub.publish(String(data="IDLE"))
             # TODO also reset yaw
             return
 
@@ -288,6 +294,7 @@ class BodyPIDFollower(Node):
             # Command motion once toward bottom_left
             self.goto_position(x_end, y_end, depth_end, yaw_deg=self.yaw)
             self.snake_state = SnakeState.MOVE_TO_TAG_END
+            self.snake_status_pub.publish(String(data="MOVE_TO_TAG_END"))
             return
 
         if self.snake_state == SnakeState.MOVE_TO_TAG_END:
@@ -303,6 +310,7 @@ class BodyPIDFollower(Node):
                     self.checked_apriltags = True
                     self.get_logger().info("AprilTag region reached, starting first pass.")
                     self.snake_state = SnakeState.MOVE_TO_LINE_START
+                    self.snake_status_pub.publish(String(data="MOVE_TO_LINE_START"))
             return
 
         # 2) Decide line direction at current depth
@@ -319,6 +327,7 @@ class BodyPIDFollower(Node):
             )
             self.goto_position(x_start, y_start, self.current_depth, yaw_deg=self.yaw)
             self.snake_state = SnakeState.WAIT_AT_LINE_START
+            self.snake_status_pub.publish(String(data="WAIT_AT_LINE_START"))
             return
 
         if self.snake_state == SnakeState.WAIT_AT_LINE_START:
@@ -336,6 +345,7 @@ class BodyPIDFollower(Node):
                 if self.vel_small:
                     self.get_logger().info("Reached start of line, moving to end.")
                     self.snake_state = SnakeState.MOVE_TO_LINE_END
+                    self.snake_status_pub.publish(String(data="MOVE_TO_LINE_END"))
             return
 
         if self.snake_state == SnakeState.MOVE_TO_LINE_END:
@@ -349,6 +359,7 @@ class BodyPIDFollower(Node):
             self.get_logger().info("Moving to end of line.")
             self.goto_position(x_end, y_end, self.current_depth, yaw_deg=self.yaw)
             self.snake_state = SnakeState.WAIT_AT_LINE_END
+            self.snake_status_pub.publish(String(data="WAIT_AT_LINE_END"))
             return
 
         if self.snake_state == SnakeState.WAIT_AT_LINE_END:
@@ -366,6 +377,7 @@ class BodyPIDFollower(Node):
                 if self.vel_small:
                     self.get_logger().info("Reached end of line, stepping depth.")
                     self.snake_state = SnakeState.STEP_DEPTH
+                    self.snake_status_pub.publish(String(data="STEP_DEPTH"))
             return
 
         if self.snake_state == SnakeState.STEP_DEPTH:
@@ -375,6 +387,7 @@ class BodyPIDFollower(Node):
                     f"Max depth {self.max_depth:.2f} m reached, finishing snake."
                 )
                 self.snake_state = SnakeState.FINISHED
+                self.snake_status_pub.publish(String(data="FINISHED and RESTARTING"))
                 self.execute_snake_path()
                 return
 
@@ -384,6 +397,7 @@ class BodyPIDFollower(Node):
                 f"direction: {'right' if self.going_right else 'left'}"
             )
             self.snake_state = SnakeState.MOVE_TO_LINE_START
+            self.snake_status_pub.publish(String(data="MOVE_TO_LINE_START"))
             return
 
 
