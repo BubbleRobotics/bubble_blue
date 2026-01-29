@@ -104,6 +104,7 @@ class BodyPIDFollower(Node):
         # Period 0.5 s matches your old time.sleep(0.5)
         self.snake_timer = self.create_timer(0.1, self._snake_timer_cb)
         self.goal_timer = self.create_timer(5.0, self.send_goal_callback)
+        self.snake_yaw_to_use = 0.0
         # ==== END SNAKE FSM ADDED ====
 
     def _odom_cb(self, msg: Odometry):
@@ -196,7 +197,7 @@ class BodyPIDFollower(Node):
             return response
 
         yaw_msg = SnakeYaw()
-        yaw_msg.snake_yaw = 0.0#1.5708#3.1415#-0.2738
+        yaw_msg.snake_yaw = self.snake_yaw_to_use
         yaw_msg.use_snake_yaw = True
 
         self.snake_yaw_pub.publish(yaw_msg)
@@ -226,7 +227,7 @@ class BodyPIDFollower(Node):
         y_curr = self.current_odom.pose.pose.position.y
         depth_curr = -self.current_odom.pose.pose.position.z
 
-        self.goto_position(x_curr, y_curr, depth_curr, yaw_deg=0.0)
+        self.goto_position(x_curr, y_curr, depth_curr, yaw_deg=self.snake_yaw_to_use)
         response.success = True
         response.message = "Snake path execution stopped."
         return response
@@ -262,7 +263,7 @@ class BodyPIDFollower(Node):
 
         # Start FSM at "go to tag check position"
         self.snake_active = True
-        self.snake_state = SnakeState.CHECK_TAG_INIT
+        self.snake_state = SnakeState.MOVE_TO_LINE_START
         self.get_logger().info("Snake path FSM started.")
 
     # =======================
@@ -387,8 +388,8 @@ class BodyPIDFollower(Node):
                     f"Max depth {self.max_depth:.2f} m reached, finishing snake."
                 )
                 self.snake_state = SnakeState.FINISHED
-                self.snake_status_pub.publish(String(data="FINISHED and RESTARTING"))
-                self.execute_snake_path()
+                self.snake_status_pub.publish(String(data="FINISHED SNAKE PATH"))
+                #self.execute_snake_path()
                 return
 
             self.going_right = not self.going_right
