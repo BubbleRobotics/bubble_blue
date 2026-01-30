@@ -96,7 +96,6 @@ class BodyPIDFollower(Node):
         self.current_depth = None
         self.max_depth = None
         self.going_right = None
-        self.yaw = None
         self.checked_apriltags = False
         self.vel_small = False
 
@@ -105,6 +104,7 @@ class BodyPIDFollower(Node):
         self.snake_timer = self.create_timer(0.1, self._snake_timer_cb)
         self.goal_timer = self.create_timer(5.0, self.send_goal_callback)
         self.snake_yaw_to_use = 0.0
+        self.width_of_ocean_ecostructure = 1.0
         # ==== END SNAKE FSM ADDED ====
 
     def _odom_cb(self, msg: Odometry):
@@ -197,6 +197,13 @@ class BodyPIDFollower(Node):
             return response
 
         yaw_msg = SnakeYaw()
+        roll, pitch, yaw = euler_from_quaternion([
+            self.current_odom.pose.pose.orientation.x,
+            self.current_odom.pose.pose.orientation.y,
+            self.current_odom.pose.pose.orientation.z,
+            self.current_odom.pose.pose.orientation.w
+        ])
+        self.snake_yaw_to_use = yaw
         yaw_msg.snake_yaw = self.snake_yaw_to_use
         yaw_msg.use_snake_yaw = True
 
@@ -249,16 +256,18 @@ class BodyPIDFollower(Node):
         self.bottom_left = {"x": 10.92, "y": 13.56, "depth": 5.0, "yaw": 105.6923}
         self.bottom_right = {"x": 10.7,  "y": 12.63, "depth": 5.0, "yaw": 105.6923}"""
 
-        self.top_left = {"x": 0.0, "y": 0.0, "depth": 0.3, "yaw": 105.6923}
-        self.top_right = {"x": 0.0,  "y": 1.0, "depth": 0.3, "yaw": 105.6923}
-        self.bottom_left = {"x": 0.0, "y": 0.0, "depth": 0.1, "yaw": 105.6923}
-        self.bottom_right = {"x": 0.0,  "y": 1.0, "depth": 0.1, "yaw": 105.6923}
+        x_right = math.sin(self.snake_yaw_to_use)*self.width_of_ocean_ecostructure
+        y_right = -math.cos(self.snake_yaw_to_use)*self.width_of_ocean_ecostructure
+
+        self.top_left = {"x": 0.0, "y": 0.0, "depth": 0.1}
+        self.top_right = {"x": x_right, "y": y_right, "depth": 0.1}
+        self.bottom_left = {"x": 0.0, "y": 0.0, "depth": 0.3}
+        self.bottom_right = {"x": x_right, "y": y_right, "depth": 0.3}
 
         self.depth_step = 0.1
         self.current_depth = self.top_left["depth"]
         self.max_depth = self.bottom_left["depth"]
         self.going_right = True
-        self.yaw = self.top_left["yaw"]
         self.checked_apriltags = False
 
         # Start FSM at "go to tag check position"
@@ -293,7 +302,7 @@ class BodyPIDFollower(Node):
             depth_end = self.bottom_left["depth"]
 
             # Command motion once toward bottom_left
-            self.goto_position(x_end, y_end, depth_end, yaw_deg=self.yaw)
+            self.goto_position(x_end, y_end, depth_end, yaw_deg=self.snake_yaw_to_use)
             self.snake_state = SnakeState.MOVE_TO_TAG_END
             self.snake_status_pub.publish(String(data="MOVE_TO_TAG_END"))
             return
@@ -304,7 +313,7 @@ class BodyPIDFollower(Node):
             depth_end = self.bottom_left["depth"]
 
             reached, dist = self.reached_goal(
-                x_end, y_end, depth_end, self.yaw, threshold=0.25
+                x_end, y_end, depth_end, self.snake_yaw_to_use, threshold=0.25
             )
             if reached:
                 if self.vel_small:
@@ -326,7 +335,7 @@ class BodyPIDFollower(Node):
             self.get_logger().info(
                 f"Moving to start of line at depth {self.current_depth:.2f} m"
             )
-            self.goto_position(x_start, y_start, self.current_depth, yaw_deg=self.yaw)
+            self.goto_position(x_start, y_start, self.current_depth, yaw_deg=self.snake_yaw_to_use)
             self.snake_state = SnakeState.WAIT_AT_LINE_START
             self.snake_status_pub.publish(String(data="WAIT_AT_LINE_START"))
             return
@@ -340,7 +349,7 @@ class BodyPIDFollower(Node):
                 y_start = self.top_right["y"]
 
             reached, dist = self.reached_goal(
-                x_start, y_start, self.current_depth, self.yaw, threshold=0.05
+                x_start, y_start, self.current_depth, self.snake_yaw_to_use, threshold=0.05
             )
             if reached:
                 if self.vel_small:
@@ -358,7 +367,7 @@ class BodyPIDFollower(Node):
                 y_end = self.top_left["y"]
 
             self.get_logger().info("Moving to end of line.")
-            self.goto_position(x_end, y_end, self.current_depth, yaw_deg=self.yaw)
+            self.goto_position(x_end, y_end, self.current_depth, yaw_deg=self.snake_yaw_to_use)
             self.snake_state = SnakeState.WAIT_AT_LINE_END
             self.snake_status_pub.publish(String(data="WAIT_AT_LINE_END"))
             return
@@ -372,7 +381,7 @@ class BodyPIDFollower(Node):
                 y_end = self.top_left["y"]
 
             reached, dist = self.reached_goal(
-                x_end, y_end, self.current_depth, self.yaw, threshold=0.05
+                x_end, y_end, self.current_depth, self.snake_yaw_to_use, threshold=0.05
             )
             if reached:
                 if self.vel_small:
