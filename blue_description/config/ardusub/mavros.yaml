@@ -10,7 +10,11 @@ mavros:
       - vision*
       - local*
       - global_position
+      - heartbeat
+      - setpoint_*
       - mavros_sensor
+      - odometry*
+      - manual_control
     mavros_sensor:
       sensor_topic: "/sensors/generalized_sensor_test"
       mavros_topic: "/mavros/custom_vision_speed/speed_twist"

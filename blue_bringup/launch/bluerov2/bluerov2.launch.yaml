@@ -193,8 +193,8 @@ launch:
         - name: namespace
           value: $(var model_name)
         - name: timeout_sec
-          value: "120.0"           # wait forever; no timeouts that kill launch
+          value: "120.0"
         - name: use_planner
           value: "false" 
         - name: use_follower
-          value: "true"
+          value: "false"

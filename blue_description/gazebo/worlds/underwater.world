@@ -85,8 +85,8 @@
     <include>
     <uri>model://features</uri>
     <pose>0 0 0 0 0 0</pose>
-    </include>
-  
+    </include>    
+    
     <include>
       <uri>
         https://fuel.gazebosim.org/1.0/OpenRobotics/models/Coast Water

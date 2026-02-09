@@ -55,7 +55,7 @@ from tf2_ros import (
 )
 from tf2_ros.buffer import Buffer
 from tf2_ros.transform_listener import TransformListener
-
+from std_srvs.srv import Trigger
 
 class Localizer(Node, ABC):
     """Base class for implementing a visual localization interface."""
@@ -154,22 +154,42 @@ class PoseLocalizer(Localizer):
         )
         self.vision_pose_cov_pub = self.create_publisher(
             PoseWithCovarianceStamped,
-            "/mavros/vision_pose/pose_cov",
+            "/mavros/vision_pose/pose_cov", #TODO see if this change was correct (now through odometry)
             qos_profile_default,
         )
+        self.initialized = False
+        self.initialized_srv = self.create_service(Trigger, "initializer/trigger_ekf_init", self.handle_init_ekf)
 
     def publish(self) -> None:
         """Publish a pose message to the ArduSub EKF."""
+        if not self.initialized:
+            return 
         if isinstance(self.state, PoseStamped):
             self.vision_pose_pub.publish(self.state)
         elif isinstance(self.state, PoseWithCovarianceStamped):
             self.vision_pose_cov_pub.publish(self.state)
+
         else:
             raise TypeError(
                 "Invalid state type provided for publishing. Expected one of"
                 f" {PoseStamped.__name__}, {PoseWithCovarianceStamped.__name__}: got"
                 f" {self.state.__class__.__name__}"
             )
+        
+    def handle_init_ekf(self, request: Trigger.Request, response: Trigger.Response):
+        
+        self.get_logger().info(
+            "\n\n##################################################################\n"
+        )
+        self.get_logger().info(
+            "Service request: initialize"
+        )
+        # Start worker thread to run the mission
+        self.initialized = True
+        # Send simple acknowledgment
+        response.success = True
+        return response
+
 
 
 class TwistLocalizer(Localizer):
@@ -623,6 +643,8 @@ class GazeboLocalizer(PoseLocalizer):
         odom_topic = (
             self.get_parameter("gazebo_odom_topic").get_parameter_value().string_value
         )
+        odom_topic = "/odometry/filtered_old" #TODO filtered
+        
         self.odom_sub = self.create_subscription(
             Odometry, odom_topic, self.update_odom_cb, qos_profile_sensor_data
         )
@@ -633,6 +655,7 @@ class GazeboLocalizer(PoseLocalizer):
         Args:
             msg: The Gazebo ground-truth odometry for the BlueROV2.
         """
+        
         pose_cov = PoseWithCovarianceStamped()
         pose_cov.header = msg.header
         pose_cov.pose = msg.pose

@@ -184,21 +184,10 @@ def reached_goal(x_east_goal, y_north_goal, z_down_goal, yaw_goal, threshold=0.0
 # -------------------------
 home = master.recv_match(type='HOME_POSITION', blocking=True, timeout=2)
 
-
-top_left = {"lat": 47.376824, "lon": 8.5417325, "depth": 3.75, "yaw": 180}
-top_right = {"lat": 47.376824, "lon": 8.54172,   "depth": 3.75, "yaw": 180}
-bottom_left = {"lat": 47.376824, "lon": 8.5417325, "depth": 5.15,  "yaw": 180}
-bottom_right = {"lat": 47.376824, "lon": 8.54172,   "depth": 5.15,  "yaw": 180}
-
-top_left = {"lat":41.358508333, "lon": 2.185419444, "altitude: 0.0depth": 3.1, "yaw": 105.6923}
-top_right = {"lat": 41.3585, "lon": 2.185416667,    "depth": 3.75, "yaw": 105.6923}
-bottom_left = {"lat": 41.358508333, "lon": 2.185419444, "depth": 5.15,  "yaw": 105.6923}
-bottom_right = {"lat": 41.3585, "lon": 2.185416667,   "depth": 5.15,  "yaw": 105.6923}
-
-top_left = {"x":10.92, "y": 13.55, "depth": 3.75, "yaw": 105.6923}
-top_right = {"x": 10.7, "y": 12.63,    "depth": 3.75, "yaw": 105.6923}
-bottom_left = {"x": 10.92, "y": 13.56, "depth": 5.15,  "yaw": 105.6923}
-bottom_right = {"x": 10.7, "y": 12.63,   "depth": 5.15,  "yaw": 105.6923}
+top_left = {"x":10.92, "y": 13.55, "depth": 3.25, "yaw": 105.6923}
+top_right = {"x": 10.7, "y": 12.63,    "depth": 3.25, "yaw": 105.6923}
+bottom_left = {"x": 10.92, "y": 13.56, "depth": 5.0,  "yaw": 105.6923}
+bottom_right = {"x": 10.7, "y": 12.63,   "depth": 5.0,  "yaw": 105.6923}
 
 depth_step = 0.2
 current_depth = top_left["depth"]

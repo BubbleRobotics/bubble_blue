@@ -275,8 +275,8 @@
  
 
       <!-- Pillar at (-2, 2) -->
-      <collision name="pillar_-2_2_collision">
-        <pose>-2 2 0 0 0 0</pose>
+      <collision name="pillar_2_2_collision">
+        <pose>2 2 0 0 0 0</pose>
         <geometry>
           <box>
             <size>1 1 10</size>
@@ -284,7 +284,29 @@
         </geometry>
       </collision>
       <visual name="pillar_-2_2_visual">
-        <pose>-2 2 0 0 0 0</pose>
+        <pose>2 2 0 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1 1 10</size>
+          </box>
+        </geometry>
+        <material>
+          <ambient>0.7 0.7 0.7 1</ambient>
+          <diffuse>0.7 0.7 0.7 1</diffuse>
+        </material>
+      </visual>
+
+      <!-- Pillar at (-2, 2) -->
+      <collision name="pillar_2_-2_collision">
+        <pose>2 -2 0 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1 1 10</size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name="pillar_2_-2_visual">
+        <pose>2 -2 0 0 0 0</pose>
         <geometry>
           <box>
             <size>1 1 10</size>
