@@ -12,7 +12,7 @@ import tf2_geometry_msgs
 
 class NedToEnuOdom(Node):
     def __init__(self):
-        super().__init__('ned_to_enu_odom_sim')
+        super().__init__('odometry_ned_enu')
 
         self.declare_parameter("in_odom", "/odometry/filtered")
         self.declare_parameter("out_odom", "/odometry/filtered_enu")
@@ -36,6 +36,9 @@ class NedToEnuOdom(Node):
 
         self.sub = self.create_subscription(Odometry, in_odom, self.cb, qos)
         self.pub = self.create_publisher(Odometry, out_odom, 10)
+
+        self.sub_de = self.create_subscription(Odometry, "/baro/odom", self.cb_de, qos)
+        self.pub_de = self.create_publisher(Odometry, "/baro/odom_enu", 10)
 
         self.get_logger().info(f"Starting Conversion: {in_odom} (NED) -> {out_odom} (ENU)")
 
@@ -83,7 +86,48 @@ class NedToEnuOdom(Node):
             return
         
         
+    def cb_de(self, msg: Odometry):
+        odom_in = Odometry()
+        odom_in.header = msg.header
+        odom_in.pose = msg.pose
+        odom_in.twist = msg.twist
+        odom_in.child_frame_id = msg.child_frame_id
+        
+        pose_in = PoseWithCovarianceStamped()
+        pose_in.pose = odom_in.pose
+        pose_in.header = odom_in.header
+        
+        twist_in = odom_in.twist
+        
+        try:
+            # Lookup transform target <- source at the message time
+            t_frame = self.tf_buffer.lookup_transform(
+                self.pose_target_frame,
+                odom_in.header.frame_id,
+                rclpy.time.Time.from_msg(odom_in.header.stamp),
+                timeout=Duration(seconds=0.1),
+            )
 
+            pose_out = tf2_geometry_msgs.do_transform_pose_with_covariance_stamped(pose_in, t_frame)
+            twist_out = self.twist_transform(odom_in.header.stamp, twist_in)
+            
+            odom_out = Odometry()
+            odom_out.header = odom_in.header
+            odom_out.header.frame_id = self.pose_target_frame
+            odom_out.child_frame_id = self.twist_target_frame
+            odom_out.pose = pose_out.pose
+            odom_out.twist = twist_out
+
+            self.pub_de.publish(odom_out)
+    
+        except (tf2_ros.LookupException,
+                tf2_ros.ConnectivityException,
+                tf2_ros.ExtrapolationException) as ex:
+            self.get_logger().warn(
+                f"TF transform {pose_in.header.frame_id} -> {self.pose_target_frame} unavailable: {ex}"
+            )
+            return
+    
     def twist_transform(self, msg_stamp, twist:TwistWithCovariance):
         """
         Rotate twist vectors from base_link_frd to base_link using TF.

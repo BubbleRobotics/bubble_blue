@@ -78,8 +78,8 @@ def generate_launch_description():
 
         Node(
             package='path_planner',
-            executable='follower_live_test',
-            name='body_pid_follower',
+            executable='snake_planner',
+            name='snake_planner',
             output='screen',
             parameters=[{
                 'publish_rate_hz': publish_rate_hz,

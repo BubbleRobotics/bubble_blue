@@ -21,8 +21,8 @@ def generate_launch_description():
         ),
         Node(
             package="path_planner",
-            executable="odometry_enu_ned_sim",
-            name="odometry_enu_ned_sim",
+            executable="odometry_ned_enu",
+            name="odometry_ned_enu",
             output="screen",
             parameters=[{
                 "in_odom": in_odom,
