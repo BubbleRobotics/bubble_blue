@@ -1,0 +1,16 @@
+seabed_scan_planner:
+  ros__parameters:
+    odom_topic: "/odometry/filtered_enu"
+    goal_topic: "/ego_planner/move_base_simple/goal"
+    status_topic: "/seabed_scan_planner/status"
+    yaw_topic: "planning/snake_yaw"
+    scan_width_m: 10.0
+    scan_height_m: 10.0
+    lane_spacing_m: 0.5
+    goal_tolerance_m: 0.10
+    stop_speed_threshold_mps: 0.05
+    fixed_depth_down_m: 2.0
+    use_current_depth: true
+    goal_refresh_period_s: 5.0
+    control_period_s: 0.1
+    hold_current_yaw: true

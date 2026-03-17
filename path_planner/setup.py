@@ -14,10 +14,14 @@ setup(
       'launch/follower.launch.py',
       'launch/follower_gated.launch.py', 
       'launch/simple_planner.launch.py',
+      'launch/seabed_scan.launch.py',
       'launch/follower_live_test.launch.py',  
       'launch/odometry_enu_ned.launch.py',
       'launch/odometry_enu_ned_sim.launch.py',
       'launch/simple_accel_controller.launch.py'
+    ]),
+    ('share/path_planner/config', [
+      'config/seabed_scan.yaml',
     ]),
     ],
     install_requires=['setuptools'],
@@ -32,6 +36,7 @@ setup(
         'follower_node = path_planner.follower_node:main',
         'wait_mavros_ready = path_planner.wait_mavros_ready:main',
         'simple_planner = path_planner.simple_planner:main',  
+        'seabed_scan_planner = path_planner.seabed_scan_planner:main',
         'follower_live_test = path_planner.follower_node_live_test:main',
         'odometry_enu_ned = path_planner.odometry_enu_ned:main',
         'odometry_enu_ned_sim = path_planner.odometry_enu_ned_sim:main',
