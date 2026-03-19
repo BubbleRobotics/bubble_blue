@@ -129,6 +129,12 @@ class SeabedScanPlanner(Node):
             depth_down = self.fixed_depth_down_m
 
         self.scan_waypoints = self.build_raster_waypoints(origin_x, origin_y, depth_down)
+        self.scan_waypoints = self.trim_redundant_start_waypoints(self.scan_waypoints)
+        if not self.scan_waypoints:
+            response.success = False
+            response.message = "Generated scan is empty after removing waypoints already at the current pose."
+            return response
+
         self.current_waypoint_index = 0
         self.scan_state = ScanState.MOVE_TO_WAYPOINT
         self.scan_active = True
@@ -267,6 +273,36 @@ class SeabedScanPlanner(Node):
                 if width > 0.0:
                     waypoints.append((x_start, row_y, depth_down))
         return waypoints
+
+    def trim_redundant_start_waypoints(
+        self, waypoints: List[Tuple[float, float, float]]
+    ) -> List[Tuple[float, float, float]]:
+        if self.current_odom is None:
+            return waypoints
+
+        pos = self.current_odom.pose.pose.position
+        current_depth_down = -pos.z
+
+        first_non_redundant_idx = 0
+        for idx, (x_goal, y_goal, z_goal) in enumerate(waypoints):
+            distance = math.sqrt(
+                (x_goal - pos.x) ** 2
+                + (y_goal - pos.y) ** 2
+                + (z_goal - current_depth_down) ** 2
+            )
+            if distance >= self.goal_tolerance_m:
+                first_non_redundant_idx = idx
+                break
+        else:
+            return []
+
+        if first_non_redundant_idx > 0:
+            self.get_logger().info(
+                "Skipping %d initial waypoint(s) already at the current pose."
+                % first_non_redundant_idx
+            )
+
+        return waypoints[first_non_redundant_idx:]
 
 
 def main(args=None):
