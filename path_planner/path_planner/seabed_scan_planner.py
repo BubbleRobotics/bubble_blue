@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 import math
+from collections import deque
 from enum import Enum
-from typing import List, Optional, Tuple
+from typing import Deque, List, Optional, Tuple
 
 import rclpy
 from geometry_msgs.msg import PoseStamped
 from nav_msgs.msg import Odometry
 from rclpy.node import Node
 from rclpy.qos import QoSProfile
-from std_msgs.msg import String
+from std_msgs.msg import Float32, String
 from std_srvs.srv import Trigger
 from tf_transformations import euler_from_quaternion
 from traj_utils.msg import SnakeYaw
@@ -35,6 +36,11 @@ class SeabedScanPlanner(Node):
         self.declare_parameter("stop_speed_threshold_mps", 0.05)
         self.declare_parameter("fixed_depth_down_m", 2.0)
         self.declare_parameter("use_current_depth", True)
+        self.declare_parameter("use_initial_seabed_distance", False)
+        self.declare_parameter("initial_distance_topic", "/min_distance")
+        self.declare_parameter("target_distance_from_seabed_m", 2.0)
+        self.declare_parameter("initial_distance_timeout_s", 1.0)
+        self.declare_parameter("initial_distance_average_samples", 10)
         self.declare_parameter("goal_refresh_period_s", 5.0)
         self.declare_parameter("control_period_s", 0.1)
         self.declare_parameter("hold_current_yaw", True)
@@ -43,6 +49,7 @@ class SeabedScanPlanner(Node):
         goal_topic = self.get_parameter("goal_topic").value
         status_topic = self.get_parameter("status_topic").value
         yaw_topic = self.get_parameter("yaw_topic").value
+        initial_distance_topic = self.get_parameter("initial_distance_topic").value
 
         self.scan_width_m = float(self.get_parameter("scan_width_m").value)
         self.scan_height_m = float(self.get_parameter("scan_height_m").value)
@@ -51,6 +58,18 @@ class SeabedScanPlanner(Node):
         self.stop_speed_threshold_mps = float(self.get_parameter("stop_speed_threshold_mps").value)
         self.fixed_depth_down_m = float(self.get_parameter("fixed_depth_down_m").value)
         self.use_current_depth = bool(self.get_parameter("use_current_depth").value)
+        self.use_initial_seabed_distance = bool(
+            self.get_parameter("use_initial_seabed_distance").value
+        )
+        self.target_distance_from_seabed_m = float(
+            self.get_parameter("target_distance_from_seabed_m").value
+        )
+        self.initial_distance_timeout_s = float(
+            self.get_parameter("initial_distance_timeout_s").value
+        )
+        self.initial_distance_average_samples = max(
+            1, int(self.get_parameter("initial_distance_average_samples").value)
+        )
         self.goal_refresh_period_s = float(self.get_parameter("goal_refresh_period_s").value)
         self.control_period_s = float(self.get_parameter("control_period_s").value)
         self.hold_current_yaw = bool(self.get_parameter("hold_current_yaw").value)
@@ -69,11 +88,22 @@ class SeabedScanPlanner(Node):
         self.scan_state = ScanState.IDLE
         self.scan_active = False
         self.fixed_yaw_rad = 0.0
+        self.latest_min_distance_m: Optional[float] = None
+        self.latest_min_distance_stamp = None
+        self.min_distance_samples: Deque[Tuple[float, object]] = deque(
+            maxlen=self.initial_distance_average_samples
+        )
 
         self.odom_sub = self.create_subscription(
             Odometry,
             odom_topic,
             self.odom_callback,
+            best_effort_qos,
+        )
+        self.min_distance_sub = self.create_subscription(
+            Float32,
+            initial_distance_topic,
+            self.min_distance_callback,
             best_effort_qos,
         )
         self.goal_pub = self.create_publisher(PoseStamped, goal_topic, qos)
@@ -101,6 +131,13 @@ class SeabedScanPlanner(Node):
 
     def odom_callback(self, msg: Odometry) -> None:
         self.current_odom = msg
+
+    def min_distance_callback(self, msg: Float32) -> None:
+        sample = float(msg.data)
+        stamp = self.get_clock().now()
+        self.latest_min_distance_m = sample
+        self.latest_min_distance_stamp = stamp
+        self.min_distance_samples.append((sample, stamp))
 
     def execute_scan_callback(self, request, response):
         del request
@@ -130,6 +167,7 @@ class SeabedScanPlanner(Node):
 
         self.scan_waypoints = self.build_raster_waypoints(origin_x, origin_y, depth_down)
         self.scan_waypoints = self.trim_redundant_start_waypoints(self.scan_waypoints)
+        self.apply_initial_seabed_distance_if_enabled()
         if not self.scan_waypoints:
             response.success = False
             response.message = "Generated scan is empty after removing waypoints already at the current pose."
@@ -238,6 +276,64 @@ class SeabedScanPlanner(Node):
         vel = self.current_odom.twist.twist.linear
         speed = math.sqrt(vel.x * vel.x + vel.y * vel.y + vel.z * vel.z)
         return speed < self.stop_speed_threshold_mps
+
+    def apply_initial_seabed_distance_if_enabled(self) -> None:
+        if not self.use_initial_seabed_distance or not self.scan_waypoints:
+            return
+
+        if self.current_odom is None:
+            return
+
+        if self.latest_min_distance_m is None or self.latest_min_distance_stamp is None:
+            self.get_logger().warn(
+                "Initial seabed-distance mode enabled, but no min_distance has been received yet. "
+                "Using nominal scan depth for the first waypoint."
+            )
+            return
+
+        now = self.get_clock().now()
+        valid_samples = [
+            value
+            for value, stamp in self.min_distance_samples
+            if (now - stamp).nanoseconds / 1e9 <= self.initial_distance_timeout_s
+        ]
+        if not valid_samples:
+            self.get_logger().warn(
+                "No recent min_distance samples are available (timeout %.2f s). "
+                "Using nominal scan depth for the first waypoint."
+                % self.initial_distance_timeout_s
+            )
+            return
+
+        if len(valid_samples) < self.initial_distance_average_samples:
+            self.get_logger().warn(
+                "Only %d/%d recent min_distance samples available. "
+                "Using their average for the first waypoint depth."
+                % (len(valid_samples), self.initial_distance_average_samples)
+            )
+
+        avg_min_distance_m = sum(valid_samples) / len(valid_samples)
+
+        current_depth_down = -self.current_odom.pose.pose.position.z
+        desired_depth_down = (
+            current_depth_down
+            + avg_min_distance_m
+            - self.target_distance_from_seabed_m
+        )
+        x_goal, y_goal, _ = self.scan_waypoints[0]
+        self.scan_waypoints[0] = (x_goal, y_goal, desired_depth_down)
+        self.get_logger().info(
+            "Adjusted first waypoint depth from seabed distance: current_depth=%.2f m, "
+            "avg_min_distance=%.2f m over %d sample(s), target_clearance=%.2f m "
+            "-> first_waypoint_depth=%.2f m"
+            % (
+                current_depth_down,
+                avg_min_distance_m,
+                len(valid_samples),
+                self.target_distance_from_seabed_m,
+                desired_depth_down,
+            )
+        )
 
     def get_current_yaw(self) -> float:
         q = self.current_odom.pose.pose.orientation
