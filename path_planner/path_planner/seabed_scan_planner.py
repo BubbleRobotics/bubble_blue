@@ -33,6 +33,7 @@ class SeabedScanPlanner(Node):
         self.declare_parameter("scan_height_m", 10.0)
         self.declare_parameter("lane_spacing_m", 0.5)
         self.declare_parameter("goal_tolerance_m", 0.10)
+        self.declare_parameter("goal_check_xy_only", False)
         self.declare_parameter("stop_speed_threshold_mps", 0.05)
         self.declare_parameter("fixed_depth_down_m", 2.0)
         self.declare_parameter("use_current_depth", True)
@@ -55,6 +56,7 @@ class SeabedScanPlanner(Node):
         self.scan_height_m = float(self.get_parameter("scan_height_m").value)
         self.lane_spacing_m = float(self.get_parameter("lane_spacing_m").value)
         self.goal_tolerance_m = float(self.get_parameter("goal_tolerance_m").value)
+        self.goal_check_xy_only = bool(self.get_parameter("goal_check_xy_only").value)
         self.stop_speed_threshold_mps = float(self.get_parameter("stop_speed_threshold_mps").value)
         self.fixed_depth_down_m = float(self.get_parameter("fixed_depth_down_m").value)
         self.use_current_depth = bool(self.get_parameter("use_current_depth").value)
@@ -269,7 +271,10 @@ class SeabedScanPlanner(Node):
         x_err = x_goal - pos.x
         y_err = y_goal - pos.y
         z_err = z_goal - (-pos.z)
-        distance = math.sqrt(x_err * x_err + y_err * y_err + z_err * z_err)
+        if self.goal_check_xy_only:
+            distance = math.sqrt(x_err * x_err + y_err * y_err)
+        else:
+            distance = math.sqrt(x_err * x_err + y_err * y_err + z_err * z_err)
         return distance < self.goal_tolerance_m, distance
 
     def is_vehicle_slow(self) -> bool:
