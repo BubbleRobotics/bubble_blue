@@ -37,6 +37,7 @@ setup(
         'wait_mavros_ready = path_planner.wait_mavros_ready:main',
         'simple_planner = path_planner.simple_planner:main',  
         'seabed_scan_planner = path_planner.seabed_scan_planner:main',
+        'seabed_scan_planner_zig_zag = path_planner.seabed_scan_planner_zig_zag:main',
         'follower_live_test = path_planner.follower_node_live_test:main',
         'odometry_enu_ned = path_planner.odometry_enu_ned:main',
         'odometry_enu_ned_sim = path_planner.odometry_enu_ned_sim:main',

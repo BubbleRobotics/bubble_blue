@@ -20,3 +20,7 @@ seabed_scan_planner:
     goal_refresh_period_s: 5.0
     control_period_s: 0.1
     hold_current_yaw: false
+    use_goal_facing_yaw_near_waypoint: false
+    goal_facing_yaw_switch_distance_m: 1.0
+    pre_rotate_to_next_waypoint: false
+    yaw_alignment_tolerance_deg: 10.0

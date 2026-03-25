@@ -498,19 +498,22 @@ class SeabedScanPlanner(Node):
         if abs(y_offsets[-1] - height) > 1e-9:
             y_offsets.append(height)
 
+        x_start = origin_x
+        x_end = origin_x + width
         waypoints: List[Tuple[float, float, float]] = []
-        for row_idx, y_offset in enumerate(y_offsets):
+
+        # Build a true zig-zag path:
+        # row 0 goes from start side to end side, then each new row jumps
+        # directly to the opposite side of the next lane.
+        first_row_y = origin_y + y_offsets[0]
+        waypoints.append((x_start, first_row_y, depth_down))
+        if width > 0.0:
+            waypoints.append((x_end, first_row_y, depth_down))
+
+        for row_idx, y_offset in enumerate(y_offsets[1:], start=1):
             row_y = origin_y + y_offset
-            x_start = origin_x
-            x_end = origin_x + width
-            if row_idx % 2 == 0:
-                waypoints.append((x_start, row_y, depth_down))
-                if width > 0.0:
-                    waypoints.append((x_end, row_y, depth_down))
-            else:
-                waypoints.append((x_end, row_y, depth_down))
-                if width > 0.0:
-                    waypoints.append((x_start, row_y, depth_down))
+            x_target = x_start if row_idx % 2 == 1 else x_end
+            waypoints.append((x_target, row_y, depth_down))
         return waypoints
 
     def trim_redundant_start_waypoints(
