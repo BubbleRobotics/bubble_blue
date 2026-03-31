@@ -107,6 +107,7 @@ class SeabedScanPlanner(Node):
         self.scan_state = ScanState.IDLE
         self.scan_active = False
         self.fixed_yaw_rad = 0.0
+        self.segment_yaw_rad: Optional[float] = None
         self.last_goal_facing_yaw_rad = 0.0
         self.pending_waypoint_index: Optional[int] = None
         self.target_alignment_yaw_rad: Optional[float] = None
@@ -176,6 +177,7 @@ class SeabedScanPlanner(Node):
             return response
 
         self.fixed_yaw_rad = self.get_current_yaw()
+        self.segment_yaw_rad = None
         self.last_goal_facing_yaw_rad = self.fixed_yaw_rad
         if self.hold_current_yaw:
             self.publish_snake_yaw(self.fixed_yaw_rad, True)
@@ -293,6 +295,7 @@ class SeabedScanPlanner(Node):
         self.current_goal = None
         self.pending_waypoint_index = None
         self.target_alignment_yaw_rad = None
+        self.segment_yaw_rad = None
         self.status_pub.publish(String(data=status))
         self.publish_snake_yaw(0.0, False)
 
@@ -406,6 +409,7 @@ class SeabedScanPlanner(Node):
     def start_alignment_to_next_waypoint(self, waypoint_index: int) -> None:
         self.pending_waypoint_index = waypoint_index
         self.target_alignment_yaw_rad = self.compute_yaw_to_waypoint(waypoint_index)
+        self.segment_yaw_rad = self.target_alignment_yaw_rad
         self.current_goal = None
         self.scan_state = ScanState.ALIGN_TO_NEXT_WAYPOINT
         self.publish_snake_yaw(self.target_alignment_yaw_rad, True)
@@ -457,6 +461,10 @@ class SeabedScanPlanner(Node):
             if planar_distance <= self.goal_facing_yaw_switch_distance_m:
                 use_snake_yaw = True
                 yaw_rad = self.compute_goal_facing_yaw()
+
+        if not use_snake_yaw and self.segment_yaw_rad is not None:
+            use_snake_yaw = True
+            yaw_rad = self.segment_yaw_rad
 
         if not use_snake_yaw and self.hold_current_yaw:
             use_snake_yaw = True
