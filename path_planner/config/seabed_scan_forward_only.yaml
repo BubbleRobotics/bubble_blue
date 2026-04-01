@@ -1,4 +1,4 @@
-seabed_scan_planner:
+seabed_scan_planner_forward_only:
   ros__parameters:
     odom_topic: "/odometry/filtered_enu"
     goal_topic: "/ego_planner/move_base_simple/goal"
@@ -12,16 +12,16 @@ seabed_scan_planner:
     goal_check_xy_only: true
     stop_speed_threshold_mps: 0.05
     fixed_depth_down_m: 2.0
-    use_current_depth: false
+    use_current_depth: true
     use_initial_seabed_distance: true
-    initial_distance_topic: "/sonar/distance"
-    target_distance_from_seabed_m: 1.0
+    initial_distance_topic: "/min_distance"
+    target_distance_from_seabed_m: 1.414
     initial_distance_timeout_s: 1.0
     initial_distance_average_samples: 10
     goal_refresh_period_s: 5.0
     control_period_s: 0.1
-    hold_current_yaw: true # adapted to not actually hold yaw, but rather enables simple straight line planner 
-    use_goal_facing_yaw_near_waypoint: true
+    hold_current_yaw: false
+    use_goal_facing_yaw_near_waypoint: false
     goal_facing_yaw_switch_distance_m: 1.0
     pre_rotate_to_next_waypoint: true
     yaw_alignment_tolerance_deg: 10.0

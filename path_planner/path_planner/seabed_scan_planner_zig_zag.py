@@ -30,6 +30,7 @@ class SeabedScanPlanner(Node):
         self.declare_parameter("goal_topic", "/ego_planner/move_base_simple/goal")
         self.declare_parameter("status_topic", "/seabed_scan_planner/status")
         self.declare_parameter("yaw_topic", "planning/snake_yaw")
+        self.declare_parameter("goal_frame_id", "odom")
         self.declare_parameter("scan_width_m", 10.0)
         self.declare_parameter("scan_height_m", 10.0)
         self.declare_parameter("lane_spacing_m", 0.5)
@@ -55,6 +56,7 @@ class SeabedScanPlanner(Node):
         goal_topic = self.get_parameter("goal_topic").value
         status_topic = self.get_parameter("status_topic").value
         yaw_topic = self.get_parameter("yaw_topic").value
+        self.goal_frame_id = self.get_parameter("goal_frame_id").value
         initial_distance_topic = self.get_parameter("initial_distance_topic").value
 
         self.scan_width_m = float(self.get_parameter("scan_width_m").value)
@@ -265,6 +267,7 @@ class SeabedScanPlanner(Node):
 
         goal_msg = PoseStamped()
         goal_msg.header.stamp = self.get_clock().now().to_msg()
+        goal_msg.header.frame_id = self.goal_frame_id
         goal_msg.pose = self.current_goal.pose
         self.goal_pub.publish(goal_msg)
 
@@ -272,9 +275,11 @@ class SeabedScanPlanner(Node):
         x_east, y_north, z_down = self.scan_waypoints[self.current_waypoint_index]
         goal_msg = PoseStamped()
         goal_msg.header.stamp = self.get_clock().now().to_msg()
+        goal_msg.header.frame_id = self.goal_frame_id
         goal_msg.pose.position.x = x_east
         goal_msg.pose.position.y = y_north
         goal_msg.pose.position.z = -z_down
+        goal_msg.pose.orientation.w = 1.0
         self.current_goal = goal_msg
         self.goal_pub.publish(goal_msg)
         self.update_yaw_behavior()
