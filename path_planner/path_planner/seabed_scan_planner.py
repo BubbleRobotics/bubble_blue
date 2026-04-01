@@ -7,7 +7,9 @@ from typing import Deque, List, Optional, Tuple
 import rclpy
 from geometry_msgs.msg import PoseStamped
 from nav_msgs.msg import Odometry
+from rcl_interfaces.msg import SetParametersResult
 from rclpy.node import Node
+from rclpy.parameter import Parameter
 from rclpy.qos import QoSProfile
 from std_msgs.msg import Float32, String
 from std_srvs.srv import Trigger
@@ -120,6 +122,9 @@ class SeabedScanPlanner(Node):
         )
         self._last_snake_yaw_use: Optional[bool] = None
         self._last_snake_yaw_rad: Optional[float] = None
+        self._param_callback_handle = self.add_on_set_parameters_callback(
+            self.on_parameters_changed
+        )
 
         self.odom_sub = self.create_subscription(
             Odometry,
@@ -155,6 +160,60 @@ class SeabedScanPlanner(Node):
             "Seabed scan planner ready: width=%.2f m, height=%.2f m, spacing=%.2f m"
             % (self.scan_width_m, self.scan_height_m, self.lane_spacing_m)
         )
+
+    def on_parameters_changed(self, params: List[Parameter]) -> SetParametersResult:
+        result = SetParametersResult(successful=True)
+        new_target_distance = self.target_distance_from_seabed_m
+        target_updated = False
+
+        for param in params:
+            if param.name != "target_distance_from_seabed_m":
+                continue
+
+            if param.type_ not in (Parameter.Type.DOUBLE, Parameter.Type.INTEGER):
+                result.successful = False
+                result.reason = "target_distance_from_seabed_m must be numeric"
+                return result
+
+            new_target_distance = float(param.value)
+            if new_target_distance <= 0.0:
+                result.successful = False
+                result.reason = "target_distance_from_seabed_m must be > 0"
+                return result
+
+            target_updated = True
+
+        if not target_updated:
+            return result
+
+        previous_target_distance = self.target_distance_from_seabed_m
+        self.target_distance_from_seabed_m = new_target_distance
+        self.get_logger().info(
+            "Updated target_distance_from_seabed_m: %.2f -> %.2f m"
+            % (previous_target_distance, self.target_distance_from_seabed_m)
+        )
+
+        if (
+            self.scan_active
+            and self.use_initial_seabed_distance
+            and self.scan_waypoints
+            and abs(previous_target_distance - new_target_distance) > 1e-9
+        ):
+            depth_adjustment = previous_target_distance - new_target_distance
+            start_index = min(self.current_waypoint_index, len(self.scan_waypoints) - 1)
+            for idx in range(start_index, len(self.scan_waypoints)):
+                x_goal, y_goal, z_down = self.scan_waypoints[idx]
+                self.scan_waypoints[idx] = (x_goal, y_goal, z_down + depth_adjustment)
+
+            if self.current_goal is not None:
+                self.publish_current_waypoint()
+
+            self.get_logger().info(
+                "Shifted remaining seabed-scan waypoints by %.2f m in depth to apply the new target clearance live."
+                % depth_adjustment
+            )
+
+        return result
 
     def odom_callback(self, msg: Odometry) -> None:
         self.current_odom = msg
@@ -265,21 +324,22 @@ class SeabedScanPlanner(Node):
         if self.current_goal is None or not self.scan_active:
             return
 
-        goal_msg = PoseStamped()
-        goal_msg.header.stamp = self.get_clock().now().to_msg()
-        goal_msg.header.frame_id = self.goal_frame_id
-        goal_msg.pose = self.current_goal.pose
+        self.refresh_current_waypoint_depth_from_seabed_distance()
+        goal_msg = self.build_goal_message_for_waypoint(self.current_waypoint_index)
+        if goal_msg is None:
+            return
+        self.current_goal = goal_msg
         self.goal_pub.publish(goal_msg)
 
     def publish_current_waypoint(self) -> None:
-        x_east, y_north, z_down = self.scan_waypoints[self.current_waypoint_index]
-        goal_msg = PoseStamped()
-        goal_msg.header.stamp = self.get_clock().now().to_msg()
-        goal_msg.header.frame_id = self.goal_frame_id
-        goal_msg.pose.position.x = x_east
-        goal_msg.pose.position.y = y_north
-        goal_msg.pose.position.z = -z_down
-        goal_msg.pose.orientation.w = 1.0
+        self.refresh_current_waypoint_depth_from_seabed_distance()
+        goal_msg = self.build_goal_message_for_waypoint(self.current_waypoint_index)
+        if goal_msg is None:
+            return
+
+        x_east = goal_msg.pose.position.x
+        y_north = goal_msg.pose.position.y
+        z_down = -goal_msg.pose.position.z
         self.current_goal = goal_msg
         self.goal_pub.publish(goal_msg)
         self.update_yaw_behavior()
@@ -317,19 +377,16 @@ class SeabedScanPlanner(Node):
         speed = math.sqrt(vel.x * vel.x + vel.y * vel.y + vel.z * vel.z)
         return speed < self.stop_speed_threshold_mps
 
-    def apply_initial_seabed_distance_if_enabled(self) -> None:
-        if not self.use_initial_seabed_distance or not self.scan_waypoints:
-            return
-
-        if self.current_odom is None:
-            return
-
+    def get_recent_min_distance_average(
+        self, warn_if_unavailable: bool = False
+    ) -> Optional[Tuple[float, int]]:
         if self.latest_min_distance_m is None or self.latest_min_distance_stamp is None:
-            self.get_logger().warn(
-                "Initial seabed-distance mode enabled, but no min_distance has been received yet. "
-                "Using nominal scan depth for the first waypoint."
-            )
-            return
+            if warn_if_unavailable:
+                self.get_logger().warn(
+                    "Seabed-distance mode enabled, but no min_distance has been received yet. "
+                    "Keeping the nominal scan depth."
+                )
+            return None
 
         now = self.get_clock().now()
         valid_samples = [
@@ -338,28 +395,91 @@ class SeabedScanPlanner(Node):
             if (now - stamp).nanoseconds / 1e9 <= self.initial_distance_timeout_s
         ]
         if not valid_samples:
-            self.get_logger().warn(
-                "No recent min_distance samples are available (timeout %.2f s). "
-                "Using nominal scan depth for the first waypoint."
-                % self.initial_distance_timeout_s
-            )
-            return
+            if warn_if_unavailable:
+                self.get_logger().warn(
+                    "No recent min_distance samples are available (timeout %.2f s). "
+                    "Keeping the nominal scan depth."
+                    % self.initial_distance_timeout_s
+                )
+            return None
 
-        if len(valid_samples) < self.initial_distance_average_samples:
+        if warn_if_unavailable and len(valid_samples) < self.initial_distance_average_samples:
             self.get_logger().warn(
                 "Only %d/%d recent min_distance samples available. "
-                "Using their average for the first waypoint depth."
+                "Using their average for the scan depth update."
                 % (len(valid_samples), self.initial_distance_average_samples)
             )
 
         avg_min_distance_m = sum(valid_samples) / len(valid_samples)
+        return avg_min_distance_m, len(valid_samples)
 
+    def compute_desired_depth_from_recent_distance(
+        self, warn_if_unavailable: bool = False
+    ) -> Optional[Tuple[float, float, int]]:
+        if self.current_odom is None:
+            return None
+
+        avg_result = self.get_recent_min_distance_average(warn_if_unavailable)
+        if avg_result is None:
+            return None
+
+        avg_min_distance_m, sample_count = avg_result
         current_depth_down = -self.current_odom.pose.pose.position.z
         desired_depth_down = (
             current_depth_down
             + avg_min_distance_m
             - self.target_distance_from_seabed_m
         )
+        return desired_depth_down, avg_min_distance_m, sample_count
+
+    def refresh_current_waypoint_depth_from_seabed_distance(self) -> bool:
+        if (
+            not self.use_initial_seabed_distance
+            or not self.scan_waypoints
+            or self.current_waypoint_index >= len(self.scan_waypoints)
+        ):
+            return False
+
+        desired_depth = self.compute_desired_depth_from_recent_distance(False)
+        if desired_depth is None:
+            return False
+
+        desired_depth_down, _, _ = desired_depth
+        x_goal, y_goal, z_down = self.scan_waypoints[self.current_waypoint_index]
+        if abs(z_down - desired_depth_down) < 1e-6:
+            return False
+
+        self.scan_waypoints[self.current_waypoint_index] = (
+            x_goal,
+            y_goal,
+            desired_depth_down,
+        )
+        return True
+
+    def build_goal_message_for_waypoint(self, waypoint_index: int) -> Optional[PoseStamped]:
+        if waypoint_index < 0 or waypoint_index >= len(self.scan_waypoints):
+            return None
+
+        x_east, y_north, z_down = self.scan_waypoints[waypoint_index]
+        goal_msg = PoseStamped()
+        goal_msg.header.stamp = self.get_clock().now().to_msg()
+        goal_msg.header.frame_id = self.goal_frame_id
+        goal_msg.pose.position.x = x_east
+        goal_msg.pose.position.y = y_north
+        goal_msg.pose.position.z = -z_down
+        goal_msg.pose.orientation.w = 1.0
+        return goal_msg
+
+    def apply_initial_seabed_distance_if_enabled(self) -> None:
+        if not self.use_initial_seabed_distance or not self.scan_waypoints:
+            return
+
+        desired_depth = self.compute_desired_depth_from_recent_distance(True)
+        if desired_depth is None:
+            return
+
+        desired_depth_down, avg_min_distance_m, sample_count = desired_depth
+        current_depth_down = -self.current_odom.pose.pose.position.z
         x_goal, y_goal, _ = self.scan_waypoints[0]
         self.scan_waypoints[0] = (x_goal, y_goal, desired_depth_down)
         self.get_logger().info(
@@ -369,7 +489,7 @@ class SeabedScanPlanner(Node):
             % (
                 current_depth_down,
                 avg_min_distance_m,
-                len(valid_samples),
+                sample_count,
                 self.target_distance_from_seabed_m,
                 desired_depth_down,
             )
