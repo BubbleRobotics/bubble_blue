@@ -9,3 +9,5 @@ ardusub_manager:
         longitude: 2.185278  # 2°11'7.0"E
         altitude: 0.0
     publish_tf: false
+    tf:
+      send: false
