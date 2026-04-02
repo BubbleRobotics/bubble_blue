@@ -51,9 +51,9 @@
       </graded_buoyancy>
     </plugin>
 
-    <include>
+    <!-- <include>
       <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Sun</uri>
-    </include>
+    </include> -->
 
     <include>
       <uri>model://sand_heightmap</uri>
@@ -65,7 +65,7 @@
     <pose>0 0 0 0 0 0</pose>
     </include>
 
-    <include>
+    <!-- <include>
     <uri>model://apriltags</uri>
     <pose>0 0 0 0 0 0</pose>
     </include>
@@ -73,7 +73,7 @@
     <include>
     <uri>model://features</uri>
     <pose>0 0 0 0 0 0</pose>
-    </include>
+    </include> -->
     
     
     <include>
