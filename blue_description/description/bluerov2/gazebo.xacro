@@ -95,19 +95,19 @@
         <mDotQ>0</mDotQ>
         <nDotR>0</nDotR>
         <!-- First order stability derivative -->
-        <xU>0</xU>
-        <yV>0</yV>
-        <zW>0</zW>
-        <kP>0</kP>
-        <mQ>0</mQ>
-        <nR>0</nR>
+        <xU>-4.03</xU>
+        <yV>-6.22</yV>
+        <zW>-5.18</zW>
+        <kP>-0.7</kP>
+        <mQ>-0.7</mQ>
+        <nR>-0.7</nR>
         <!-- Second order stability derivative -->
-        <xUabsU>-33.8</xUabsU>
-        <yVabsV>-54.269</yVabsV>
-        <zWabsW>-73.371</zWabsW>
-        <kPabsP>-4.0</kPabsP>
-        <mQabsQ>-4.0</mQabsQ>
-        <nRabsR>-4.0</nRabsR>
+        <xUabsU>-18.18</xUabsU>
+        <yVabsV>-21.66</yVabsV>
+        <zWabsW>-36.99</zWabsW>
+        <kPabsP>-1.55</kPabsP>
+        <mQabsQ>-1.55</mQabsQ>
+        <nRabsR>-1.55</nRabsR>
       </plugin>
     </gazebo>
 
