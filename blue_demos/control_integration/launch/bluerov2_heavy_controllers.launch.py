@@ -109,7 +109,7 @@ def generate_launch_description() -> LaunchDescription:
             package="controller_manager",
             executable="spawner",
             arguments=[
-                f"thruster{i + 1}_controller",
+                f"thruster_{i + 1}_controller",
                 "--controller-manager",
                 ["", "controller_manager"],
             ],
