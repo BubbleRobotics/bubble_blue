@@ -63,7 +63,7 @@ class Localizer(Node, ABC):
     MAP_FRAME = "map"
     MAP_NED_FRAME = "map_ned"
     BASE_LINK_FRAME = "base_link"
-    BASE_LINK_FRD_FRAME = "base_link_frd"
+    BASE_LINK_FRD_FRAME = "base_link_fsd"
     CAMERA_FRAME = "camera_link"
 
     def __init__(self, node_name: str) -> None:

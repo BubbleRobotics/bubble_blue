@@ -2,11 +2,9 @@
 import rclpy
 from rclpy.node import Node
 from nav_msgs.msg import Odometry
-import numpy as np
-import tf_transformations as tft
 from rclpy.qos import QoSProfile, ReliabilityPolicy, DurabilityPolicy, HistoryPolicy
 from rclpy.duration import Duration
-from geometry_msgs.msg import PoseWithCovariance, TwistWithCovariance, PoseWithCovarianceStamped, Vector3Stamped
+from geometry_msgs.msg import TwistWithCovariance, PoseWithCovarianceStamped, Vector3Stamped
 import tf2_ros
 import tf2_geometry_msgs
 
@@ -130,7 +128,7 @@ class NedToEnuOdom(Node):
     
     def twist_transform(self, msg_stamp, twist:TwistWithCovariance):
         """
-        Rotate twist vectors from base_link_frd to base_link using TF.
+        Rotate twist vectors from base_link_fsd to base_link using TF.
 
         """
 

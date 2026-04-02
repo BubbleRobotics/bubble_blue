@@ -115,7 +115,7 @@ class NedToEnuOdom(Node):
         # Header
         out.header.stamp = msg.header.stamp
         out.header.frame_id = "map_ned"
-        out.child_frame_id = "base_link_frd"  # or base_link if you prefer
+        out.child_frame_id = "base_link_fsd"
 
         # ------------------
         # Position ENU -> NED
