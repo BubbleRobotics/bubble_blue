@@ -190,9 +190,9 @@ class StartTestService(Node):
 
         timestamp = time.strftime("%Y%m%d_%H%M%S")
         if self.test_ego:
-            bag_name = f"{self.bag_output_dir}/ego_test_bag_{self.trajectory_type}_{timestamp}"
+            bag_name = f"{self.bag_output_dir}/ego_bag_{self.trajectory_name}_{timestamp}"
         else:
-            bag_name = f"{self.bag_output_dir}/optimized_trajectory_bag_{self.trajectory_type}_{timestamp}"
+            bag_name = f"{self.bag_output_dir}/opt_bag_{self.trajectory_name}_{timestamp}"
 
         cmd = [
             "ros2", "bag", "record",
