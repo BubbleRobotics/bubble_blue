@@ -8,7 +8,7 @@ seabed_scan_planner:
     scan_width_m: 5.0
     scan_height_m: 5.0
     lane_spacing_m: 0.5
-    goal_tolerance_m: 0.20
+    goal_tolerance_m: 0.40
     goal_check_xy_only: true
     stop_speed_threshold_mps: 0.05
     fixed_depth_down_m: 2.0
@@ -20,8 +20,8 @@ seabed_scan_planner:
     initial_distance_average_samples: 10
     goal_refresh_period_s: 5.0
     control_period_s: 0.1
-    hold_current_yaw: true # adapted to not actually hold yaw, but rather enables simple straight line planner 
-    use_goal_facing_yaw_near_waypoint: true
+    hold_current_yaw: false # adapted to not actually hold yaw, but rather enables simple straight line planner 
+    use_goal_facing_yaw_near_waypoint: false
     goal_facing_yaw_switch_distance_m: 1.0
     pre_rotate_to_next_waypoint: true
-    yaw_alignment_tolerance_deg: 10.0
+    yaw_alignment_tolerance_deg: 20.0
