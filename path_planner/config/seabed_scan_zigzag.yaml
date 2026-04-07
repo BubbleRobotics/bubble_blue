@@ -1,4 +1,4 @@
-seabed_scan_planner:
+seabed_scan_planner_zig_zag:
   ros__parameters:
     odom_topic: "/odometry/filtered_enu"
     goal_topic: "/ego_planner/move_base_simple/goal"
@@ -20,7 +20,7 @@ seabed_scan_planner:
     initial_distance_average_samples: 10
     goal_refresh_period_s: 5.0
     control_period_s: 0.1
-    hold_current_yaw: false # adapted to not actually hold yaw, but rather enables simple straight line planner 
+    hold_current_yaw: false
     use_goal_facing_yaw_near_waypoint: false
     goal_facing_yaw_switch_distance_m: 1.0
     pre_rotate_to_next_waypoint: true

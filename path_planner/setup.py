@@ -15,6 +15,7 @@ setup(
       'launch/follower_gated.launch.py', 
       'launch/simple_planner.launch.py',
       'launch/seabed_scan.launch.py',
+      'launch/seabed_scan_zigzag.launch.py',
       'launch/seabed_scan_forward_only.launch.py',
       'launch/follower_live_test.launch.py',  
       'launch/odometry_enu_ned.launch.py',
@@ -23,6 +24,7 @@ setup(
     ]),
     ('share/path_planner/config', [
       'config/seabed_scan.yaml',
+      'config/seabed_scan_zigzag.yaml',
       'config/seabed_scan_forward_only.yaml',
     ]),
     ],
