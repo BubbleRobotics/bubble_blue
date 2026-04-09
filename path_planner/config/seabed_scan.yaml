@@ -8,7 +8,7 @@ seabed_scan_planner:
     scan_width_m: 5.0
     scan_height_m: 5.0
     lane_spacing_m: 0.5
-    goal_tolerance_m: 0.20
+    goal_tolerance_m: 0.40
     goal_check_xy_only: true
     stop_speed_threshold_mps: 0.05
     fixed_depth_down_m: 2.0
