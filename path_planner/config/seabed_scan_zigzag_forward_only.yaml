@@ -1,4 +1,4 @@
-seabed_scan_planner_zig_zag:
+seabed_scan_planner_zig_zag_forward_only:
   ros__parameters:
     odom_topic: "/odometry/filtered_enu"
     goal_topic: "/ego_planner/move_base_simple/goal"
