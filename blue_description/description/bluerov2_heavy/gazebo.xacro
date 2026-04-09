@@ -3,6 +3,9 @@
   <xacro:macro name="bluerov2_heavy_gazebo" params="prefix">
 
     <xacro:property name="model" value="bluerov2_heavy" />
+    <xacro:arg name="use_imu" default="true" />
+    <xacro:arg name="use_dvl" default="true" />
+    <xacro:arg name="use_gnss" default="true" />
 
     <gazebo>
       <plugin name="ArduPilotPlugin" filename="libArduPilotPlugin.so">
@@ -24,74 +27,74 @@
 
         <!-- Thrusters -->
         <control channel="0">
-          <jointName>${prefix}thruster1_joint</jointName>
+          <jointName>${prefix}thruster1_joint_old</jointName>
           <servo_min>1100</servo_min>
           <servo_max>1900</servo_max>
           <type>COMMAND</type>
-          <cmd_topic>/model/${model}/joint/${prefix}thruster1_joint/cmd_thrust</cmd_topic>
+          <cmd_topic>/model/${model}/joint/${prefix}thruster1_joint_old/cmd_thrust</cmd_topic>
           <offset>-0.5</offset>
           <multiplier>100</multiplier>
         </control>
         <control channel="1">
-          <jointName>${prefix}thruster2_joint</jointName>
+          <jointName>${prefix}thruster2_joint_old</jointName>
           <servo_min>1100</servo_min>
           <servo_max>1900</servo_max>
           <type>COMMAND</type>
-          <cmd_topic>/model/${model}/joint/${prefix}thruster2_joint/cmd_thrust</cmd_topic>
+          <cmd_topic>/model/${model}/joint/${prefix}thruster2_joint_old/cmd_thrust</cmd_topic>
           <offset>-0.5</offset>
           <multiplier>100</multiplier>
         </control>
         <control channel="2">
-          <jointName>${prefix}thruster3_joint</jointName>
+          <jointName>${prefix}thruster3_joint_old</jointName>
           <servo_min>1100</servo_min>
           <servo_max>1900</servo_max>
           <type>COMMAND</type>
-          <cmd_topic>/model/${model}/joint/${prefix}thruster3_joint/cmd_thrust</cmd_topic>
+          <cmd_topic>/model/${model}/joint/${prefix}thruster3_joint_old/cmd_thrust</cmd_topic>
           <offset>-0.5</offset>
           <multiplier>100</multiplier>
         </control>
         <control channel="3">
-          <jointName>${prefix}thruster4_joint</jointName>
+          <jointName>${prefix}thruster4_joint_old</jointName>
           <servo_min>1100</servo_min>
           <servo_max>1900</servo_max>
           <type>COMMAND</type>
-          <cmd_topic>/model/${model}/joint/${prefix}thruster4_joint/cmd_thrust</cmd_topic>
+          <cmd_topic>/model/${model}/joint/${prefix}thruster4_joint_old/cmd_thrust</cmd_topic>
           <offset>-0.5</offset>
           <multiplier>100</multiplier>
         </control>
         <control channel="4">
-          <jointName>${prefix}thruster5_joint</jointName>
+          <jointName>${prefix}thruster5_joint_old</jointName>
           <servo_min>1100</servo_min>
           <servo_max>1900</servo_max>
           <type>COMMAND</type>
-          <cmd_topic>/model/${model}/joint/${prefix}thruster5_joint/cmd_thrust</cmd_topic>
+          <cmd_topic>/model/${model}/joint/${prefix}thruster5_joint_old/cmd_thrust</cmd_topic>
           <offset>-0.5</offset>
           <multiplier>100</multiplier>
         </control>
         <control channel="5">
-          <jointName>${prefix}thruster6_joint</jointName>
+          <jointName>${prefix}thruster6_joint_old</jointName>
           <servo_min>1100</servo_min>
           <servo_max>1900</servo_max>
           <type>COMMAND</type>
-          <cmd_topic>/model/${model}/joint/${prefix}thruster6_joint/cmd_thrust</cmd_topic>
+          <cmd_topic>/model/${model}/joint/${prefix}thruster6_joint_old/cmd_thrust</cmd_topic>
           <offset>-0.5</offset>
           <multiplier>100</multiplier>
         </control>
         <control channel="6">
-          <jointName>${prefix}thruster7_joint</jointName>
+          <jointName>${prefix}thruster7_joint_old</jointName>
           <servo_min>1100</servo_min>
           <servo_max>1900</servo_max>
           <type>COMMAND</type>
-          <cmd_topic>/model/${model}/joint/${prefix}thruster7_joint/cmd_thrust</cmd_topic>
+          <cmd_topic>/model/${model}/joint/${prefix}thruster7_joint_old/cmd_thrust</cmd_topic>
           <offset>-0.5</offset>
           <multiplier>100</multiplier>
         </control>
         <control channel="7">
-          <jointName>${prefix}thruster8_joint</jointName>
+          <jointName>${prefix}thruster8_joint_old</jointName>
           <servo_min>1100</servo_min>
           <servo_max>1900</servo_max>
           <type>COMMAND</type>
-          <cmd_topic>/model/${model}/joint/${prefix}thruster8_joint/cmd_thrust</cmd_topic>
+          <cmd_topic>/model/${model}/joint/${prefix}thruster8_joint_old/cmd_thrust</cmd_topic>
           <offset>-0.5</offset>
           <multiplier>100</multiplier>
         </control>
@@ -110,19 +113,19 @@
         <mDotQ>0</mDotQ>
         <nDotR>0</nDotR>
         <!-- First order stability derivative -->
-        <xU>0</xU>
-        <yV>0</yV>
-        <zW>0</zW>
-        <kP>0</kP>
-        <mQ>0</mQ>
-        <nR>0</nR>
+        <xU>-4.03</xU>
+        <yV>-6.22</yV>
+        <zW>-5.18</zW>
+        <kP>-0.7</kP>
+        <mQ>-0.7</mQ>
+        <nR>-0.7</nR>
         <!-- Second order stability derivative -->
-        <xUabsU>-58.42</xUabsU>
-        <yVabsV>-55.137</yVabsV>
-        <zWabsW>-124.818</zWabsW>
-        <kPabsP>-4.0</kPabsP>
-        <mQabsQ>-4.0</mQabsQ>
-        <nRabsR>-4.0</nRabsR>
+        <xUabsU>-18.18</xUabsU>
+        <yVabsV>-21.66</yVabsV>
+        <zWabsW>-36.99</zWabsW>
+        <kPabsP>-1.55</kPabsP>
+        <mQabsQ>-1.55</mQabsQ>
+        <nRabsR>-1.55</nRabsR>
       </plugin>
     </gazebo>
 
@@ -136,6 +139,11 @@
         <update_rate>1000.0</update_rate>
       </sensor>
     </gazebo>
+
+    <!-- Publish the sensor data for the bubble_blue package -->
+    <xacro:include filename="$(find blue_description)/description/bluerov2_heavy/sensors.xacro" />
+    <xacro:sensors_macro prefix="$(arg prefix)" use_sim="true" use_imu="$(arg use_imu)"
+      use_dvl="$(arg use_dvl)" use_gnss="$(arg use_gnss)" />
 
     <!-- Publish the ground-truth pose -->
     <gazebo>

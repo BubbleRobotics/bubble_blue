@@ -34,6 +34,19 @@
       </collision>
     </link>
 
+    <gazebo reference="${prefix}base_link">
+      <inertial>
+        <fluid_added_mass>
+          <xx>5.5</xx>
+          <yy>12.7</yy>
+          <zz>14.57</zz>
+          <pp>0.12</pp>
+          <qq>0.12</qq>
+          <rr>0.12</rr>
+        </fluid_added_mass>
+      </inertial>
+    </gazebo>
+
     <joint name="${prefix}base_footprint_joint" type="fixed">
       <parent link="${prefix}base_footprint" />
       <child link="${prefix}base_link" />

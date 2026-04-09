@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <xacro:macro name="sensors_macro" params="prefix:='' use_sim:=false use_imu:=true use_dvl:=true use_gnss:=true">
+    <!-- Import IMU sensor -->
+    <xacro:include filename="$(find blue_description)/description/vn100/urdf.xacro" />
+    <xacro:imu_urdf prefix="$(arg prefix)" parent="$(arg prefix)base_link">
+      <!-- Should output body-fixed measurements(NED)-->
+      <origin rpy="3.1415 0 0" xyz="0.0 0.0 0.1" />
+    </xacro:imu_urdf>
+
+    <!-- Import DVL sensor -->
+    <!-- The physical DVL model is there regardless of whether use_dvl is true -->
+    <xacro:include filename="$(find blue_description)/description/dvl/urdf.xacro" />
+    <xacro:dvl_urdf prefix="$(arg prefix)" parent="$(arg prefix)base_link">
+      <origin rpy="3.1416 0 0" xyz="0.0 0.0 -0.12" />
+    </xacro:dvl_urdf>
+
+    <!-- GNSS sensor -->
+    <xacro:include filename="$(find sensors_gnss)/description/ZED-F9P/urdf.xacro" />
+    <xacro:gnss_urdf prefix="$(arg prefix)" parent="$(arg prefix)base_link" />
+
+    <!-- Import Realsense URDF-->
+    <xacro:include filename="$(find sensors_camera)/description/d455/urdf.xacro" />
+    <xacro:realsense_d455_urdf parent="$(arg prefix)base_link" prefix="$(arg prefix)">
+    </xacro:realsense_d455_urdf>
+
+    <!-- Add Gazebo sensor plugins if in simulation -->
+    <xacro:if value="$(arg use_sim)">
+      <xacro:include filename="$(find blue_description)/description/vn100/gazebo.xacro" />
+      <xacro:imu_gazebo reference="$(arg prefix)imu_link" topic="/vectornav/Imu_raw"
+        frame_id="vectornav" />
+
+      <xacro:include filename="$(find blue_description)/description/dvl/gazebo.xacro" />
+      <xacro:dvl_gazebo reference="$(arg prefix)dvl_link" topic="/dvl/data_test" />
+
+      <xacro:include filename="$(find sensors_gnss)/description/ZED-F9P/gazebo.xacro" />
+      <xacro:gnss_gazebo reference="$(arg prefix)gnss_link" />
+
+    <!-- TODO: eventually these should only be executed when a flag use_d455 is 
+     set during launch. However, currently, parameter passing does not work, the 
+     chain is broken at some link.-->
+      <xacro:include filename="$(find sensors_camera)/description/d455/gazebo.xacro" />
+      <xacro:realsense_d455_gazebo reference="$(arg prefix)realsense_d455_link"/>
+    </xacro:if>
+  </xacro:macro>
+</robot>

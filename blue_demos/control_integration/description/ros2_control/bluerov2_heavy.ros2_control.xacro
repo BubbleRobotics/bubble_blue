@@ -6,7 +6,6 @@
 
       <hardware>
         <plugin>fake_thruster_hardware/FakeThrusterHardware</plugin>
-        <param name="max_set_param_attempts">${max_set_param_attempts}</param>
       </hardware>
 
       <joint name="${prefix}thruster1_joint">

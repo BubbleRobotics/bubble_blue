@@ -61,7 +61,6 @@ launch:
       if: $(var test_ego)
       value: "$(find-pkg-share blue_description)/gazebo/worlds/ego_underwater.world"
 
-  
   - let:
       name: gazebo_world_file
       # RRT test world (obstacle wall with hole)
@@ -97,11 +96,6 @@ launch:
   - arg:
       name: robot_description
       default: $(command 'xacro $(var description_file) use_sim:=$(var use_sim)')
-
-
-  - arg:
-      name: use_path_planner
-      default: "false"
 
   # Nodes
 
@@ -179,18 +173,4 @@ launch:
 
   - include:
       file: $(find-pkg-share blue_bringup)/launch/$(var model_name)/thrusters.launch.yaml
-        
-  - include:
-      file: $(find-pkg-share path_planner)/launch/follower_gated.launch.py
-      if: $(var use_path_planner)
-      arg:
-        - name: use_sim_time
-          value: $(var use_sim)
-        - name: namespace
-          value: $(var model_name)
-        - name: timeout_sec
-          value: "120.0"
-        - name: use_planner
-          value: "false" 
-        - name: use_follower
-          value: "false"
+  

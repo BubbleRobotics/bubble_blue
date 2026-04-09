@@ -12,6 +12,10 @@ launch:
   - arg:
       name: use_mocap
       default: "false"
+    
+  - arg:
+      name: use_blue_localization
+      default: "true"
 
   - arg:
       name: localization_source
@@ -26,6 +30,14 @@ launch:
       default: "false"
 
   - arg:
+      name: test_ego
+      default: "false"
+
+  - arg:
+      name: test_rrt
+      default: "false"
+
+  - arg:
       name: use_rviz
       default: "false"
 
@@ -37,12 +49,31 @@ launch:
       name: rviz_config
       default: $(find-pkg-share blue_description)/rviz/$(var model_name).rviz
 
-  - arg:
+  # Decide which Gazebo world to use
+  - let:
       name: gazebo_world_file
-      default: $(find-pkg-share blue_description)/gazebo/worlds/underwater.world
+      # default world (Barcelona Harbor Pilot)
+      value: "$(find-pkg-share blue_description)/gazebo/worlds/underwater.world"
+
+  - let:
+      name: gazebo_world_file
+      # EGO test world (basic collumns)
+      if: $(var test_ego)
+      value: "$(find-pkg-share blue_description)/gazebo/worlds/ego_underwater.world"
+
+  - let:
+      name: gazebo_world_file
+      # RRT test world (obstacle wall with hole)
+      if: $(var test_rrt)
+      value: "$(find-pkg-share blue_description)/gazebo/worlds/rrt_underwater.world"
+
 
   - arg:
-      name: mavros_file
+      name: mavros_file_sim
+      default: $(find-pkg-share blue_description)/config/ardusub/mavros_sim.yaml
+
+  - arg:
+      name: mavros_file_real
       default: $(find-pkg-share blue_description)/config/ardusub/mavros.yaml
 
   - arg:
@@ -85,12 +116,31 @@ launch:
         - name: robot_description
           value: $(var robot_description)
 
-  # Includes
   - include:
       file: $(find-pkg-share ardusub_bringup)/launch/ardusub.launch.yaml
+      if: $(var use_sim)
       arg:
         - name: mavros_file
-          value: $(var mavros_file)
+          value: $(var mavros_file_sim)
+        - name: gazebo_world_file
+          value: $(var gazebo_world_file)
+        - name: ardusub_params_file
+          value: $(var ardusub_params_file)
+        - name: manager_file
+          value: $(var manager_file)
+        - name: model_name
+          value: $(var model_name)
+        - name: use_sim
+          value: $(var use_sim)
+        - name: use_manager
+          value: $(var use_manager)
+
+  - include:
+      file: $(find-pkg-share ardusub_bringup)/launch/ardusub.launch.yaml
+      if: $(not $(var use_sim))
+      arg:
+        - name: mavros_file
+          value: $(var mavros_file_real)
         - name: gazebo_world_file
           value: $(var gazebo_world_file)
         - name: ardusub_params_file
@@ -106,6 +156,7 @@ launch:
 
   - include:
       file: $(find-pkg-share blue_localization)/localization.launch.py
+      if: $(var use_blue_localization)
       arg:
         - name: localization_source
           value: $(var localization_source)
@@ -120,6 +171,3 @@ launch:
 
   - include:
       file: $(find-pkg-share blue_bringup)/launch/$(var model_name)/thrusters.launch.yaml
-
-  - include:
-      file: $(find-pkg-share message_transforms)/launch/tf.launch.yaml

@@ -47,7 +47,7 @@ class StartTestService(Node):
             "/clock",
             "/odometry/filtered",
             "/odometry/filtered_enu",
-            "/model/bluerov2/odometry",
+            "/model/bluerov2_heavy/odometry",
             "/current_disturbance/current",
             "/position_cmd",
             "/adaptive_integral_terminal_sliding_mode_controller/reference",

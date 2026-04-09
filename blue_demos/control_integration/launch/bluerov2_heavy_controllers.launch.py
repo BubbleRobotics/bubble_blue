@@ -25,14 +25,15 @@ from launch.actions import (
     RegisterEventHandler,
 )
 from launch.event_handlers import OnProcessExit
-from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch.launch_description_sources import AnyLaunchDescriptionSource
 from launch.substitutions import PathJoinSubstitution, TextSubstitution
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
 
 
 def generate_launch_description() -> LaunchDescription:
-    """Generate a launch description for the BlueROV2.
+    """Generate a launch description for the BlueROV2 Heavy.
+
     This should be launched after MAVROS has fully loaded.
     """
     args = [
@@ -53,12 +54,12 @@ def generate_launch_description() -> LaunchDescription:
 
     # The ISMC expects state information to be provided in the FSD frame
     message_transformer = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
+        AnyLaunchDescriptionSource(
             PathJoinSubstitution(
                 [
                     FindPackageShare("message_transforms"),
                     "launch",
-                    "message_transforms.launch.py",
+                    "message_transforms.launch.yaml",
                 ]
             )
         ),
@@ -114,7 +115,7 @@ def generate_launch_description() -> LaunchDescription:
                 ["", "controller_manager"],
             ],
         )
-        for i in range(8)  # BlueROV2 Heavy has 8 thrusters
+        for i in range(8)  # BlueROV2 heavy has 8 thrusters
     ]
 
     delay_thruster_spawners = []

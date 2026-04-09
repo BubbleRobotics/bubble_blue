@@ -57,7 +57,7 @@ def generate_launch_description():
             IncludeLaunchDescription(
                 PythonLaunchDescriptionSource([
                     FindPackageShare('blue_demos'),
-                    '/control_integration/launch/bluerov2_controllers.launch.py'
+                    '/control_integration/launch/bluerov2_heavy_controllers.launch.py'
                 ])
             )
         ]

@@ -49,7 +49,7 @@ class SimplePlannerNode(Node):
         self.last_direction = "None"
         # MAVROS subscribers
         #self._pose_sub = self.create_subscription(PoseWithCovarianceStamped, '/mavros/vision_pose/pose_cov', self._pose_cb, 10)
-        self.depth_sub = self.create_subscription(Odometry, 'model/bluerov2/odometry', self._odom_callback, 10)
+        self.depth_sub = self.create_subscription(Odometry, 'model/bluerov2_heavy/odometry', self._odom_callback, 10)
         # MAVROS setpoint publishers
         self.vel_local_pub = self.create_publisher(TwistStamped,'/pilot_planner/vel_cmd',10)
         
