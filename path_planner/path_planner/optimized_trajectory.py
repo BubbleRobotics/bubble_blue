@@ -24,8 +24,22 @@ class StartTestService(Node):
         self.declare_parameter("test_ego", False)
         self.test_ego = self.get_parameter("test_ego").value
 
-        self.declare_parameter("use_current_disturbances", False)
-        self.use_current_disturbances = self.get_parameter("use_current_disturbances").value
+        self.nr_ego_done = 0
+        self.nr_opt_done = 0
+        self.nr_per_process = 20
+
+        self.declare_parameter("use_known_currents", False)
+        self.use_known_currents = self.get_parameter("use_known_currents").value #use_current_disturbances
+        self.declare_parameter("use_disturbance_currents", False)
+        self.use_disturbance_currents = self.get_parameter("use_disturbance_currents").value
+
+        self.evalation_test = True
+        self.evaluation_test_case = 0
+        # First case: No Currents
+        self.test_ego = True
+        self.use_known_currents = False
+        self.use_disturbance_currents = False
+
 
         self.bag_process = None
 
@@ -51,7 +65,8 @@ class StartTestService(Node):
         self.service_group = MutuallyExclusiveCallbackGroup()
         self.client_group = ReentrantCallbackGroup()
 
-        self.trajectory_name = "example_trajectory"
+        self.trajectory_name = "example_trajectory" # For test case 0 and 1
+        # self.trajectory_name = "data_xd_dense_10ms_05_against_long" for test case 2 and 3
         self.csv_file_path = Path(
             f"/home/ubuntu/ws_blue/src/blue/path_planner/optimized_trajectories/{self.trajectory_name}.csv"
         )
@@ -70,9 +85,9 @@ class StartTestService(Node):
         self.start_world_qz = 0.0
         self.start_world_qw = 1.0
 
-        self.goal_x = 0.0
-        self.goal_y = 0.0
-        self.goal_z = 0.0
+        self.goal_x = 999
+        self.goal_y = 999
+        self.goal_z = 999
 
         self.pub = self.create_publisher(
             OptimizedTrajectory,
@@ -92,15 +107,27 @@ class StartTestService(Node):
             callback_group=self.client_group,
         )
 
-        self.start_disturbances_client = self.create_client(
+        self.start_known_currents_client = self.create_client(
             Trigger,
-            "/current_disturbances/start_disturbances",
+            "/current_disturbances/start_known_currents",
             callback_group=self.client_group,
         )
 
-        self.end_disturbances_client = self.create_client(
+        self.end_known_currents_client = self.create_client(
             Trigger,
-            "/current_disturbances/end_disturbances",
+            "/current_disturbances/end_known_currents",
+            callback_group=self.client_group,
+        )
+
+        self.start_disturbance_currents_client = self.create_client(
+            Trigger,
+            "/current_disturbances/start_disturbance_currents",
+            callback_group=self.client_group,
+        )
+
+        self.end_disturbance_currents_client = self.create_client(
+            Trigger,
+            "/current_disturbances/end_disturbance_currents",
             callback_group=self.client_group,
         )
 
@@ -190,9 +217,9 @@ class StartTestService(Node):
 
         timestamp = time.strftime("%Y%m%d_%H%M%S")
         if self.test_ego:
-            bag_name = f"{self.bag_output_dir}/ego_bag_{self.trajectory_name}_{timestamp}"
+            bag_name = f"{self.bag_output_dir}/ego_bag_{self.trajectory_name}_current_known_{self.use_known_currents}_dist_{self.use_disturbance_currents}_{timestamp}"
         else:
-            bag_name = f"{self.bag_output_dir}/opt_bag_{self.trajectory_name}_{timestamp}"
+            bag_name = f"{self.bag_output_dir}/opt_bag_{self.trajectory_name}_current_known_{self.use_known_currents}_dist_{self.use_disturbance_currents}_{timestamp}"
 
         cmd = [
             "ros2", "bag", "record",
@@ -380,6 +407,16 @@ class StartTestService(Node):
         )
         
         if goal_reached:
+            if self.nr_ego_done >= self.nr_per_process and self.nr_opt_done >= self.nr_per_process:
+                self.get_logger().info("All tests completed, Stopping.")
+                # self.goal_x = 999
+                # self.goal_y = 999
+                # self.goal_z = 999
+                # self.test_ego = True
+                # self.nr_ego_done = 0
+                # self.nr_opt_done = 0
+                # self.stop_bag_recording()
+                # return
             self.get_logger().info("Goal reached, stopping ros2 bag recording...")
             self.stop_bag_recording()
             self.get_logger().info("Restarting the test with the next trajectory...")
@@ -431,6 +468,45 @@ class StartTestService(Node):
         return msg
 
     def handle_start_test(self, request, response):
+
+        if self.evalation_test:
+            if self.nr_ego_done >= self.nr_per_process and self.nr_opt_done >= self.nr_per_process:
+                self.evaluation_test_case += 1
+                self.nr_ego_done = 0
+                self.nr_opt_done = 0
+                self.test_ego = True
+                if self.evaluation_test_case >= 4:
+                    self.get_logger().info("All tests completed, Stopping.")
+
+                    response.success = True
+                    response.message = "All tests completed."
+                    return response
+                else:
+                    if self.evaluation_test_case == 1:
+                        self.use_known_currents = False
+                        self.use_disturbance_currents = True
+                    elif self.evaluation_test_case == 2:
+                        self.use_known_currents = True
+                        self.use_disturbance_currents = False
+                        self.trajectory_name = "data_xd_dense_10ms_05_against_long" # Switch to trajectory with known currents for test case 2 and 3
+                        self.csv_file_path = Path(
+                            f"/home/ubuntu/ws_blue/src/blue/path_planner/optimized_trajectories/{self.trajectory_name}.csv"
+                        )
+                    elif self.evaluation_test_case == 3:
+                        self.use_known_currents = True
+                        self.use_disturbance_currents = True
+
+                    self.get_logger().info(f"\n\n\nStarting evaluation test case {self.evaluation_test_case}/3\n\n\n")
+            
+        if self.nr_ego_done >= self.nr_per_process:
+            self.test_ego = False
+            self.nr_opt_done += 1
+            self.get_logger().info(f"\n######################################### \n \n \n Starting optimized trajectory test [{self.nr_opt_done}/{self.nr_per_process}] \n \n \n#########################################")
+        else:
+            self.nr_ego_done += 1
+            self.get_logger().info(f"\n######################################### \n \n \n Starting EGO trajectory test [{self.nr_ego_done}/{self.nr_per_process}] \n \n \n#########################################")
+        
+
         del request
         t0 = time.time()
 
@@ -515,20 +591,31 @@ class StartTestService(Node):
             if not ok:
                 self.get_logger().warn(f"Resetting trajectory server failed: {msg}")
 
-        # If current disturbances are enabled, turn them off when moving the robot to the starting positionn
-        if self.use_current_disturbances:
-            if self.wait_for_service_client(
-                self.end_disturbances_client,
-                "/current_disturbances/end_disturbances",
-                timeout_sec=1.0,
-            ):
-                ok, msg = self.call_trigger_client(
-                    self.end_disturbances_client,
-                    "/current_disturbances/end_disturbances",
-                    timeout_sec=5.0,
-                )
-                if not ok:
-                    self.get_logger().warn(f"Ending disturbances failed: {msg}")
+        # Turn off all currents before starting the test to ensure a clean state, in case they were left on from a previous test
+        if self.wait_for_service_client(
+            self.end_known_currents_client,
+            "/current_disturbances/end_known_currents",
+            timeout_sec=1.0,
+        ):
+            ok, msg = self.call_trigger_client(
+                self.end_known_currents_client,
+                "/current_disturbances/end_known_currents",
+                timeout_sec=5.0,
+            )
+            if not ok:
+                self.get_logger().warn(f"Ending disturbances failed: {msg}")
+        if self.wait_for_service_client(
+            self.end_disturbance_currents_client,
+            "/current_disturbances/end_disturbance_currents",
+            timeout_sec=1.0,
+        ):
+            ok, msg = self.call_trigger_client(
+                self.end_disturbance_currents_client,
+                "/current_disturbances/end_disturbance_currents",
+                timeout_sec=5.0,
+            )
+            if not ok:
+                self.get_logger().warn(f"Ending disturbances failed: {msg}")
 
         # Stop the EGO trajectory server output
         cmd_state_msg = String()
@@ -635,15 +722,29 @@ class StartTestService(Node):
         cmd_state_msg.data = "auv_controller"
         self.cmd_state_pub.publish(cmd_state_msg)
         
-        if self.use_current_disturbances:
+        if self.use_known_currents:
             if self.wait_for_service_client(
-                self.start_disturbances_client,
-                "/current_disturbances/start_disturbances",
+                self.start_known_currents_client,
+                "/current_disturbances/start_known_currents",
                 timeout_sec=1.0,
             ):
                 ok, msg = self.call_trigger_client(
-                    self.start_disturbances_client,
-                    "/current_disturbances/start_disturbances",
+                    self.start_known_currents_client,
+                    "/current_disturbances/start_known_currents",
+                    timeout_sec=5.0,
+                )
+                if not ok:
+                    self.get_logger().warn(f"Starting disturbances failed: {msg}")
+
+        if self.use_disturbance_currents:
+            if self.wait_for_service_client(
+                self.start_disturbance_currents_client,
+                "/current_disturbances/start_disturbance_currents",
+                timeout_sec=1.0,
+            ):
+                ok, msg = self.call_trigger_client(
+                    self.start_disturbance_currents_client,
+                    "/current_disturbances/start_disturbance_currents",
                     timeout_sec=5.0,
                 )
                 if not ok:

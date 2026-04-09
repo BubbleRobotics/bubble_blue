@@ -5,7 +5,8 @@ from launch_ros.actions import Node
 
 def generate_launch_description():
     test_ego = LaunchConfiguration('test_ego')
-    use_current_disturbances = LaunchConfiguration('use_current_disturbances')
+    use_known_currents = LaunchConfiguration('use_known_currents')
+    use_disturbance_currents = LaunchConfiguration('use_disturbance_currents')
 
     return LaunchDescription([
         DeclareLaunchArgument(
@@ -14,9 +15,14 @@ def generate_launch_description():
             description='Run ego test mode'
         ),
         DeclareLaunchArgument(
-            'use_current_disturbances',
+            'use_known_currents',
             default_value='false',
-            description='Whether to use current disturbances in the optimized trajectory node'
+            description='Whether to use known currents in the optimized trajectory node'
+        ),
+        DeclareLaunchArgument(
+            'use_disturbance_currents',
+            default_value='false',
+            description='Whether to use disturbance currents in the optimized trajectory node'
         ),
 
         Node(
@@ -27,7 +33,8 @@ def generate_launch_description():
             parameters=[{
                 'use_sim_time': False,
                 'test_ego': test_ego,
-                'use_current_disturbances': use_current_disturbances
+                'use_known_currents': use_known_currents,
+                'use_disturbance_currents': use_disturbance_currents,
             }],
         ),
     ])

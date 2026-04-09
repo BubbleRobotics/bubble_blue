@@ -2,38 +2,38 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
   <hydrodynamics>
     <inertial>
-      <mass value="16.61" />
-      <inertia ixx="0.24"
-               iyy="0.2"
-               izz="0.4" />
+      <mass value="10.0" />
+      <inertia ixx="0.16"
+               iyy="0.16"
+               izz="0.16" />
       <center_of_gravity x="0.0"
                          y="0.0"
                          z="0.0" />
-      <added_mass Xdu="-12.7"
-                  Ydv="-10.5"
-                  Zdw="-14.57"
+      <added_mass Xdu="-5.5"
+                  Ydv="-12.7"
+                  Zdw="-14.6"
                   Kdp="-0.12"
                   Mdq="-0.12"
                   Ndr="-0.12" />
     </inertial>
 
     <damping>
-      <linear Xu="-28.23"
-              Yv="-18.29"
-              Zw="-23.51"
-              Kp="-0.31"
-              Mq="-0.31"
-              Nr="-0.31" />
-      <quadratic Xuu="-93.47"
-                 Yvv="-74.28"
-                 Zww="-168.17"
+      <linear Xu="-4.03"
+              Yv="-6.22"
+              Zw="-5.18"
+              Kp="-0.07"
+              Mq="-0.07"
+              Nr="-0.07" />
+      <quadratic Xuu="-18.18"
+                 Yvv="-21.66"
+                 Zww="-36.99"
                  Kpp="-1.55"
                  Mqq="-1.55"
                  Nrr="-1.55" />
     </damping>
 
     <hydrostatics>
-      <buoyancy value="159.91" />
+      <buoyancy value="100.06" />
       <center_of_buoyancy x="0.0"
                           y="0.0"
                           z="0.0" />

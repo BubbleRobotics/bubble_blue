@@ -74,15 +74,15 @@ adaptive_integral_terminal_sliding_mode_controller:
       base_frame: "base_link_fsd"
       odom_frame: "map_ned"
     hydrodynamics:
-      mass: 16.61
+      mass: 10.0
       weight: 98.1
-      buoyancy: 159.91
-      moments_of_inertia: [0.24, 0.2, 0.4]
-      added_mass: [-12.7, -10.5, -14.57, -0.12, -0.12, -0.12]
+      buoyancy: 100.06
+      moments_of_inertia: [0.16, 0.16, 0.16]
+      added_mass: [-5.50, -12.70, -14.60, -0.12, -0.12, -0.12]
       center_of_buoyancy: [0.0, 0.0, 0.0]
       center_of_gravity: [0.0, 0.0, 0.0]
-      linear_damping: [-28.23, -18.29, -23.51, -0.31, -0.31, -0.31]
-      quadratic_damping: [-93.47, -74.28, -168.17, -1.55, -1.55, -1.55]
+      linear_damping: [-4.03, -6.22, -5.18, -0.07, -0.07, -0.07]
+      quadratic_damping: [-18.18, -21.66, -36.99, -1.55, -1.55, -1.55]
 
 thruster_allocation_matrix_controller:
   ros__parameters:
