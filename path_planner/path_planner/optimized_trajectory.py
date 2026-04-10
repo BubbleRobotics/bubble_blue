@@ -34,8 +34,8 @@ class StartTestService(Node):
         self.use_disturbance_currents = self.get_parameter("use_disturbance_currents").value
 
         self.evalation_test = True
-        self.evaluation_test_case = 0
         # First case: No Currents
+        self.evaluation_test_case = 1
         self.test_ego = True
         self.use_known_currents = False
         self.use_disturbance_currents = False
@@ -65,8 +65,8 @@ class StartTestService(Node):
         self.service_group = MutuallyExclusiveCallbackGroup()
         self.client_group = ReentrantCallbackGroup()
 
-        self.trajectory_name = "example_trajectory" # For test case 0 and 1
-        # self.trajectory_name = "data_xd_dense_10ms_05_against_long" for test case 2 and 3
+        self.trajectory_name = "No_Current_Heavy" # For test case 0 and 1
+        # self.trajectory_name = "With_Current_Heavy" for test case 2 and 3
         self.csv_file_path = Path(
             f"/home/ubuntu/ws_blue/src/blue/path_planner/optimized_trajectories/{self.trajectory_name}.csv"
         )
@@ -475,28 +475,28 @@ class StartTestService(Node):
                 self.nr_ego_done = 0
                 self.nr_opt_done = 0
                 self.test_ego = True
-                if self.evaluation_test_case >= 4:
+                if self.evaluation_test_case >= 5:
                     self.get_logger().info("All tests completed, Stopping.")
 
                     response.success = True
                     response.message = "All tests completed."
                     return response
                 else:
-                    if self.evaluation_test_case == 1:
+                    if self.evaluation_test_case == 2:
                         self.use_known_currents = False
                         self.use_disturbance_currents = True
-                    elif self.evaluation_test_case == 2:
+                    elif self.evaluation_test_case == 3:
                         self.use_known_currents = True
                         self.use_disturbance_currents = False
-                        self.trajectory_name = "data_xd_dense_10ms_05_against_long" # Switch to trajectory with known currents for test case 2 and 3
+                        self.trajectory_name = "With_Current_Heavy" # Switch to trajectory with known currents for test case 3 and 4
                         self.csv_file_path = Path(
                             f"/home/ubuntu/ws_blue/src/blue/path_planner/optimized_trajectories/{self.trajectory_name}.csv"
                         )
-                    elif self.evaluation_test_case == 3:
+                    elif self.evaluation_test_case == 4:
                         self.use_known_currents = True
                         self.use_disturbance_currents = True
 
-                    self.get_logger().info(f"\n\n\nStarting evaluation test case {self.evaluation_test_case}/3\n\n\n")
+                    self.get_logger().info(f"\n\n\nStarting evaluation test case {self.evaluation_test_case}/4\n\n\n")
             
         if self.nr_ego_done >= self.nr_per_process:
             self.test_ego = False
