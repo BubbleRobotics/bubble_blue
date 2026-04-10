@@ -21,8 +21,9 @@ class SeabedScanPlannerForwardOnly(SeabedScanPlanner):
         scan_heading = self.fixed_yaw_rad
         forward_x = math.cos(scan_heading)
         forward_y = math.sin(scan_heading)
-        lateral_x = math.cos(scan_heading + math.pi / 2.0)
-        lateral_y = math.sin(scan_heading + math.pi / 2.0)
+        lateral_angle = scan_heading + self.get_lateral_direction_sign() * math.pi / 2.0
+        lateral_x = math.cos(lateral_angle)
+        lateral_y = math.sin(lateral_angle)
 
         y_offsets = []
         current_y = 0.0

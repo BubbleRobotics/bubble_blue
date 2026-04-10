@@ -30,16 +30,17 @@ class SeabedScanPlannerZigZag(SeabedScanPlanner):
         x_start = origin_x
         x_end = origin_x + width
         waypoints: List[Tuple[float, float, float]] = []
+        lateral_sign = self.get_lateral_direction_sign()
 
         # Build a true zig-zag path: traverse the first lane horizontally,
         # then move diagonally to the opposite side of each next lane.
-        first_row_y = origin_y + y_offsets[0]
+        first_row_y = origin_y + lateral_sign * y_offsets[0]
         waypoints.append((x_start, first_row_y, depth_down))
         if width > 0.0:
             waypoints.append((x_end, first_row_y, depth_down))
 
         for row_idx, y_offset in enumerate(y_offsets[1:], start=1):
-            row_y = origin_y + y_offset
+            row_y = origin_y + lateral_sign * y_offset
             x_target = x_start if row_idx % 2 == 1 else x_end
             waypoints.append((x_target, row_y, depth_down))
 

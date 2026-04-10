@@ -5,7 +5,7 @@ seabed_scan_planner_zig_zag_forward_only:
     status_topic: "/seabed_scan_planner/status"
     yaw_topic: "planning/snake_yaw"
     goal_frame_id: "odom"
-    scan_width_m: 5.0
+    scan_width_m: 100.0
     scan_height_m: 5.0
     lane_spacing_m: 0.5
     goal_tolerance_m: 0.20
@@ -24,4 +24,5 @@ seabed_scan_planner_zig_zag_forward_only:
     use_goal_facing_yaw_near_waypoint: false
     goal_facing_yaw_switch_distance_m: 1.0
     pre_rotate_to_next_waypoint: true
+    turn_right: false
     yaw_alignment_tolerance_deg: 15.0

@@ -24,4 +24,5 @@ seabed_scan_planner_forward_only:
     use_goal_facing_yaw_near_waypoint: false
     goal_facing_yaw_switch_distance_m: 1.0
     pre_rotate_to_next_waypoint: true
+    turn_right: false
     yaw_alignment_tolerance_deg: 15.0

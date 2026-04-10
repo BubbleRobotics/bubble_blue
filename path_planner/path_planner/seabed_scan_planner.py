@@ -52,7 +52,12 @@ class SeabedScanPlanner(Node):
         self.declare_parameter("use_goal_facing_yaw_near_waypoint", False)
         self.declare_parameter("goal_facing_yaw_switch_distance_m", 1.0)
         self.declare_parameter("pre_rotate_to_next_waypoint", False)
+        self.declare_parameter("pre_rotate_before_first_waypoint", False)
+        self.declare_parameter("turn_right", False)
         self.declare_parameter("yaw_alignment_tolerance_deg", 10.0)
+        self.declare_parameter("use_absolute_compass_heading", False)
+        self.declare_parameter("absolute_heading_deg", 0.0)
+        self.declare_parameter("heading_bias_deg", 0.0)
 
         odom_topic = self.get_parameter("odom_topic").value
         goal_topic = self.get_parameter("goal_topic").value
@@ -93,9 +98,20 @@ class SeabedScanPlanner(Node):
         self.pre_rotate_to_next_waypoint = bool(
             self.get_parameter("pre_rotate_to_next_waypoint").value
         )
+        self.pre_rotate_before_first_waypoint = bool(
+            self.get_parameter("pre_rotate_before_first_waypoint").value
+        )
+        self.turn_right = bool(self.get_parameter("turn_right").value)
         self.yaw_alignment_tolerance_rad = math.radians(
             max(0.0, float(self.get_parameter("yaw_alignment_tolerance_deg").value))
         )
+        self.use_absolute_compass_heading = bool(
+            self.get_parameter("use_absolute_compass_heading").value
+        )
+        self.absolute_heading_deg = float(
+            self.get_parameter("absolute_heading_deg").value
+        )
+        self.heading_bias_deg = float(self.get_parameter("heading_bias_deg").value)
 
         qos = QoSProfile(depth=10)
         best_effort_qos = QoSProfile(
@@ -159,6 +175,10 @@ class SeabedScanPlanner(Node):
         self.get_logger().info(
             "Seabed scan planner ready: width=%.2f m, height=%.2f m, spacing=%.2f m"
             % (self.scan_width_m, self.scan_height_m, self.lane_spacing_m)
+        )
+        self.get_logger().info(
+            "Lane transition direction: %s"
+            % ("right" if self.turn_right else "left")
         )
 
     def on_parameters_changed(self, params: List[Parameter]) -> SetParametersResult:
@@ -237,7 +257,7 @@ class SeabedScanPlanner(Node):
             response.message = "No odometry yet."
             return response
 
-        self.fixed_yaw_rad = self.get_current_yaw()
+        self.fixed_yaw_rad = self.compute_scan_heading()
         self.segment_yaw_rad = None
         self.last_goal_facing_yaw_rad = self.fixed_yaw_rad
         if self.hold_current_yaw:
@@ -258,11 +278,15 @@ class SeabedScanPlanner(Node):
             response.message = "Generated scan is empty after removing waypoints already at the current pose."
             return response
 
-        self.current_waypoint_index = 0
-        self.scan_state = ScanState.MOVE_TO_WAYPOINT
         self.scan_active = True
-        self.publish_current_waypoint()
-        self.status_pub.publish(String(data="MOVE_TO_WAYPOINT"))
+        self.current_waypoint_index = 0
+
+        if self.pre_rotate_before_first_waypoint:
+            self.start_alignment_to_next_waypoint(self.current_waypoint_index)
+        else:
+            self.scan_state = ScanState.MOVE_TO_WAYPOINT
+            self.publish_current_waypoint()
+            self.status_pub.publish(String(data="MOVE_TO_WAYPOINT"))
 
         response.success = True
         response.message = f"Seabed scan started with {len(self.scan_waypoints)} waypoints."
@@ -500,6 +524,38 @@ class SeabedScanPlanner(Node):
         _, _, yaw = euler_from_quaternion([q.x, q.y, q.z, q.w])
         return yaw
 
+    def normalize_angle_rad(self, angle: float) -> float:
+        return math.atan2(math.sin(angle), math.cos(angle))
+
+    def get_lateral_direction_sign(self) -> float:
+        return -1.0 if self.turn_right else 1.0
+
+    def compass_heading_deg_to_enu_yaw_rad(self, heading_deg: float) -> float:
+        return self.normalize_angle_rad(math.radians(90.0 - heading_deg))
+
+    def compute_scan_heading(self) -> float:
+        if not self.use_absolute_compass_heading:
+            current_yaw = self.get_current_yaw()
+            self.get_logger().info(
+                "Using current yaw for scan heading: %.1f deg (ENU frame)"
+                % math.degrees(current_yaw)
+            )
+            return current_yaw
+
+        effective_heading_deg = (self.absolute_heading_deg + self.heading_bias_deg) % 360.0
+        scan_yaw_rad = self.compass_heading_deg_to_enu_yaw_rad(effective_heading_deg)
+        self.get_logger().info(
+            "Using absolute compass heading for scan: desired_heading=%.1f deg, "
+            "heading_bias=%.1f deg, effective_heading=%.1f deg, scan_yaw=%.1f deg (ENU)"
+            % (
+                self.absolute_heading_deg,
+                self.heading_bias_deg,
+                effective_heading_deg,
+                math.degrees(scan_yaw_rad),
+            )
+        )
+        return scan_yaw_rad
+
     def get_current_waypoint_errors(self) -> Tuple[float, float, float]:
         x_goal, y_goal, z_goal = self.scan_waypoints[self.current_waypoint_index]
         pos = self.current_odom.pose.pose.position
@@ -620,6 +676,7 @@ class SeabedScanPlanner(Node):
         spacing = max(self.lane_spacing_m, 1e-3)
         width = max(self.scan_width_m, 0.0)
         height = max(self.scan_height_m, 0.0)
+        lateral_sign = self.get_lateral_direction_sign()
 
         y_offsets = []
         current_y = 0.0
@@ -633,7 +690,7 @@ class SeabedScanPlanner(Node):
 
         waypoints: List[Tuple[float, float, float]] = []
         for row_idx, y_offset in enumerate(y_offsets):
-            row_y = origin_y + y_offset
+            row_y = origin_y + lateral_sign * y_offset
             x_start = origin_x
             x_end = origin_x + width
             if row_idx % 2 == 0:

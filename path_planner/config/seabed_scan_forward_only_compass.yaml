@@ -1,4 +1,4 @@
-seabed_scan_planner_zig_zag:
+seabed_scan_planner_forward_only:
   ros__parameters:
     odom_topic: "/odometry/filtered_enu"
     goal_topic: "/ego_planner/move_base_simple/goal"
@@ -24,5 +24,11 @@ seabed_scan_planner_zig_zag:
     use_goal_facing_yaw_near_waypoint: false
     goal_facing_yaw_switch_distance_m: 1.0
     pre_rotate_to_next_waypoint: true
+    pre_rotate_before_first_waypoint: true
     turn_right: false
     yaw_alignment_tolerance_deg: 15.0
+    use_absolute_compass_heading: true
+    # Compass convention: 0 = North, 90 = East, 180 = South, 270 = West.
+    absolute_heading_deg: 0.0
+    # Bias convention: measured_heading_in_odom_ned - real_compass_heading.
+    heading_bias_deg: 45.0
