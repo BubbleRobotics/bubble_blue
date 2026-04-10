@@ -31,7 +31,7 @@ def generate_launch_description():
             name='optimal_trajectory',
             output='screen',
             parameters=[{
-                'use_sim_time': False,
+                'use_sim_time': True,
                 'test_ego': test_ego,
                 'use_known_currents': use_known_currents,
                 'use_disturbance_currents': use_disturbance_currents,

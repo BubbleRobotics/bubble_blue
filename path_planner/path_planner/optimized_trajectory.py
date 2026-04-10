@@ -20,9 +20,13 @@ from nav_msgs.msg import Odometry
 class StartTestService(Node):
     def __init__(self):
         super().__init__("optimal_trajectory")
-
+        
         self.declare_parameter("test_ego", False)
         self.test_ego = self.get_parameter("test_ego").value
+        
+        self.odom_x = 0.0
+        self.odom_y = 0.0
+        self.odom_z = 0.0
 
         self.nr_ego_done = 0
         self.nr_opt_done = 0
@@ -33,13 +37,19 @@ class StartTestService(Node):
         self.declare_parameter("use_disturbance_currents", False)
         self.use_disturbance_currents = self.get_parameter("use_disturbance_currents").value
 
+        # Sampling period for sending updated EGO waypoints from the optimized trajectory
+        self.declare_parameter("ego_waypoint_update_period", 1)
+        self.ego_waypoint_update_period = float(
+            self.get_parameter("ego_waypoint_update_period").value
+        )
+
         self.evalation_test = True
         # First case: No Currents
         self.evaluation_test_case = 1
-        self.test_ego = True
-        self.use_known_currents = False
+        self.test_ego = False
+        self.test_opt = False
+        self.use_known_currents = True
         self.use_disturbance_currents = False
-
 
         self.bag_process = None
 
@@ -58,6 +68,8 @@ class StartTestService(Node):
             "/thruster_4_controller/status",
             "/thruster_5_controller/status",
             "/thruster_6_controller/status",
+            "/thruster_7_controller/status",
+            "/thruster_8_controller/status",
         ]
 
         self.bag_output_dir = "/home/ubuntu/ws_blue/evaluation/data"
@@ -65,12 +77,16 @@ class StartTestService(Node):
         self.service_group = MutuallyExclusiveCallbackGroup()
         self.client_group = ReentrantCallbackGroup()
 
-        self.trajectory_name = "No_Current_Heavy" # For test case 0 and 1
+        self.trajectory_name = "With_Current_Heavy"#No_Current_Heavy" # For test case 0 and 1
         # self.trajectory_name = "With_Current_Heavy" for test case 2 and 3
         self.csv_file_path = Path(
             f"/home/ubuntu/ws_blue/src/blue/path_planner/optimized_trajectories/{self.trajectory_name}.csv"
         )
-        
+
+        # State for timer-driven EGO waypoint updates
+        self.ego_waypoint_timer = None
+        self.active_optimized_trajectory = None
+        self.next_waypoint_index = 0
 
         # Compensate for estimator initialization bias.
         # If the estimator starts at +90 deg, rotate the commanded trajectory by -90 deg.
@@ -149,7 +165,13 @@ class StartTestService(Node):
             "/ego_planner/move_base_simple/goal",
             10
         )
-        
+
+        self.velocity_waypoint_pub = self.create_publisher(
+            Odometry,
+            "/ego_planner/move_base_simple/goal_with_velocity",
+            10
+        )
+
         self.odom_sub = self.create_subscription(
             Odometry,
             "/odometry/filtered_enu",
@@ -396,10 +418,125 @@ class StartTestService(Node):
 
         return rebased
 
+    def stop_ego_waypoint_updates(self):
+        if self.ego_waypoint_timer is not None:
+            self.ego_waypoint_timer.cancel()
+            self.destroy_timer(self.ego_waypoint_timer)
+            self.ego_waypoint_timer = None
+
+        self.active_optimized_trajectory = None
+        self.next_waypoint_index = 0
+
+    def start_ego_waypoint_updates(self, optimized_trajectory_msg: OptimizedTrajectory):
+        self.stop_ego_waypoint_updates()
+
+        if not optimized_trajectory_msg.points:
+            self.get_logger().warn("Optimized trajectory is empty, cannot start EGO waypoint updates.")
+            return
+
+        self.active_optimized_trajectory = optimized_trajectory_msg
+        self.next_waypoint_index = max(1, int(round((5.0) / self.active_optimized_trajectory.dt)))
+
+        self.ego_waypoint_timer = self.create_timer(
+            self.ego_waypoint_update_period,
+            self.publish_next_ego_velocity_waypoint,
+            callback_group=self.client_group,
+        )
+
+        self.get_logger().info(
+            f"Started EGO waypoint updates every {self.ego_waypoint_update_period:.2f} s."
+        )
+
+    def publish_next_ego_velocity_waypoint(self):
+        if self.active_optimized_trajectory is None:
+            return
+
+        points = self.active_optimized_trajectory.points
+        if not points:
+            self.stop_ego_waypoint_updates()
+            return
+
+        # Need valid odometry to choose the closest point
+        if not hasattr(self, "odom_x") or not hasattr(self, "odom_y") or not hasattr(self, "odom_z"):
+            self.get_logger().warn("Current odometry not available yet, skipping waypoint update.")
+            return
+
+        # Find closest trajectory point to current vehicle position
+        closest_index = 0
+        closest_dist_sq = float("inf")
+
+        for i, pt in enumerate(points):
+            dx = float(pt.position.x) - float(self.odom_x)
+            dy = float(pt.position.y) - float(self.odom_y)
+            dz = float(pt.position.z) - float(self.odom_z)
+            dist_sq = dx * dx + dy * dy + dz * dz
+
+            if dist_sq < closest_dist_sq:
+                closest_dist_sq = dist_sq
+                closest_index = i
+
+        # Choose a point 3 seconds ahead of the closest point
+        lookahead_time = 5.0
+
+        step = 1
+        if self.active_optimized_trajectory.dt > 0.0:
+            step = max(1, int(round(lookahead_time / self.active_optimized_trajectory.dt)))
+
+        target_index = min(closest_index + step, len(points) - 1)
+        sample = points[target_index]
+
+        # Body-frame velocity
+        u = float(sample.body_velocity.x)
+        v = float(sample.body_velocity.y)
+        w = float(sample.body_velocity.z)
+
+        # Yaw of the trajectory sample
+        yaw = float(sample.yaw)
+
+        # Rotate body-frame velocity into odom/world frame
+        cy = math.cos(yaw)
+        sy = math.sin(yaw)
+
+        vx_odom = cy * u - sy * v
+        vy_odom = sy * u + cy * v
+        vz_odom = w
+
+        msg = Odometry()
+        msg.header.stamp = self.get_clock().now().to_msg()
+        msg.header.frame_id = "odom"
+
+        msg.pose.pose.position.x = float(sample.position.x)
+        msg.pose.pose.position.y = float(sample.position.y)
+        msg.pose.pose.position.z = float(sample.position.z)
+
+        msg.twist.twist.linear.x = vx_odom
+        msg.twist.twist.linear.y = vy_odom
+        msg.twist.twist.linear.z = vz_odom
+
+        self.velocity_waypoint_pub.publish(msg)
+
+        self.get_logger().info(
+            f"Published EGO velocity waypoint: "
+            f"closest_idx={closest_index}, target_idx={target_index}, "
+            f"pos=({sample.position.x:.3f}, {sample.position.y:.3f}, {sample.position.z:.3f}), "
+            f"body_vel=({u:.3f}, {v:.3f}, {w:.3f}), "
+            f"odom_vel=({vx_odom:.3f}, {vy_odom:.3f}, {vz_odom:.3f}), "
+            f"yaw={yaw:.3f}, "
+            f"dist_to_closest={math.sqrt(closest_dist_sq):.3f}"
+        )
+        if (target_index == len(points) - 1):
+            self.get_logger().info("Finished publishing all sampled EGO velocity waypoints.")
+            self.stop_ego_waypoint_updates()
+            return
+
+        
     def odom_callback(self, msg: Odometry):
         # check if goal is reached and if so, stop the the recording
         
         pos = msg.pose.pose.position
+        self.odom_x = pos.x
+        self.odom_y = pos.y
+        self.odom_z = pos.z
         goal_reached = (
             abs(pos.x - self.goal_x) < 0.05 and
             abs(pos.y - self.goal_y) < 0.05 and
@@ -419,6 +556,7 @@ class StartTestService(Node):
                 # return
             self.get_logger().info("Goal reached, stopping ros2 bag recording...")
             self.stop_bag_recording()
+            self.stop_ego_waypoint_updates()
             self.get_logger().info("Restarting the test with the next trajectory...")
             trigger_request = Trigger.Request()
             self.handle_start_test(trigger_request, Trigger.Response())
@@ -546,7 +684,7 @@ class StartTestService(Node):
             "--timeout", "1000",
             "--req",
             (
-                f'name: "bluerov2", '
+                f'name: "bluerov2_heavy", '
                 f'position: {{x: {self.start_world_x}, y: {self.start_world_y}, z: {self.start_world_z}}}, '
                 f'orientation: {{x: {self.start_world_qx}, y: {self.start_world_qy}, '
                 f'z: {self.start_world_qz}, w: {self.start_world_qw}}}'
@@ -563,6 +701,8 @@ class StartTestService(Node):
         ]
 
         self.stop_bag_recording()
+
+        self.stop_ego_waypoint_updates()
 
         # Reset the ego planner FSM and trajectory server to ensure a clean state before starting the test
         if self.wait_for_service_client(
@@ -698,12 +838,12 @@ class StartTestService(Node):
             response.message = "Failed to start ros2 bag recording"
             return response
 
-        if not self.test_ego:
+        if self.test_opt:
             # Publish optimized trajectory to be followed
             self.get_logger().info("Publishing optimized trajectory...")
             self.pub.publish(optimized_trajectory_msg)
-
-        else:
+        
+        elif self.test_ego:  
             self.get_logger().info("Publishing new waypoint to the EGO planner...")
             last_point = optimized_trajectory_msg.points[-1]
             last_pos = last_point.position
@@ -714,6 +854,19 @@ class StartTestService(Node):
             waypoint_msg.pose.position.y = last_pos.y
             waypoint_msg.pose.position.z = last_pos.z
             self.waypoint_pub.publish(waypoint_msg)
+        else:
+            self.get_logger().info("Start publishing sampled waypoints with velocity to EGO Planner...")
+            # self.get_logger().info("Publishing new waypoint to the EGO planner...")
+            # last_point = optimized_trajectory_msg.points[-1]
+            # last_pos = last_point.position
+            # waypoint_msg = PoseStamped()
+
+            # waypoint_msg.header.frame_id = "odom"
+            # waypoint_msg.pose.position.x = last_pos.x
+            # waypoint_msg.pose.position.y = last_pos.y
+            # waypoint_msg.pose.position.z = last_pos.z
+            # self.waypoint_pub.publish(waypoint_msg)
+            self.start_ego_waypoint_updates(optimized_trajectory_msg)
 
         time.sleep(0.05)
 
@@ -761,6 +914,7 @@ class StartTestService(Node):
 
     def destroy_node(self):
         self.get_logger().info("Shutting down node, stopping rosbag...")
+        self.stop_ego_waypoint_updates()
         self.stop_bag_recording()
         super().destroy_node()
 

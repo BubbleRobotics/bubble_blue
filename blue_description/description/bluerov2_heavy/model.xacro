@@ -33,7 +33,7 @@
     </damping>
 
     <hydrostatics>
-      <buoyancy value="112.80" />
+      <buoyancy value="132.435" />
       <center_of_buoyancy x="0.0"
                           y="0.0"
                           z="0.0" />

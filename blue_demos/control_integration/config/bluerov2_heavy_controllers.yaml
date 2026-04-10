@@ -81,8 +81,8 @@ adaptive_integral_terminal_sliding_mode_controller:
       odom_frame: "map_ned"
     hydrodynamics:
       mass: 13.5
-      weight: 114.80
-      buoyancy: 112.80
+      weight: 132.435
+      buoyancy: 132.435
       moments_of_inertia: [0.16, 0.16, 0.16]
       added_mass: [-5.50, -12.70, -14.60, -0.12, -0.12, -0.12]
       center_of_buoyancy: [0.0, 0.0, 0.0]
