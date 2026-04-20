@@ -16,7 +16,7 @@ from std_srvs.srv import Trigger
 from tf_transformations import quaternion_from_euler
 from traj_utils.msg import OptimizedTrajectory, TrajectorySample
 from nav_msgs.msg import Odometry
-
+from traj_utils.srv import VelAccCmd
 class StartTestService(Node):
     def __init__(self):
         super().__init__("optimal_trajectory")
@@ -30,7 +30,8 @@ class StartTestService(Node):
 
         self.nr_ego_done = 0
         self.nr_opt_done = 0
-        self.nr_per_process = 20
+        self.nr_combined_done = 0
+        self.nr_per_process = 10
 
         self.declare_parameter("use_known_currents", False)
         self.use_known_currents = self.get_parameter("use_known_currents").value #use_current_disturbances
@@ -44,11 +45,11 @@ class StartTestService(Node):
         )
 
         self.evalation_test = True
-        # First case: No Currents
+        # First case: No Currents & EGO
         self.evaluation_test_case = 1
-        self.test_ego = False
+        self.test_ego = True
         self.test_opt = False
-        self.use_known_currents = True
+        self.use_known_currents = False
         self.use_disturbance_currents = False
 
         self.bag_process = None
@@ -77,8 +78,8 @@ class StartTestService(Node):
         self.service_group = MutuallyExclusiveCallbackGroup()
         self.client_group = ReentrantCallbackGroup()
 
-        self.trajectory_name = "With_Current_Heavy"#No_Current_Heavy" # For test case 0 and 1
-        # self.trajectory_name = "With_Current_Heavy" for test case 2 and 3
+        self.trajectory_name = "Without_Current_Heavy" # For test case 0 and 1
+        # self.trajectory_name = "With_Current_Heavy" # for test case 2 and 3
         self.csv_file_path = Path(
             f"/home/ubuntu/ws_blue/src/blue/path_planner/optimized_trajectories/{self.trajectory_name}.csv"
         )
@@ -196,6 +197,12 @@ class StartTestService(Node):
             callback_group=self.client_group,
         )
 
+        self.set_vel_acc_client = self.create_client(
+            VelAccCmd,
+            "ego_planner/set_vel_acc_cmd",
+            callback_group=self.client_group
+        )
+
         self.get_logger().info("Service /start_test is ready.")
 
     @staticmethod
@@ -240,8 +247,10 @@ class StartTestService(Node):
         timestamp = time.strftime("%Y%m%d_%H%M%S")
         if self.test_ego:
             bag_name = f"{self.bag_output_dir}/ego_bag_{self.trajectory_name}_current_known_{self.use_known_currents}_dist_{self.use_disturbance_currents}_{timestamp}"
-        else:
+        elif self.test_opt:
             bag_name = f"{self.bag_output_dir}/opt_bag_{self.trajectory_name}_current_known_{self.use_known_currents}_dist_{self.use_disturbance_currents}_{timestamp}"
+        else:
+            bag_name = f"{self.bag_output_dir}/comb_bag_{self.trajectory_name}_current_known_{self.use_known_currents}_dist_{self.use_disturbance_currents}_{timestamp}"
 
         cmd = [
             "ros2", "bag", "record",
@@ -426,6 +435,35 @@ class StartTestService(Node):
 
         self.active_optimized_trajectory = None
         self.next_waypoint_index = 0
+        if hasattr(self, "set_vel_acc_client") and self.set_vel_acc_client is not None:
+            if self.set_vel_acc_client.service_is_ready():
+                req = VelAccCmd.Request()
+                req.max_velocity = float(0.4) # back to default value
+
+                future = self.set_vel_acc_client.call_async(req)
+
+                def _vel_acc_response_cb(fut):
+                    try:
+                        resp = fut.result()
+                        self.get_logger().info(
+                            f"Set planner vel/acc: success={resp.success}, "
+                            f"message='{resp.message}', "
+                            f"max_velocity={req.max_velocity:.3f}"
+                        )
+                    except Exception as e:
+                        self.get_logger().warn(
+                            f"Failed calling ego_planner/set_vel_acc_cmd: {e}"
+                        )
+
+                future.add_done_callback(_vel_acc_response_cb)
+            else:
+                self.get_logger().warn(
+                    "Service ego_planner/set_vel_acc_cmd not ready, skipping velocity update."
+                )
+        else:
+            self.get_logger().warn(
+                "set_vel_acc_client not initialized, skipping velocity update."
+            )
 
     def start_ego_waypoint_updates(self, optimized_trajectory_msg: OptimizedTrajectory):
         self.stop_ego_waypoint_updates()
@@ -475,7 +513,7 @@ class StartTestService(Node):
                 closest_dist_sq = dist_sq
                 closest_index = i
 
-        # Choose a point 3 seconds ahead of the closest point
+        # Choose a point 5 seconds ahead of the closest point
         lookahead_time = 5.0
 
         step = 1
@@ -485,7 +523,61 @@ class StartTestService(Node):
         target_index = min(closest_index + step, len(points) - 1)
         sample = points[target_index]
 
-        # Body-frame velocity
+        # ------------------------------------------------------------
+        # Compute segment average and maximum speed from closest_index
+        # to target_index inclusive
+        # ------------------------------------------------------------
+        segment_points = points[closest_index:target_index + 1]
+
+        segment_speeds = []
+        for pt in segment_points:
+            u_seg = float(pt.body_velocity.x)
+            v_seg = float(pt.body_velocity.y)
+            w_seg = float(pt.body_velocity.z)
+            speed = math.sqrt(u_seg * u_seg + v_seg * v_seg + w_seg * w_seg)
+            segment_speeds.append(speed)
+
+        if segment_speeds:
+            avg_segment_speed = sum(segment_speeds) / len(segment_speeds)
+            max_segment_speed = max(segment_speeds)
+        else:
+            avg_segment_speed = 0.0
+            max_segment_speed = 0.0
+
+        # ------------------------------------------------------------
+        # Push max velocity to EGO planner via service
+        # ------------------------------------------------------------
+        if hasattr(self, "set_vel_acc_client") and self.set_vel_acc_client is not None:
+            if self.set_vel_acc_client.service_is_ready():
+                req = VelAccCmd.Request()
+                req.max_velocity = float(max_segment_speed)
+
+                future = self.set_vel_acc_client.call_async(req)
+
+                def _vel_acc_response_cb(fut):
+                    try:
+                        resp = fut.result()
+                        self.get_logger().info(
+                            f"Set planner vel/acc: success={resp.success}, "
+                            f"message='{resp.message}', "
+                            f"max_velocity={req.max_velocity:.3f}"
+                        )
+                    except Exception as e:
+                        self.get_logger().warn(
+                            f"Failed calling ego_planner/set_vel_acc_cmd: {e}"
+                        )
+
+                future.add_done_callback(_vel_acc_response_cb)
+            else:
+                self.get_logger().warn(
+                    "Service ego_planner/set_vel_acc_cmd not ready, skipping velocity update."
+                )
+        else:
+            self.get_logger().warn(
+                "set_vel_acc_client not initialized, skipping velocity update."
+            )
+
+        # Body-frame velocity at target waypoint
         u = float(sample.body_velocity.x)
         v = float(sample.body_velocity.y)
         w = float(sample.body_velocity.z)
@@ -522,9 +614,12 @@ class StartTestService(Node):
             f"body_vel=({u:.3f}, {v:.3f}, {w:.3f}), "
             f"odom_vel=({vx_odom:.3f}, {vy_odom:.3f}, {vz_odom:.3f}), "
             f"yaw={yaw:.3f}, "
-            f"dist_to_closest={math.sqrt(closest_dist_sq):.3f}"
+            f"dist_to_closest={math.sqrt(closest_dist_sq):.3f}, "
+            f"segment_avg_speed={avg_segment_speed:.3f}, "
+            f"segment_max_speed={max_segment_speed:.3f}"
         )
-        if (target_index == len(points) - 1):
+
+        if target_index == len(points) - 1:
             self.get_logger().info("Finished publishing all sampled EGO velocity waypoints.")
             self.stop_ego_waypoint_updates()
             return
@@ -544,7 +639,7 @@ class StartTestService(Node):
         )
         
         if goal_reached:
-            if self.nr_ego_done >= self.nr_per_process and self.nr_opt_done >= self.nr_per_process:
+            if self.nr_ego_done >= self.nr_per_process and self.nr_opt_done >= self.nr_per_process and self.nr_combined_done >= self.nr_per_process:
                 self.get_logger().info("All tests completed, Stopping.")
                 # self.goal_x = 999
                 # self.goal_y = 999
@@ -608,14 +703,19 @@ class StartTestService(Node):
     def handle_start_test(self, request, response):
 
         if self.evalation_test:
-            if self.nr_ego_done >= self.nr_per_process and self.nr_opt_done >= self.nr_per_process:
+            if self.nr_ego_done >= self.nr_per_process and self.nr_opt_done >= self.nr_per_process and self.nr_combined_done >= self.nr_per_process:
                 self.evaluation_test_case += 1
                 self.nr_ego_done = 0
                 self.nr_opt_done = 0
+                self.nr_combined_done = 0
                 self.test_ego = True
                 if self.evaluation_test_case >= 5:
                     self.get_logger().info("All tests completed, Stopping.")
-
+                    self.goal_x = 999
+                    self.goal_y = 999
+                    self.goal_z = 999
+                    self.test_ego = False
+                    self.test_opt = False
                     response.success = True
                     response.message = "All tests completed."
                     return response
@@ -636,8 +736,15 @@ class StartTestService(Node):
 
                     self.get_logger().info(f"\n\n\nStarting evaluation test case {self.evaluation_test_case}/4\n\n\n")
             
-        if self.nr_ego_done >= self.nr_per_process:
+        if self.nr_ego_done >= self.nr_per_process and self.nr_opt_done >= self.nr_per_process:
             self.test_ego = False
+            self.test_opt = False
+            self.nr_combined_done += 1
+            self.get_logger().info(f"\n######################################### \n \n \n Starting hierarchical trajectory test [{self.nr_combined_done}/{self.nr_per_process}] \n \n \n#########################################")
+
+        elif self.nr_ego_done >= self.nr_per_process:
+            self.test_ego = False
+            self.test_opt = True
             self.nr_opt_done += 1
             self.get_logger().info(f"\n######################################### \n \n \n Starting optimized trajectory test [{self.nr_opt_done}/{self.nr_per_process}] \n \n \n#########################################")
         else:
