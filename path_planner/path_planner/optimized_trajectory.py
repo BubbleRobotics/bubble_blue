@@ -78,7 +78,7 @@ class StartTestService(Node):
         self.service_group = MutuallyExclusiveCallbackGroup()
         self.client_group = ReentrantCallbackGroup()
 
-        self.trajectory_name = "Without_Current_Heavy" # For test case 0 and 1
+        self.trajectory_name = "HWTestcase6" # For test case 0 and 1
         # self.trajectory_name = "With_Current_Heavy" # for test case 2 and 3
         self.csv_file_path = Path(
             f"/home/ubuntu/ws_blue/src/blue/path_planner/optimized_trajectories/{self.trajectory_name}.csv"
