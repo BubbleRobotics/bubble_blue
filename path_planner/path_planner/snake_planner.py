@@ -265,8 +265,8 @@ class BodyPIDFollower(Node):
         x_right = math.sin(self.snake_yaw_to_use)*self.width_of_ocean_ecostructure
         y_right = -math.cos(self.snake_yaw_to_use)*self.width_of_ocean_ecostructure
 
-        self.top_left = {"x": 0.0, "y": 0.0, "depth": 0.5}
-        self.top_right = {"x": x_right, "y": y_right, "depth": 0.5}
+        self.top_left = {"x": 0.0, "y": 0.0, "depth": 0.2}
+        self.top_right = {"x": x_right, "y": y_right, "depth": 0.2}
         self.bottom_left = {"x": 0.0, "y": 0.0, "depth": 1.0}
         self.bottom_right = {"x": x_right, "y": y_right, "depth": 1.0}
 
@@ -388,7 +388,7 @@ class BodyPIDFollower(Node):
                 y_end = self.top_left["y"]
 
             reached, dist = self.reached_goal(
-                x_end, y_end, self.current_depth, self.snake_yaw_to_use, threshold=0.05
+                x_end, y_end, self.current_depth, self.snake_yaw_to_use, threshold=0.1
             )
             if reached and self.vel_small:
                 
