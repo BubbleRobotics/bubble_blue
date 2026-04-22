@@ -25,6 +25,8 @@ class StartTestService(Node):
         
         self.declare_parameter("test_ego", False)
         self.test_ego = self.get_parameter("test_ego").value
+        self.declare_parameter("test_opt", False)
+        self.test_opt = self.get_parameter("test_opt").value
         
         self.odom_x = 0.0
         self.odom_y = 0.0
@@ -35,11 +37,6 @@ class StartTestService(Node):
         self.ego_waypoint_update_period = float(
             self.get_parameter("ego_waypoint_update_period").value
         )
-
-        # Only case: No Currents
-        self.evaluation_test_case = 1
-        self.test_ego = True
-        self.test_opt = False
 
 
         self.bag_process = None
@@ -68,9 +65,9 @@ class StartTestService(Node):
         self.service_group = MutuallyExclusiveCallbackGroup()
         self.client_group = ReentrantCallbackGroup()
 
-        self.declare_parameter("trajectory_name", "Without_Current_Heavy")
-        self.trajectory_name = self.get_parameter("trajectory_name").value
-
+        self.declare_parameter("test_case_id", 1)
+        self.test_case_id = self.get_parameter("test_case_id").value
+        self.trajectory_name = f"HWTestcase{self.test_case_id}"
         share_dir = get_package_share_directory("path_planner")
         self.csv_file_path = Path(share_dir) / "optimized_trajectories" / f"{self.trajectory_name}.csv"
 
@@ -663,13 +660,13 @@ class StartTestService(Node):
     def handle_start_test(self, request, response):
 
         if self.test_ego:
-            self.get_logger().info("\n######################################### \n \n \n Starting EGO trajectory test \n \n \n#########################################")
+            self.get_logger().info(f"\n######################################### \n \n \n Starting EGO trajectory test on {self.trajectory_name} \n \n \n#########################################")
 
         elif self.test_opt:
-            self.get_logger().info("\n######################################### \n \n \n Starting optimized trajectory test \n \n \n#########################################")
+            self.get_logger().info(f"\n######################################### \n \n \n Starting optimized trajectory test on {self.trajectory_name} \n \n \n#########################################")
         
         else:
-            self.get_logger().info("\n######################################### \n \n \n Starting hierarchical trajectory test \n \n \n#########################################")
+            self.get_logger().info(f"\n######################################### \n \n \n Starting hierarchical trajectory test on {self.trajectory_name} \n \n \n#########################################")
         
         msg_info = String()
         msg_info.data = f"Starting new test run with | EGO {self.test_ego} | OPT {self.test_opt} |"
