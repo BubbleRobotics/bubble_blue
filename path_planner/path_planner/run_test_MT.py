@@ -25,6 +25,8 @@ class StartTestService(Node):
         
         self.declare_parameter("test_ego", False)
         self.test_ego = self.get_parameter("test_ego").value
+        self.declare_parameter("test_opt", False)
+        self.test_opt = self.get_parameter("test_opt").value
         
         self.odom_x = 0.0
         self.odom_y = 0.0
@@ -35,11 +37,6 @@ class StartTestService(Node):
         self.ego_waypoint_update_period = float(
             self.get_parameter("ego_waypoint_update_period").value
         )
-
-        # Only case: No Currents
-        self.evaluation_test_case = 1
-        self.test_ego = False
-        self.test_opt = False
 
 
         self.bag_process = None
@@ -68,9 +65,9 @@ class StartTestService(Node):
         self.service_group = MutuallyExclusiveCallbackGroup()
         self.client_group = ReentrantCallbackGroup()
 
-        self.declare_parameter("trajectory_name", "HWTestcase1")
-        self.trajectory_name = self.get_parameter("trajectory_name").value
-
+        self.declare_parameter("test_case_id", 1)
+        self.test_case_id = self.get_parameter("test_case_id").value
+        self.trajectory_name = f"HWTestcase{self.test_case_id}"
         share_dir = get_package_share_directory("path_planner")
         self.csv_file_path = Path(share_dir) / "optimized_trajectories" / f"{self.trajectory_name}.csv"
 
@@ -157,6 +154,12 @@ class StartTestService(Node):
             String,
             "/hw_test/info",
             10
+        )
+
+        self.snake_planner_starter_client = self.create_client(
+            Trigger,
+            "snake_planner/execute_snake_path",
+            callback_group=self.client_group
         )
 
         # Expose service to start the test execution
@@ -634,13 +637,13 @@ class StartTestService(Node):
     def handle_start_test(self, request, response):
 
         if self.test_ego:
-            self.get_logger().info("\n######################################### \n \n \n Starting EGO trajectory test \n \n \n#########################################")
+            self.get_logger().info(f"\n######################################### \n \n \n Starting EGO trajectory test on {self.trajectory_name} \n \n \n#########################################")
 
         elif self.test_opt:
-            self.get_logger().info("\n######################################### \n \n \n Starting optimized trajectory test \n \n \n#########################################")
+            self.get_logger().info(f"\n######################################### \n \n \n Starting optimized trajectory test on {self.trajectory_name} \n \n \n#########################################")
         
         else:
-            self.get_logger().info("\n######################################### \n \n \n Starting hierarchical trajectory test \n \n \n#########################################")
+            self.get_logger().info(f"\n######################################### \n \n \n Starting hierarchical trajectory test on {self.trajectory_name} \n \n \n#########################################")
         
         msg_info = String()
         msg_info.data = f"Starting new test run with | EGO {self.test_ego} | OPT {self.test_opt} |"
@@ -743,26 +746,40 @@ class StartTestService(Node):
         #     response.message = "Failed to start ros2 bag recording"
         #     return response
 
-        if self.test_opt:
-            # Publish optimized trajectory to be followed
-            self.get_logger().info("Publishing optimized trajectory...")
-            self.pub.publish(optimized_trajectory_msg)
-        
-        elif self.test_ego:  
-            self.get_logger().info("Publishing new waypoint to the EGO planner...")
-            last_point = optimized_trajectory_msg.points[-1]
-            last_pos = last_point.position
-            waypoint_msg = PoseStamped()
-
-            waypoint_msg.header.frame_id = "odom"
-            waypoint_msg.pose.position.x = last_pos.x
-            waypoint_msg.pose.position.y = last_pos.y
-            waypoint_msg.pose.position.z = last_pos.z
-            self.waypoint_pub.publish(waypoint_msg)
+        if self.test_case_id == 7:
+            if self.wait_for_service_client(
+                self.snake_planner_starter_client,
+                "/snake_planner/execute_snake_path",
+                timeout_sec=1.0,
+            ):
+                ok, msg = self.call_trigger_client(
+                    self.snake_planner_starter_client,
+                    "/snake_planner/execute_snake_path",
+                    timeout_sec=5.0,
+                )
+                if not ok:
+                    self.get_logger().warn(f"Resetting snake planner execution failed: {msg}")
         else:
-            self.get_logger().info("Start publishing sampled waypoints with velocity to EGO Planner...")
+            if self.test_opt:
+                # Publish optimized trajectory to be followed
+                self.get_logger().info("Publishing optimized trajectory...")
+                self.pub.publish(optimized_trajectory_msg)
+            
+            elif self.test_ego:  
+                self.get_logger().info("Publishing new waypoint to the EGO planner...")
+                last_point = optimized_trajectory_msg.points[-1]
+                last_pos = last_point.position
+                waypoint_msg = PoseStamped()
 
-            self.start_ego_waypoint_updates(optimized_trajectory_msg)
+                waypoint_msg.header.frame_id = "odom"
+                waypoint_msg.pose.position.x = last_pos.x
+                waypoint_msg.pose.position.y = last_pos.y
+                waypoint_msg.pose.position.z = last_pos.z
+                self.waypoint_pub.publish(waypoint_msg)
+            else:
+                self.get_logger().info("Start publishing sampled waypoints with velocity to EGO Planner...")
+
+                self.start_ego_waypoint_updates(optimized_trajectory_msg)
 
         # Set the controller mode to auv_controller, so that the EGO trajectory server can start publishing velocity commands
         cmd_state_msg = String()
