@@ -22,6 +22,7 @@ setup(
             'launch/odometry_enu_ned_sim.launch.py',
             'launch/simple_accel_controller.launch.py',
             'launch/run_test_MT.launch.py',
+            'launch/snake_planner.launch.py',
         ]),
         ('share/path_planner/config', [
             'config/seabed_scan.yaml',
@@ -52,6 +53,7 @@ setup(
             'simple_accel_controller = path_planner.simple_accel_controller:main',
             'odometry_ned_enu = path_planner.odometry_ned_enu:main',
             'run_test_MT = path_planner.run_test_MT:main',
+            'snake_planner = path_planner.snake_planner:main',
         ],
     },
 )

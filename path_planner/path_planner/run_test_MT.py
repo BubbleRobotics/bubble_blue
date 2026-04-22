@@ -156,6 +156,12 @@ class StartTestService(Node):
             10
         )
 
+        self.snake_planner_starter_client = self.create_publisher(
+            Trigger,
+            "snake_planner/execute_snake_path",
+            callback_group=self.client_group
+        )
+
         # Expose service to start the test execution
         self.srv = self.create_service(
             Trigger,
@@ -774,26 +780,40 @@ class StartTestService(Node):
         #     response.message = "Failed to start ros2 bag recording"
         #     return response
 
-        if self.test_opt:
-            # Publish optimized trajectory to be followed
-            self.get_logger().info("Publishing optimized trajectory...")
-            self.pub.publish(optimized_trajectory_msg)
-        
-        elif self.test_ego:  
-            self.get_logger().info("Publishing new waypoint to the EGO planner...")
-            last_point = optimized_trajectory_msg.points[-1]
-            last_pos = last_point.position
-            waypoint_msg = PoseStamped()
-
-            waypoint_msg.header.frame_id = "odom"
-            waypoint_msg.pose.position.x = last_pos.x
-            waypoint_msg.pose.position.y = last_pos.y
-            waypoint_msg.pose.position.z = last_pos.z
-            self.waypoint_pub.publish(waypoint_msg)
+        if self.test_case_id == 7:
+            if self.wait_for_service_client(
+                self.snake_planner_starter_client,
+                "/snake_planner/execute_snake_path",
+                timeout_sec=1.0,
+            ):
+                ok, msg = self.call_trigger_client(
+                    self.snake_planner_starter_client,
+                    "/snake_planner/execute_snake_path",
+                    timeout_sec=5.0,
+                )
+                if not ok:
+                    self.get_logger().warn(f"Resetting snake planner execution failed: {msg}")
         else:
-            self.get_logger().info("Start publishing sampled waypoints with velocity to EGO Planner...")
+            if self.test_opt:
+                # Publish optimized trajectory to be followed
+                self.get_logger().info("Publishing optimized trajectory...")
+                self.pub.publish(optimized_trajectory_msg)
+            
+            elif self.test_ego:  
+                self.get_logger().info("Publishing new waypoint to the EGO planner...")
+                last_point = optimized_trajectory_msg.points[-1]
+                last_pos = last_point.position
+                waypoint_msg = PoseStamped()
 
-            self.start_ego_waypoint_updates(optimized_trajectory_msg)
+                waypoint_msg.header.frame_id = "odom"
+                waypoint_msg.pose.position.x = last_pos.x
+                waypoint_msg.pose.position.y = last_pos.y
+                waypoint_msg.pose.position.z = last_pos.z
+                self.waypoint_pub.publish(waypoint_msg)
+            else:
+                self.get_logger().info("Start publishing sampled waypoints with velocity to EGO Planner...")
+
+                self.start_ego_waypoint_updates(optimized_trajectory_msg)
 
         # Set the controller mode to auv_controller, so that the EGO trajectory server can start publishing velocity commands
         cmd_state_msg = String()
