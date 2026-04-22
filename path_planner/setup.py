@@ -21,6 +21,7 @@ setup(
             'launch/simple_accel_controller.launch.py',
             'launch/optimized_trajectory.launch.py',
             'launch/full_sim_stack.launch.py',
+            'launch/run_test_MT.launch.py',
         ]),
     ],
     install_requires=[
@@ -43,6 +44,7 @@ setup(
             'odometry_ned_enu = path_planner.odometry_ned_enu:main',
             'simple_accel_controller = path_planner.simple_accel_controller:main',
             'optimal_trajectory = path_planner.optimized_trajectory:main',
+            'run_test_MT = path_planner.run_test_MT:main',        
         ],
     },
 )
