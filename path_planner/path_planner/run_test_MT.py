@@ -156,7 +156,7 @@ class StartTestService(Node):
             10
         )
 
-        self.snake_planner_starter_client = self.create_publisher(
+        self.snake_planner_starter_client = self.create_client(
             Trigger,
             "snake_planner/execute_snake_path",
             callback_group=self.client_group
