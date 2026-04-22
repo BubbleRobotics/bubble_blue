@@ -11,7 +11,7 @@ from geometry_msgs.msg import Point, Vector3, Twist, PoseStamped
 from rclpy.callback_groups import MutuallyExclusiveCallbackGroup, ReentrantCallbackGroup
 from rclpy.executors import MultiThreadedExecutor
 from rclpy.node import Node
-from std_msgs.msg import Header, String
+from std_msgs.msg import Header, String, Empty
 from std_srvs.srv import Trigger
 from tf_transformations import quaternion_from_euler
 from traj_utils.msg import OptimizedTrajectory, TrajectorySample
@@ -38,7 +38,7 @@ class StartTestService(Node):
 
         # Only case: No Currents
         self.evaluation_test_case = 1
-        self.test_ego = True
+        self.test_ego = False
         self.test_opt = False
 
 
@@ -68,7 +68,7 @@ class StartTestService(Node):
         self.service_group = MutuallyExclusiveCallbackGroup()
         self.client_group = ReentrantCallbackGroup()
 
-        self.declare_parameter("trajectory_name", "Without_Current_Heavy")
+        self.declare_parameter("trajectory_name", "HWTestcase1")
         self.trajectory_name = self.get_parameter("trajectory_name").value
 
         share_dir = get_package_share_directory("path_planner")
@@ -81,7 +81,7 @@ class StartTestService(Node):
 
         # Compensate for estimator initialization bias.
         # If the estimator starts at +90 deg, rotate the commanded trajectory by -90 deg.
-        self.init_yaw_bias_rad = -math.pi / 2.0 # TODO see how 
+        self.init_yaw_bias_rad = 0.0 # TODO see how 
 
         self.goal_x = 999
         self.goal_y = 999
@@ -99,10 +99,10 @@ class StartTestService(Node):
             10,
         )
 
-        self.initialize_client = self.create_client(
-            Trigger,
-            "/initialize",
-            callback_group=self.client_group,
+        self.initialize_pub = self.create_publisher(
+            Empty,
+            "/teleop/initialize",
+            10
         )
 
         self.vel_reference_pub = self.create_publisher(
@@ -288,40 +288,11 @@ class StartTestService(Node):
         self.get_logger().error(f"{service_name} failed: {response.message}")
         return False, response.message
 
-    def wait_for_initialize_service(self, timeout_sec=5.0):
-        self.get_logger().info("Waiting for /initialize service...")
-        available = self.initialize_client.wait_for_service(timeout_sec=timeout_sec)
-        if not available:
-            self.get_logger().error("/initialize service not available.")
-            return False
-        return True
-
     def call_initialize_service(self, timeout_sec=10.0):
-        request = Trigger.Request()
-        future = self.initialize_client.call_async(request)
-
-        start_time = time.time()
-        while rclpy.ok() and not future.done():
-            if time.time() - start_time > timeout_sec:
-                self.get_logger().error("/initialize service call timed out.")
-                return False, "timeout"
-            time.sleep(0.05)
-
-        if not future.done():
-            self.get_logger().error("/initialize future did not complete.")
-            return False, "future did not complete"
-
-        response = future.result()
-        if response is None:
-            self.get_logger().error("Failed to call /initialize.")
-            return False, "future.result() is None"
-
-        if response.success:
-            self.get_logger().info(f"/initialize succeeded: {response.message}")
-            return True, response.message
-
-        self.get_logger().error(f"/initialize failed: {response.message}")
-        return False, response.message
+        self.initialize_pub.publish(Empty())
+        self.get_logger().info("Waiting for estimator to stabilize after initialization...")
+        time.sleep(3.0)
+        return True, "Initialization successful (placeholder)" # TODO implement if necessary
 
     def load_trajectory_dataframe(self) -> pd.DataFrame:
         if not self.csv_file_path.exists():
@@ -730,7 +701,7 @@ class StartTestService(Node):
 
         # Stop the EGO trajectory server output
         cmd_state_msg = String()
-        cmd_state_msg.data = "other"
+        cmd_state_msg.data = "gamepad"
         self.cmd_state_pub.publish(cmd_state_msg)
 
         # Stop the velocity controller
@@ -743,13 +714,8 @@ class StartTestService(Node):
         vel_cmd.angular.z = 0.0
         self.vel_reference_pub.publish(vel_cmd)
     
-        # Initialize the state estimation
-        if not self.wait_for_initialize_service(timeout_sec=2.0):
-            response.success = False
-            response.message = "/initialize service not available"
-            return response
-
         ok, msg = self.call_initialize_service(timeout_sec=10.0)
+
         if not ok:
             response.success = False
             response.message = f"Initialize failed: {msg}"
