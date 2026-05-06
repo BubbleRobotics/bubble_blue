@@ -1,0 +1,6 @@
+[console_scripts]
+aruco_marker_localizer = blue_localization.localizer:main_aruco
+camera = blue_localization.source:main_camera
+gazebo_localizer = blue_localization.localizer:main_gazebo
+qualisys_localizer = blue_localization.localizer:main_qualisys
+qualisys_mocap = blue_localization.source:main_qualisys_mocap

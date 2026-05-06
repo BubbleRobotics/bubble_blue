@@ -1,0 +1,7 @@
+Metadata-Version: 2.1
+Name: path-planner
+Version: 0.0.1
+Summary: RRT path follower
+Maintainer: Luis Blunschi
+Maintainer-email: lublu@hotmail.ch
+License: MIT

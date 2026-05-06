@@ -1,0 +1,11 @@
+[console_scripts]
+follower_node = path_planner.follower_node:main
+odometry_enu_ned = path_planner.odometry_enu_ned:main
+odometry_ned_enu = path_planner.odometry_ned_enu:main
+optimal_trajectory = path_planner.optimized_trajectory:main
+path_planner = path_planner.path_planner:main
+run_test_MT = path_planner.run_test_MT:main
+simple_accel_controller = path_planner.simple_accel_controller:main
+simple_planner = path_planner.simple_planner:main
+snake_planner = path_planner.snake_planner:main
+wait_mavros_ready = path_planner.wait_mavros_ready:main
