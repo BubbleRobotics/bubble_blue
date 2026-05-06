@@ -65,7 +65,7 @@ launch:
       name: gazebo_world_file
       # RRT test world (obstacle wall with hole)
       if: $(var test_rrt)
-      value: "$(find-pkg-share blue_description)/gazebo/worlds/rrt_underwater.world"
+      value: "$(find-pkg-share blue_description)/gazebo/worlds/obstacle_world_EROS.world"
 
 
   - arg:

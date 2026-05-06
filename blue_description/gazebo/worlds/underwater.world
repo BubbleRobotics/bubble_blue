@@ -18,6 +18,11 @@
       filename="gz-sim-physics-system"
       name="gz::sim::systems::Physics">
     </plugin>
+    <physics name="default_physics" type="dart">
+      <max_step_size>0.004</max_step_size>
+      <real_time_update_rate>125</real_time_update_rate>
+      <real_time_factor>1.0</real_time_factor>
+    </physics>
 
     <plugin
       filename="gz-sim-user-commands-system"
@@ -58,6 +63,7 @@
     <include>
       <uri>model://sand_heightmap</uri>
       <pose>0 7 -10.5 0 0 0</pose>
+      <static>true</static>
     </include>
 
     <include>
@@ -75,7 +81,34 @@
     <pose>0 0 0 0 0 0</pose>
     </include> -->
     
-    
+
+<scene>
+  <ambient>0.2 0.3 0.35 1</ambient>
+  <background>0.05 0.12 0.2 1</background>
+  <fog>
+    <color>0.03 0.1 0.18 1</color>
+    <type>linear</type>
+    <start>2.0</start>
+    <end>30.0</end>
+    <density>0.02</density>
+  </fog>
+</scene>
+
+<light type="directional" name="sun1">
+  <pose>0 0 10 0 0 0</pose>
+  <diffuse>0.6 0.75 0.8 1</diffuse>
+  <specular>0.1 0.15 0.2 1</specular>
+  <direction>0.0 0.0 -1</direction>
+  <cast_shadows>false</cast_shadows>
+</light>
+
+<light type="directional" name="sun2">
+  <pose>5 5 8 0 0 0</pose>
+  <diffuse>0.3 0.45 0.55 1</diffuse>
+  <specular>0.0 0.0 0.0 1</specular>
+  <direction>-0.2 -0.2 -1</direction>
+  <cast_shadows>false</cast_shadows>
+</light>
     <include>
       <uri>
         https://fuel.gazebosim.org/1.0/OpenRobotics/models/Coast Water
@@ -89,13 +122,13 @@
       <sky></sky>
     </scene>
 
-    <light type="directional" name="sun1">
+    <!-- <light type="directional" name="sun1">
       <pose>50 0 150 0 0 0</pose>
       <diffuse>1 1 1 1</diffuse>
       <specular>.1 .1 .1 1</specular>
       <direction>0.3 0.3 -1</direction>
       <cast_shadows>false</cast_shadows>
-    </light>
+    </light> -->
 
   </world>
 </sdf>

@@ -16,7 +16,10 @@
       filename="gz-sim-user-commands-system"
       name="gz::sim::systems::UserCommands">
     </plugin>
-
+    <plugin filename="gz-sim-contact-system" name="gz::sim::systems::Contact">
+      <publish_rate>50</publish_rate>
+    </plugin>
+    
     <plugin
       filename="gz-sim-scene-broadcaster-system"
       name="gz::sim::systems::SceneBroadcaster">
@@ -28,8 +31,8 @@
       name="gz::sim::systems::DopplerVelocityLogSystem">
     </plugin>
     
-    <plugin filename="libgz-sim-imu-system.so"
-      name="gz::sim::systems::Imu">
+    <plugin filename="gz-sim-imu-system"
+        name="gz::sim::systems::Imu">
     </plugin>
 
     <plugin
@@ -56,6 +59,18 @@
       </affected_models>
     </plugin>
 
+    <scene>
+      <ambient>0.1 0.2 0.4 1</ambient>
+      <background>0.0 0.1 0.3 1</background>
+      <fog>
+        <color>0.0 0.15 0.35 1</color>
+        <type>linear</type>
+        <start>1</start>
+        <end>15</end>
+        <density>0.05</density>
+      </fog>
+    </scene>
+    
     <include>
       <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Sun</uri>
     </include>
@@ -67,12 +82,13 @@
     </include>
 
 
-    <include>
-    <uri>model://ego_test</uri>
+    <!-- <include>
+    <uri>model://MT_Obstacle_Eval</uri>
     <pose>0 0 0 0 0 0</pose>
-    </include>
-    
+    </include> -->
 
+    <plugin filename="libcurrent_system.so" name="CurrentSystem">
+    </plugin> 
 
     <include>
       <uri>

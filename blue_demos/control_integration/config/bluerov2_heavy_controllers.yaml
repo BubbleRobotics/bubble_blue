@@ -38,6 +38,13 @@ adaptive_integral_terminal_sliding_mode_controller:
     use_sim_time: true
     use_external_measured_states: true
     reference_controller: thruster_allocation_matrix_controller
+    joints:
+      - "x"
+      - "y"
+      - "z"
+      - "rx"
+      - "ry"
+      - "rz"
     gains:
       lambda: 0.9
       x:
@@ -114,8 +121,8 @@ thruster_allocation_matrix_controller:
       x:  [ -0.707,  -0.707,   0.707,  0.707,      0.0,     0.0,      0.0,     0.0]
       y:  [ 0.707,   -0.707,   0.707, -0.707,      0.0,     0.0,      0.0,     0.0]
       z:  [    0.0,     0.0,     0.0,    0.0,      1.0,     1.0,      1.0,     1.0]
-      rx: [    0.0,     0.0,     0.0,    0.0, -0.21805, 0.21805, -0.21805, 0.21805]
-      ry: [    0.0,     0.0,     0.0,    0.0,    -0.12,   -0.12,     0.12,    0.12]
+      rx: [    -0.06,     0.06,     -0.06,    0.06,   0.21805, -0.21805, 0.21805, -0.21805]
+      ry: [    -0.06,     -0.06,     0.06,    0.06,    -0.12,   -0.12,     0.12,    0.12]
       rz: [0.1888,  -0.1888, -0.1888, 0.1888,      0.0,     0.0,      0.0,     0.0]
 
 thruster_1_controller:

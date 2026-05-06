@@ -28,7 +28,7 @@
         </material>
       </visual>
 
-      <!-- <visual name="front_wall_texture">
+      <visual name="front_wall_texture">
         <pose>9.327034 4.138881 -5 0 0 -1.844678</pose>
         <geometry>
           <mesh>
@@ -52,7 +52,7 @@
             </metal>
           </pbr>
         </material>
-      </visual> -->
+      </visual>
 
     </link>
     <link name="inspection_elements">

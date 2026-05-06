@@ -265,12 +265,12 @@ class BodyPIDFollower(Node):
         x_right = math.sin(self.snake_yaw_to_use)*self.width_of_ocean_ecostructure
         y_right = -math.cos(self.snake_yaw_to_use)*self.width_of_ocean_ecostructure
 
-        self.top_left = {"x": 0.0, "y": 0.0, "depth": 0.2}
-        self.top_right = {"x": x_right, "y": y_right, "depth": 0.2}
-        self.bottom_left = {"x": 0.0, "y": 0.0, "depth": 1.0}
-        self.bottom_right = {"x": x_right, "y": y_right, "depth": 1.0}
+        self.top_left = {"x": 0.0, "y": 0.0, "depth": 3.4}
+        self.top_right = {"x": x_right, "y": y_right, "depth": 3.4}
+        self.bottom_left = {"x": 0.0, "y": 0.0, "depth": 5.1}
+        self.bottom_right = {"x": x_right, "y": y_right, "depth": 5.1}
 
-        self.depth_step = 0.2
+        self.depth_step = 0.15
         self.current_depth = self.top_left["depth"]
         self.max_depth = self.bottom_left["depth"]
         self.going_right = True

@@ -31,7 +31,7 @@ class StartTestService(Node):
         self.nr_ego_done = 0
         self.nr_opt_done = 0
         self.nr_combined_done = 0
-        self.nr_per_process = 10
+        self.nr_per_process = 1
 
         self.declare_parameter("use_known_currents", False)
         self.use_known_currents = self.get_parameter("use_known_currents").value #use_current_disturbances
@@ -78,7 +78,9 @@ class StartTestService(Node):
         self.service_group = MutuallyExclusiveCallbackGroup()
         self.client_group = ReentrantCallbackGroup()
 
-        self.trajectory_name = "HWTestcase6" # For test case 0 and 1
+        self.trajectory_name_without_current = "Without_Current_MT" # For test case 0 and 1
+        self.trajectory_name_with_current = "With_Current_MT"
+        self.trajectory_name = self.trajectory_name_without_current
         # self.trajectory_name = "With_Current_Heavy" # for test case 2 and 3
         self.csv_file_path = Path(
             f"/home/ubuntu/ws_blue/src/blue/path_planner/optimized_trajectories/{self.trajectory_name}.csv"
@@ -714,11 +716,25 @@ class StartTestService(Node):
                     self.goal_x = 999
                     self.goal_y = 999
                     self.goal_z = 999
-                    self.test_ego = False
+                    self.nr_ego_done = 0
+                    self.nr_opt_done = 0
+                    self.nr_combined_done = 0
+                    self.test_ego = True
                     self.test_opt = False
+                    self.evaluation_test_case = 1
+                    self.evalation_test = True
+                    # First case: No Currents & EGO
+                    self.use_known_currents = False
+                    self.use_disturbance_currents = False
+                    self.trajectory_name = self.trajectory_name_without_current
+                        # self.trajectory_name = "With_Current_Heavy" # for test case 2 and 3
+                    self.csv_file_path = Path(
+                        f"/home/ubuntu/ws_blue/src/blue/path_planner/optimized_trajectories/{self.trajectory_name}.csv"
+                    )
                     response.success = True
                     response.message = "All tests completed."
-                    return response
+
+                    
                 else:
                     if self.evaluation_test_case == 2:
                         self.use_known_currents = False
@@ -726,7 +742,7 @@ class StartTestService(Node):
                     elif self.evaluation_test_case == 3:
                         self.use_known_currents = True
                         self.use_disturbance_currents = False
-                        self.trajectory_name = "With_Current_Heavy" # Switch to trajectory with known currents for test case 3 and 4
+                        self.trajectory_name = self.trajectory_name_with_current # Switch to trajectory with known currents for test case 3 and 4
                         self.csv_file_path = Path(
                             f"/home/ubuntu/ws_blue/src/blue/path_planner/optimized_trajectories/{self.trajectory_name}.csv"
                         )
