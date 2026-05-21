@@ -1,4 +1,36 @@
 #!/usr/bin/env python3
+"""
+NOTE: this node should be launched via:
+ros2 launch path_planner snake_planner.launch.py
+
+ROS 2 node that executes a snake inspection path over an ocean
+ecostructure by commanding waypoints to the EGO-Planner.
+
+The path sweeps horizontal lines at incrementally increasing depth between
+configurable top-left/top-right and bottom-left/bottom-right corners, stepping
+depth by depth_step after each completed line. Direction alternates left-right
+between passes. The node operates as a non-blocking FSM ticked at 10 Hz.
+
+FSM states:
+  IDLE → MOVE_TO_LINE_START → WAIT_AT_LINE_START → MOVE_TO_LINE_END
+       → WAIT_AT_LINE_END → STEP_DEPTH → (repeat) → FINISHED
+
+The yaw used throughout the snake path is locked to the vehicle heading at the
+moment the path is started, and published to planning/snake_yaw so downstream
+nodes can align their control accordingly.
+
+Services exposed:
+  /snake_planner/execute_snake_path  (std_srvs/Trigger)  start the snake path
+  /snake_planner/stop_snake_path     (std_srvs/Trigger)  stop and hold position
+
+Publications:
+  /ego_planner/move_base_simple/goal  waypoints forwarded to EGO-Planner
+  /snake_planner/status               current FSM state as a string
+  planning/snake_yaw                  locked yaw for the inspection pass
+
+Subscriptions:
+  /odometry/filtered_enu              current pose and velocity
+"""
 import math
 from typing import Optional
 

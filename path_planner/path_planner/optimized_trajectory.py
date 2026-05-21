@@ -1,4 +1,37 @@
 #!/usr/bin/env python3
+"""
+NOTE: this node should be launched via:
+ros2 launch path_planner optimized_trajectory.launch.py
+
+ROS 2 node that orchestrates automated repeated evaluation runs comparing EGO-Planner,
+SCP Optimized, and Hierarchical trajectory following across four disturbance conditions.
+
+For each run the node:
+  1. Loads and rebases the optimized trajectory CSV to the local odom frame.
+  2. Pauses the simulation, teleports the robot to the trajectory start pose,
+     and reinitialises the state estimator.
+  3. Starts a ROS 2 bag recording, then triggers the appropriate control mode:
+       - EGO:          publishes the final waypoint to /ego_planner/move_base_simple/goal
+       - Optimized:    publishes the full OptimizedTrajectory to planning/optimized_trajectory
+       - Hierarchical: periodically feeds velocity-annotated waypoints to EGO-Planner
+                       using a lookahead of 5 s along the optimized trajectory
+  4. Optionally activates known-current or disturbance-current plugins.
+  5. On goal reached, stops the bag and automatically advances to the next
+     planner type or disturbance condition.
+
+Evaluation cycles through 4 conditions (no current, disturbance, known current,
+known current + disturbance) × 3 planners (EGO, Optimized, Hierarchical),
+running nr_per_process repetitions each.
+
+Services exposed:
+  /start_test    (std_srvs/Trigger)   starts or advances the evaluation sequence
+
+Parameters:
+  test_ego                   (default: False)
+  use_known_currents         (default: False)
+  use_disturbance_currents   (default: False)
+  ego_waypoint_update_period (default: 1 s)   period for hierarchical waypoint updates
+"""
 
 import math
 import subprocess

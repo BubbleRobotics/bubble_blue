@@ -1,5 +1,43 @@
 #!/usr/bin/env python3
+"""
+NOTE: this node should be launched via its launch file via:
 
+ros2 launch path_planner ego_obstacle_evaluation.launch.py
+
+ROS 2 node that orchestrates automated repeated evaluation runs of the EGO-Planner
+in Gazebo across 9 obstacle scenarios (Cases 1–9).
+
+For each run the node:
+  1. Pauses the simulation and teleports the robot to the scenario start pose.
+  2. Clears all obstacle models and spawns the scenario-specific SDF obstacle set.
+  3. Resets the EGO-Planner FSM, trajectory server, and odometry visualisation.
+  4. Resumes simulation, activates the AUV controller, and publishes the goal.
+  5. Starts a ROS 2 bag recording of all relevant topics.
+  6. Monitors /odometry/filtered_enu for goal reaching, /bluerov2_heavy/collision
+     for collisions, and a watchdog timer for timeouts.
+  7. On any terminal event (success / collision / timeout), stops the bag and
+     automatically restarts the scenario until nr_runs_total runs are completed.
+
+Scenarios (Cases 1–9) cover: single cube, corridor, uniform clutter, varied clutter,
+vertical triangle gate, dense sphere field, pylon frame, dock piles (cylindrical),
+and square piles. Triggering case 8 automatically sequences cases 8 and 9.
+Case 8 is the sense pillar feld / Pier traversal test case
+
+Services exposed:
+  /start_test_case_1  to  /start_test_case_9   (std_srvs/Trigger)
+
+Parameters:
+  world_name            (default: underwater_world)
+  model_name            (default: bluerov2_heavy)
+  goal_tolerance_xyz    (default: 0.1 m)
+  settle_time_sec       (default: 2.0 s)
+  record_bag            (default: True)
+  bag_output_dir        (default: /home/ubuntu/ws_blue/evaluation/EGO_data)
+  visualize_start_goal  (default: False)  spawns colored sphere markers in Gazebo
+  nr_runs_total         (default: 50)
+  case_to_run           (default: 8)
+  run_timeout_sec       (default: 240.0 s)
+"""
 import subprocess
 import tempfile
 import time

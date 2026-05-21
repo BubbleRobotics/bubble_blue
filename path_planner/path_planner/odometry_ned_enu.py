@@ -1,4 +1,28 @@
-"""Converts odometry/filtered from NED to ENU and publish it to mavros/odometry/out and mavros/local_position/odom from ENU to NED"""
+"""
+NOTE: this node is launched automatically with the full_sim_stack launch file
+Individually it can be launched via:
+
+ros2 launch path_planner odometry_ned_enu.launch.py
+
+
+
+ROS 2 node that converts odometry messages from NED to ENU frame using TF2.
+
+Subscribes to a NED odometry topic, transforms pose and twist into the ENU
+odom frame using live TF lookups, and republishes the result. Also handles
+a secondary barometer odometry topic with the same conversion.
+
+The pose is transformed from the source frame (odom_ned) into the odom frame,
+and the child frame is re-expressed from base_link_fsd to base_link. Twist
+vectors are rotated from base_link_fsd to base_link via TF.
+
+Subscriptions:
+  /odometry/filtered      (NED)  → republished as  /odometry/filtered_enu  (ENU)
+
+Parameters:
+  in_odom   (default: /odometry/filtered)      input NED odometry topic
+  out_odom  (default: /odometry/filtered_enu)  output ENU odometry topic
+"""
 import rclpy
 from rclpy.node import Node
 from nav_msgs.msg import Odometry
@@ -36,9 +60,6 @@ class NedToEnuOdom(Node):
 
         self.sub = self.create_subscription(Odometry, in_odom, self.cb, qos)
         self.pub = self.create_publisher(Odometry, out_odom, 10)
-
-        self.sub_de = self.create_subscription(Odometry, "/baro/odom", self.cb_de, qos)
-        self.pub_de = self.create_publisher(Odometry, "/baro/odom_enu", 10)
 
         self.get_logger().info(f"Starting Conversion: {in_odom} (NED) -> {out_odom} (ENU)")
 
@@ -99,48 +120,6 @@ class NedToEnuOdom(Node):
             self.get_logger().warn(f"TF transform failed: {ex}")
             return
         
-        
-    def cb_de(self, msg: Odometry):
-        odom_in = Odometry()
-        odom_in.header = msg.header
-        odom_in.pose = msg.pose
-        odom_in.twist = msg.twist
-        odom_in.child_frame_id = msg.child_frame_id
-        
-        pose_in = PoseWithCovarianceStamped()
-        pose_in.pose = odom_in.pose
-        pose_in.header = odom_in.header
-        
-        twist_in = odom_in.twist
-        
-        try:
-            # Lookup transform target <- source at the message time
-            t_frame = self.tf_buffer.lookup_transform(
-                self.pose_target_frame,
-                odom_in.header.frame_id,
-                rclpy.time.Time.from_msg(odom_in.header.stamp),
-                timeout=Duration(seconds=0.1),
-            )
-
-            pose_out = tf2_geometry_msgs.do_transform_pose_with_covariance_stamped(pose_in, t_frame)
-            twist_out = self.twist_transform(odom_in.header.stamp, twist_in)
-            
-            odom_out = Odometry()
-            odom_out.header = odom_in.header
-            odom_out.header.frame_id = self.pose_target_frame
-            odom_out.child_frame_id = self.twist_target_frame
-            odom_out.pose = pose_out.pose
-            odom_out.twist = twist_out
-
-            self.pub_de.publish(odom_out)
-    
-        except (tf2_ros.LookupException,
-                tf2_ros.ConnectivityException,
-                tf2_ros.ExtrapolationException) as ex:
-            self.get_logger().warn(
-                f"TF transform {pose_in.header.frame_id} -> {self.pose_target_frame} unavailable: {ex}"
-            )
-            return
     
     def convert_pose_child_frame(self, pose_old_child: PoseWithCovariance, t_old_new):
         """
